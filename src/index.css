@@ -28,7 +28,7 @@
     --border: 240 4% 83%;
     --input: 240 4% 83%;
     --ring: 333 71% 50%;
-    --radius: 1.5rem;
+    --radius: 0;
 
     /* ECFI semantic colors — light mode */
     --ecfi-gold: 43 86% 49%;

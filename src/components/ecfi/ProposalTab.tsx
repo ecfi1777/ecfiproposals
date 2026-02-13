@@ -58,7 +58,7 @@ export function ProposalTab({
   return (
     <div>
       {/* Header fields */}
-      <div className="grid grid-cols-3 gap-4 mb-7 p-5 bg-ecfi-panel-bg rounded-lg border border-ecfi-panel-border">
+      <div className="grid grid-cols-3 gap-4 mb-7 p-5 bg-ecfi-panel-bg border border-ecfi-panel-border">
         {fields.map(([lbl, val, set, ph, type], i) => (
           <div key={i}>
             <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 block">{lbl}</label>
@@ -66,7 +66,7 @@ export function ProposalTab({
               type={type || "text"}
               value={val}
               onChange={(e) => set(e.target.value)}
-              className="w-full px-2.5 py-2 border border-ecfi-input-border rounded bg-ecfi-input-bg text-foreground text-sm font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
+              className="w-full px-2.5 py-2 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-sm font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
               placeholder={ph}
             />
           </div>
@@ -78,7 +78,7 @@ export function ProposalTab({
         <div key={si} className="mb-7">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className={`w-1 h-6 ${sec.colorClass} rounded-sm`} />
+              <div className={`w-1 h-6 ${sec.colorClass}`} />
               <h2 className="text-base font-extrabold tracking-widest uppercase">{sec.title}</h2>
               <span className="text-[12px] text-ecfi-std-green-text font-semibold">{fmtCurrency(sec.totals.std)} std</span>
               {sec.totals.opt > 0 && <span className="text-[12px] text-ecfi-gold-text font-semibold">+ {fmtCurrency(sec.totals.opt)} opt</span>}
@@ -86,7 +86,7 @@ export function ProposalTab({
             </div>
             <button
               onClick={() => sec.setLines((prev) => [...prev, sec.newLine()])}
-              className="bg-ecfi-std-green/10 text-ecfi-std-green-text border border-ecfi-std-green/30 rounded px-4 py-1.5 cursor-pointer font-bold text-[12px] font-mono tracking-wider hover:bg-ecfi-std-green/20 transition-colors"
+              className="bg-ecfi-std-green/10 text-ecfi-std-green-text border border-ecfi-std-green/30 px-4 py-1.5 cursor-pointer font-bold text-[12px] font-mono tracking-wider hover:bg-ecfi-std-green/20 transition-colors"
             >
               + ADD LINE
             </button>
@@ -113,11 +113,11 @@ export function ProposalTab({
       ))}
 
       {/* Grand Totals Bar */}
-      <div className="bg-card rounded-lg border border-ecfi-panel-border overflow-hidden">
+      <div className="bg-card border border-ecfi-panel-border overflow-hidden">
         <div className="flex justify-end gap-7 p-5 items-center">
           <div
             onClick={() => setShowVolBreakdown(!showVolBreakdown)}
-            className={`text-right cursor-pointer px-3 py-1 rounded-md border border-ecfi-vol-breakdown-border transition-all select-none ${
+            className={`text-right cursor-pointer px-3 py-1 border border-ecfi-vol-breakdown-border transition-all select-none ${
               showVolBreakdown ? "bg-ecfi-vol-breakdown-bg" : "hover:bg-ecfi-vol-breakdown-bg/50"
             }`}
           >

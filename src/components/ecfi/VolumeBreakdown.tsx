@@ -55,7 +55,7 @@ export function VolumeBreakdown({ ftgLines, slabLines }: VolumeBreakdownProps) {
   return (
     <div className="border-t border-ecfi-vol-breakdown-border p-4 bg-ecfi-vol-breakdown-bg">
       {/* Summary bar */}
-      <div className="flex gap-4 mb-4 p-3 bg-background/50 rounded-md border border-ecfi-vol-breakdown-border">
+      <div className="flex gap-4 mb-4 p-3 bg-background/50 border border-ecfi-vol-breakdown-border">
         {[
           { label: "Walls", value: totalWallCY, colorClass: "text-ecfi-wall-purple-text" },
           { label: "Footings", value: totalFtgCY, colorClass: "text-ecfi-ftg-orange-text" },
