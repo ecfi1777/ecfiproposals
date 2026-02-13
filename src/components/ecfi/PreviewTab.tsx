@@ -27,7 +27,7 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
   ].filter((s) => s.lines.length > 0);
 
   return (
-    <div className="bg-ecfi-preview-bg border border-ecfi-preview-border rounded-lg p-8 max-w-[900px] mx-auto">
+    <div className="bg-ecfi-preview-bg border border-ecfi-preview-border p-8 max-w-[900px] mx-auto">
       {/* Header */}
       <div className="text-center mb-6">
         <div className="text-[11px] tracking-[4px] text-ecfi-gold-text font-bold mb-1">★ ★ ★ PROPOSAL ★ ★ ★</div>
@@ -39,7 +39,7 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
       </div>
 
       {/* Project details */}
-      <div className="grid grid-cols-2 gap-3 mb-6 p-4 bg-ecfi-preview-panel rounded-md border border-ecfi-preview-border">
+      <div className="grid grid-cols-2 gap-3 mb-6 p-4 bg-ecfi-preview-panel border border-ecfi-preview-border">
         {[
           ["Builder:", proposal.builder],
           ["Date:", proposal.date],
@@ -117,7 +117,7 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
       </div>
 
       {/* Extra charges */}
-      <div className="mt-5 p-4 bg-ecfi-preview-panel rounded-md border border-ecfi-preview-border">
+      <div className="mt-5 p-4 bg-ecfi-preview-panel border border-ecfi-preview-border">
         <div className="text-[10px] text-muted-foreground tracking-wider font-bold mb-2 uppercase">Extra Charges May Include</div>
         <div className="text-[11px] text-muted-foreground/70 leading-relaxed">
           *** Concrete Pump - Cost + 5% or Flat Rate — Avg $850/EA<br />

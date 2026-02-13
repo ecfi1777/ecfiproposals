@@ -25,12 +25,12 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
         value={line.qty}
         onChange={(e) => onChange({ ...line, qty: e.target.value })}
         placeholder="QTY"
-        className="w-[55px] px-2 py-1.5 border border-ecfi-input-border rounded bg-ecfi-input-bg text-foreground text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
+        className="w-[55px] px-2 py-1.5 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
       />
       <select
         value={line.unit}
         onChange={(e) => onChange({ ...line, unit: e.target.value })}
-        className="w-[52px] px-1 py-1.5 border border-ecfi-input-border rounded bg-ecfi-input-bg text-foreground text-[13px] font-mono cursor-pointer focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
+        className="w-[52px] px-1 py-1.5 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-[13px] font-mono cursor-pointer focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
       >
         {UNIT_OPTIONS.map((u) => (
           <option key={u} value={u}>{u}</option>
@@ -47,7 +47,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
         value={line.unitPriceStd}
         onChange={(e) => onChange({ ...line, unitPriceStd: e.target.value })}
         placeholder="Std $"
-        className="w-[72px] px-2 py-1.5 border border-ecfi-input-border rounded bg-ecfi-input-bg text-foreground text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
+        className="w-[72px] px-2 py-1.5 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
       />
       <div className={`w-[82px] text-right text-[13px] font-mono ${totalStd ? "text-ecfi-std-green-text" : "text-ecfi-subtle"}`}>
         {totalStd ? fmt(totalStd) : "-"}
@@ -56,7 +56,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
         value={line.unitPriceOpt}
         onChange={(e) => onChange({ ...line, unitPriceOpt: e.target.value })}
         placeholder="Opt $"
-        className="w-[72px] px-2 py-1.5 border border-ecfi-input-border rounded bg-ecfi-input-bg text-foreground text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
+        className="w-[72px] px-2 py-1.5 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
       />
       <div className={`w-[82px] text-right text-[13px] font-mono ${totalOpt ? "text-ecfi-gold-text" : "text-ecfi-subtle"}`}>
         {totalOpt ? fmt(totalOpt) : "-"}
@@ -69,7 +69,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
             if (line.cyOverride === "" || line.cyOverride === autoYards.toFixed(2)) onChange({ ...line, cyOverride: "" });
           }}
           placeholder="-"
-          className={`w-full px-2 py-1.5 border rounded text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold ${
+          className={`w-full px-2 py-1.5 border text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold ${
             isOverridden
               ? "text-ecfi-override-orange-text bg-ecfi-override-orange/10 border-ecfi-override-orange/30"
               : autoYards > 0
@@ -83,7 +83,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
       </div>
       <button
         onClick={onDelete}
-        className="bg-transparent border border-destructive/30 text-destructive/70 rounded cursor-pointer px-[7px] py-1 text-[13px] hover:bg-destructive/10 transition-colors"
+        className="bg-transparent border border-destructive/30 text-destructive/70 cursor-pointer px-[7px] py-1 text-[13px] hover:bg-destructive/10 transition-colors"
       >
         ×
       </button>

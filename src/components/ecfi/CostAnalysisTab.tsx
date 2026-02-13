@@ -51,21 +51,21 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
   const grossProfit = proposalTotal - totalCost;
   const grossMargin = proposalTotal > 0 ? (grossProfit / proposalTotal) * 100 : 0;
 
-  const inputClass = "w-full px-2.5 py-2 border border-ecfi-input-border rounded bg-ecfi-input-bg text-foreground text-sm font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold";
+  const inputClass = "w-full px-2.5 py-2 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-sm font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold";
   const labelClass = "text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 block";
 
   return (
     <div className="grid grid-cols-2 gap-6">
       {/* Left column */}
       <div>
-        <div className="p-6 bg-ecfi-panel-bg rounded-lg border border-ecfi-panel-border mb-5">
+         <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
           <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Job Cost Inputs</h3>
           <div className="mb-5">
             <label className={labelClass}>Proposal Total (auto)</label>
             <div className="text-2xl font-extrabold py-2">{fmtCurrency(proposalTotal)}</div>
             <div className="text-[11px] text-muted-foreground">Std: {fmtCurrency(grandStd)} + Opt: {fmtCurrency(grandOpt)}</div>
           </div>
-          <div className="mb-5 p-4 bg-ecfi-vol-breakdown-bg rounded-md border border-ecfi-vol-breakdown-border">
+          <div className="mb-5 p-4 bg-ecfi-vol-breakdown-bg border border-ecfi-vol-breakdown-border">
             <label className="text-[10px] text-ecfi-vol-blue-text font-bold uppercase tracking-widest mb-1 block">
               Concrete Volume (auto-calculated from line items)
             </label>
@@ -90,7 +90,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
         </div>
 
         {/* Volume Breakdown by Line */}
-        <div className="p-5 bg-ecfi-panel-bg rounded-lg border border-ecfi-panel-border">
+        <div className="p-5 bg-ecfi-panel-bg border border-ecfi-panel-border">
           <h3 className="text-[12px] font-extrabold text-ecfi-vol-blue-text tracking-widest uppercase mb-3">Volume Breakdown by Line</h3>
           <div className="text-[10px] text-muted-foreground mb-3">
             <span className="text-ecfi-vol-blue-text">● Blue</span> = auto-calc &nbsp;
@@ -119,7 +119,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
 
       {/* Right column */}
       <div>
-        <div className="p-6 bg-ecfi-panel-bg rounded-lg border border-ecfi-panel-border mb-5">
+        <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
           <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Cost Breakdown</h3>
           {[
             [`Concrete (${totalYards.toFixed(1)} yd × ${fmtCurrency(parseFloat(proposal.concretePerYard) || 0)}/yd)`, concreteCost],
@@ -137,7 +137,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
           </div>
         </div>
 
-        <div className="p-6 bg-ecfi-panel-bg rounded-lg border border-ecfi-panel-border">
+        <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border">
           <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Margin Analysis</h3>
           <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
             <span className="text-muted-foreground">Revenue</span>
@@ -160,9 +160,9 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
                 {grossMargin.toFixed(1)}%
               </span>
             </div>
-            <div className="w-full h-3 bg-ecfi-panel-border rounded-md overflow-hidden">
+             <div className="w-full h-3 bg-ecfi-panel-border overflow-hidden">
               <div
-                className="h-full rounded-md transition-all duration-500"
+                 className="h-full transition-all duration-500"
                 style={{
                   width: `${Math.min(Math.max(grossMargin, 0), 100)}%`,
                   background:
@@ -180,7 +180,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
               <span className="text-[10px] text-ecfi-std-green-text">30%+</span>
             </div>
           </div>
-          <div className="mt-6 p-4 bg-background rounded-md border border-ecfi-panel-border">
+          <div className="mt-6 p-4 bg-background border border-ecfi-panel-border">
             <div className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase mb-3">Per-Yard Metrics</div>
             <div className="grid grid-cols-3 gap-4">
               {[

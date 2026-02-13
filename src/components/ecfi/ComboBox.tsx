@@ -42,20 +42,20 @@ export function ComboBox({ value, onChange, items, onSaveNew, placeholder }: Com
             setFilter("");
           }}
           placeholder={placeholder || "Search or type..."}
-          className="w-full px-2 py-1.5 border border-ecfi-input-border rounded bg-ecfi-input-bg text-foreground text-[13px] font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
+          className="w-full px-2 py-1.5 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-[13px] font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
         />
         {isNew && onSaveNew && (
           <button
             onClick={() => onSaveNew(value.trim())}
             title="Save to catalog"
-            className="bg-ecfi-std-green/20 text-ecfi-std-green-text border border-ecfi-std-green/40 rounded px-2 py-1 cursor-pointer text-[11px] whitespace-nowrap font-semibold hover:bg-ecfi-std-green/30 transition-colors"
+            className="bg-ecfi-std-green/20 text-ecfi-std-green-text border border-ecfi-std-green/40 px-2 py-1 cursor-pointer text-[11px] whitespace-nowrap font-semibold hover:bg-ecfi-std-green/30 transition-colors"
           >
             + Save
           </button>
         )}
       </div>
       {open && filtered.length > 0 && (
-        <div className="absolute top-full left-0 right-0 z-[999] bg-ecfi-dropdown-bg border border-ecfi-dropdown-border rounded max-h-[220px] overflow-y-auto shadow-xl">
+        <div className="absolute top-full left-0 right-0 z-[999] bg-ecfi-dropdown-bg border border-ecfi-dropdown-border max-h-[220px] overflow-y-auto shadow-xl">
           {filtered.map((item, i) => (
             <div
               key={i}
