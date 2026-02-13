@@ -77,7 +77,7 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
         <button
           onClick={handleExportPDF}
           disabled={exporting}
-          className="flex items-center gap-2 bg-ecfi-gold text-primary-foreground px-4 py-2 font-bold text-[12px] font-mono tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="flex items-center gap-2 bg-ecfi-gold text-black px-5 py-2.5 font-bold text-[13px] font-mono tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50 border-2 border-ecfi-gold-text shadow-md"
         >
           <Download className="w-4 h-4" />
           {exporting ? "Exporting..." : "Export PDF"}
