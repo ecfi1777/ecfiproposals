@@ -1,5 +1,6 @@
 import { fmtCurrency } from "@/lib/ecfi-utils";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface TopNavProps {
   catalogCount: number;
@@ -22,7 +23,9 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMo
       </div>
       <div className="flex gap-5 items-center text-[11px]">
         {saving && <span className="text-ecfi-gold-text text-[10px] animate-pulse">Saving...</span>}
-        <span className="text-muted-foreground">{catalogCount} items</span>
+        <Link to="/catalog" className="text-muted-foreground hover:text-foreground transition-colors" title="Manage catalog">
+          <span>{catalogCount} items</span>
+        </Link>
         <span className="text-ecfi-vol-blue-text">
           <span className="font-extrabold text-sm">{totalYards.toFixed(1)}</span> CY
         </span>
