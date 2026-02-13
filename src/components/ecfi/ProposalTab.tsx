@@ -42,12 +42,12 @@ export function ProposalTab({
   const totalYards = ftgYards + slabYards;
 
   const fields: [string, string, (v: string) => void, string, string?][] = [
-    ["Builder", proposal.builder, (v) => setProposal((p: any) => ({ ...p, builder: v })), "Cranston Construction"],
+    ["Builder", proposal.builder, (v) => setProposal((p: any) => ({ ...p, builder: v })), "Builder Name"],
     ["Date", proposal.date, (v) => setProposal((p: any) => ({ ...p, date: v })), "", "date"],
-    ["County", proposal.county, (v) => setProposal((p: any) => ({ ...p, county: v })), "Calvert"],
-    ["Job Location", proposal.location, (v) => setProposal((p: any) => ({ ...p, location: v })), "3910 Dogwood Rd"],
+    ["County", proposal.county, (v) => setProposal((p: any) => ({ ...p, county: v })), "County Name"],
+    ["Job Location", proposal.location, (v) => setProposal((p: any) => ({ ...p, location: v })), "Address, Subdivision, Owner Name"],
     ["Foundation Type", proposal.foundType, (v) => setProposal((p: any) => ({ ...p, foundType: v })), "Custom"],
-    ["Foundation Size", proposal.foundSize, (v) => setProposal((p: any) => ({ ...p, foundSize: v })), '49\'-4" x 32\'-4"'],
+    ["Foundation Size", proposal.foundSize, (v) => setProposal((p: any) => ({ ...p, foundSize: v })), "Overall Measurement"],
   ];
 
   const sections = [
