@@ -1,88 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --background: 0 0% 98%;
+    --foreground: 220 15% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 220 15% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
+    --popover-foreground: 220 15% 15%;
+    --primary: 43 86% 49%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 210 20% 95%;
+    --secondary-foreground: 220 15% 20%;
+    --muted: 210 15% 93%;
+    --muted-foreground: 215 12% 45%;
+    --accent: 210 20% 95%;
+    --accent-foreground: 220 15% 20%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 43 86% 49%;
     --radius: 0.5rem;
 
+    /* ECFI semantic colors — light mode */
+    --ecfi-gold: 43 86% 49%;
+    --ecfi-gold-text: 40 86% 38%;
+    --ecfi-std-green: 147 50% 36%;
+    --ecfi-std-green-text: 147 50% 36%;
+    --ecfi-vol-blue: 217 81% 53%;
+    --ecfi-vol-blue-text: 217 81% 53%;
+    --ecfi-wall-purple: 263 67% 58%;
+    --ecfi-wall-purple-text: 263 67% 58%;
+    --ecfi-ftg-orange: 20 83% 48%;
+    --ecfi-ftg-orange-text: 20 83% 48%;
+    --ecfi-slab-green: 142 64% 38%;
+    --ecfi-slab-green-text: 142 64% 38%;
+    --ecfi-override-orange: 38 72% 44%;
+    --ecfi-override-orange-text: 38 72% 44%;
+    --ecfi-danger: 0 72% 51%;
+    --ecfi-danger-text: 0 72% 51%;
+
+    --ecfi-nav-bg: 0 0% 100%;
+    --ecfi-nav-border: 214 20% 88%;
+    --ecfi-panel-bg: 0 0% 98%;
+    --ecfi-panel-border: 214 20% 90%;
+    --ecfi-input-bg: 0 0% 100%;
+    --ecfi-input-border: 214 20% 85%;
+    --ecfi-dropdown-bg: 0 0% 100%;
+    --ecfi-dropdown-border: 214 20% 80%;
+    --ecfi-dropdown-hover: 210 15% 95%;
+    --ecfi-tab-bg: 0 0% 97%;
+    --ecfi-tab-active-bg: 0 0% 100%;
+    --ecfi-row-number: 215 10% 65%;
+    --ecfi-subtle: 215 10% 60%;
+    --ecfi-vol-breakdown-bg: 210 20% 97%;
+    --ecfi-vol-breakdown-border: 217 30% 85%;
+    --ecfi-preview-bg: 0 0% 99%;
+    --ecfi-preview-panel: 0 0% 96%;
+    --ecfi-preview-border: 214 20% 88%;
+
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 7%;
+    --foreground: 0 0% 88%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 88%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 88%;
+    --primary: 43 86% 59%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 220 15% 11%;
+    --secondary-foreground: 0 0% 88%;
+    --muted: 220 15% 11%;
+    --muted-foreground: 215 15% 55%;
+    --accent: 220 15% 11%;
+    --accent-foreground: 0 0% 88%;
+    --destructive: 0 60% 40%;
+    --destructive-foreground: 0 0% 88%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 43 86% 59%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --ecfi-gold: 43 86% 59%;
+    --ecfi-gold-text: 43 86% 59%;
+    --ecfi-std-green: 108 56% 67%;
+    --ecfi-std-green-text: 108 56% 67%;
+    --ecfi-vol-blue: 210 100% 71%;
+    --ecfi-vol-blue-text: 210 100% 71%;
+    --ecfi-wall-purple: 270 76% 75%;
+    --ecfi-wall-purple-text: 270 76% 75%;
+    --ecfi-ftg-orange: 28 96% 61%;
+    --ecfi-ftg-orange-text: 28 96% 61%;
+    --ecfi-slab-green: 142 69% 58%;
+    --ecfi-slab-green-text: 142 69% 58%;
+    --ecfi-override-orange: 30 100% 64%;
+    --ecfi-override-orange-text: 30 100% 64%;
+    --ecfi-danger: 0 100% 71%;
+    --ecfi-danger-text: 0 100% 71%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --ecfi-nav-bg: 0 0% 4%;
+    --ecfi-nav-border: 0 0% 13%;
+    --ecfi-panel-bg: 0 0% 8%;
+    --ecfi-panel-border: 0 0% 15%;
+    --ecfi-input-bg: 0 0% 12%;
+    --ecfi-input-border: 0 0% 23%;
+    --ecfi-dropdown-bg: 0 0% 15%;
+    --ecfi-dropdown-border: 0 0% 27%;
+    --ecfi-dropdown-hover: 0 0% 20%;
+    --ecfi-tab-bg: 0 0% 5%;
+    --ecfi-tab-active-bg: 0 0% 10%;
+    --ecfi-row-number: 0 0% 33%;
+    --ecfi-subtle: 0 0% 40%;
+    --ecfi-vol-breakdown-bg: 216 30% 6%;
+    --ecfi-vol-breakdown-border: 217 40% 15%;
+    --ecfi-preview-bg: 0 0% 6%;
+    --ecfi-preview-panel: 0 0% 8%;
+    --ecfi-preview-border: 0 0% 15%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -98,8 +146,8 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
+    font-family: 'JetBrains Mono', monospace;
   }
 }
