@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      catalog_items: {
+        Row: {
+          category: string
+          created_at: string
+          default_unit: string
+          description: string
+          id: string
+          is_active: boolean | null
+          section: string
+          sort_order: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          default_unit?: string
+          description: string
+          id?: string
+          is_active?: boolean | null
+          section?: string
+          sort_order?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          default_unit?: string
+          description?: string
+          id?: string
+          is_active?: boolean | null
+          section?: string
+          sort_order?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       item_catalog: {
         Row: {
           created_at: string
@@ -82,6 +121,174 @@ export type Database = {
           },
         ]
       }
+      price_history: {
+        Row: {
+          builder: string | null
+          catalog_item_id: string | null
+          county: string | null
+          description: string
+          id: string
+          job_location: string | null
+          pricing_type: string
+          proposal_id: string | null
+          qty: number | null
+          recorded_at: string
+          unit: string
+          unit_price: number
+          user_id: string
+        }
+        Insert: {
+          builder?: string | null
+          catalog_item_id?: string | null
+          county?: string | null
+          description: string
+          id?: string
+          job_location?: string | null
+          pricing_type: string
+          proposal_id?: string | null
+          qty?: number | null
+          recorded_at?: string
+          unit: string
+          unit_price: number
+          user_id: string
+        }
+        Update: {
+          builder?: string | null
+          catalog_item_id?: string | null
+          county?: string | null
+          description?: string
+          id?: string
+          job_location?: string | null
+          pricing_type?: string
+          proposal_id?: string | null
+          qty?: number | null
+          recorded_at?: string
+          unit?: string
+          unit_price?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_history_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_history_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      proposal_line_items: {
+        Row: {
+          auto_cy: number | null
+          catalog_item_id: string | null
+          created_at: string
+          cy_override: number | null
+          description: string
+          ftg_cy: number | null
+          id: string
+          optional_total: number | null
+          optional_unit_price: number | null
+          proposal_id: string
+          qty: number | null
+          section: string | null
+          sort_order: number | null
+          standard_total: number | null
+          standard_unit_price: number | null
+          unit: string | null
+          wall_cy: number | null
+        }
+        Insert: {
+          auto_cy?: number | null
+          catalog_item_id?: string | null
+          created_at?: string
+          cy_override?: number | null
+          description?: string
+          ftg_cy?: number | null
+          id?: string
+          optional_total?: number | null
+          optional_unit_price?: number | null
+          proposal_id: string
+          qty?: number | null
+          section?: string | null
+          sort_order?: number | null
+          standard_total?: number | null
+          standard_unit_price?: number | null
+          unit?: string | null
+          wall_cy?: number | null
+        }
+        Update: {
+          auto_cy?: number | null
+          catalog_item_id?: string | null
+          created_at?: string
+          cy_override?: number | null
+          description?: string
+          ftg_cy?: number | null
+          id?: string
+          optional_total?: number | null
+          optional_unit_price?: number | null
+          proposal_id?: string
+          qty?: number | null
+          section?: string | null
+          sort_order?: number | null
+          standard_total?: number | null
+          standard_unit_price?: number | null
+          unit?: string | null
+          wall_cy?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_line_items_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_line_items_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposals: {
         Row: {
           builder: string | null
@@ -124,6 +331,99 @@ export type Database = {
           labor_per_yard?: number | null
           other_costs?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      proposals_v2: {
+        Row: {
+          builder: string | null
+          concrete_per_yard: number | null
+          concrete_yards_override: number | null
+          county: string | null
+          created_at: string
+          foundation_size: string | null
+          foundation_type: string | null
+          grand_total: number | null
+          id: string
+          job_location: string | null
+          labor_per_yard: number | null
+          notes: string | null
+          optional_total: number | null
+          other_costs: number | null
+          other_costs_note: string | null
+          proposal_date: string | null
+          standard_total: number | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          builder?: string | null
+          concrete_per_yard?: number | null
+          concrete_yards_override?: number | null
+          county?: string | null
+          created_at?: string
+          foundation_size?: string | null
+          foundation_type?: string | null
+          grand_total?: number | null
+          id?: string
+          job_location?: string | null
+          labor_per_yard?: number | null
+          notes?: string | null
+          optional_total?: number | null
+          other_costs?: number | null
+          other_costs_note?: string | null
+          proposal_date?: string | null
+          standard_total?: number | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          builder?: string | null
+          concrete_per_yard?: number | null
+          concrete_yards_override?: number | null
+          county?: string | null
+          created_at?: string
+          foundation_size?: string | null
+          foundation_type?: string | null
+          grand_total?: number | null
+          id?: string
+          job_location?: string | null
+          labor_per_yard?: number | null
+          notes?: string | null
+          optional_total?: number | null
+          other_costs?: number | null
+          other_costs_note?: string | null
+          proposal_date?: string | null
+          standard_total?: number | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          id: string
+          setting_key: string
+          setting_value: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          setting_key: string
+          setting_value?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          setting_key?: string
+          setting_value?: Json | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
