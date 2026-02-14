@@ -1,6 +1,7 @@
 import { fmtCurrency } from "@/lib/ecfi-utils";
-import { Sun, Moon, Settings } from "lucide-react";
+import { Sun, Moon, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TopNavProps {
   catalogCount: number;
@@ -12,6 +13,8 @@ interface TopNavProps {
 }
 
 export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMode, setDarkMode }: TopNavProps) {
+  const { profile, signOut } = useAuth();
+
   return (
     <header className="bg-ecfi-nav-bg border-b border-ecfi-nav-border px-6 py-3.5 flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -32,12 +35,24 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMo
         <span className="text-ecfi-gold-text">
           <span className="font-extrabold text-sm">{fmtCurrency(proposalTotal)}</span>
         </span>
+        {profile?.full_name && (
+          <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
+            {profile.full_name}
+          </span>
+        )}
         <button
           onClick={() => setDarkMode(!darkMode)}
           className="p-2 border border-ecfi-panel-border hover:bg-ecfi-panel-bg transition-colors"
           title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
           {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+        <button
+          onClick={signOut}
+          className="p-2 border border-ecfi-panel-border hover:bg-ecfi-panel-bg transition-colors text-destructive"
+          title="Sign out"
+        >
+          <LogOut className="w-4 h-4" />
         </button>
       </div>
     </header>
