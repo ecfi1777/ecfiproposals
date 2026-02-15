@@ -8,8 +8,9 @@ import { ProposalTab } from "@/components/ecfi/ProposalTab";
 import { CostAnalysisTab } from "@/components/ecfi/CostAnalysisTab";
 import { PreviewTab } from "@/components/ecfi/PreviewTab";
 import { ProposalsTab } from "@/components/ecfi/ProposalsTab";
+import { PriceHistoryTab } from "@/components/ecfi/PriceHistoryTab";
 
-type TabKey = "proposal" | "costs" | "preview" | "proposals";
+type TabKey = "proposal" | "costs" | "preview" | "proposals" | "price-history";
 
 const Index = () => {
   const {
@@ -62,6 +63,7 @@ const Index = () => {
     { key: "costs", label: "Cost Analysis" },
     { key: "preview", label: "Preview" },
     { key: "proposals", label: "Proposals" },
+    { key: "price-history", label: "Price History" },
   ];
 
   return (
@@ -125,6 +127,9 @@ const Index = () => {
         )}
         {activeTab === "proposals" && (
           <ProposalsTab onLoad={handleLoadProposal} />
+        )}
+        {activeTab === "price-history" && (
+          <PriceHistoryTab onLoadProposal={handleLoadProposal} />
         )}
       </div>
     </div>
