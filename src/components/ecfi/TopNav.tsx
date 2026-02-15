@@ -1,5 +1,5 @@
 import { fmtCurrency } from "@/lib/ecfi-utils";
-import { Sun, Moon, LogOut, Save, FilePlus, Library, Clock } from "lucide-react";
+import { Sun, Moon, LogOut, Save, FilePlus, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -69,14 +69,6 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMo
           </button>
         )}
 
-        <Link
-          to="/proposals"
-          className="flex items-center gap-1.5 px-3 py-1.5 border border-ecfi-panel-border hover:bg-ecfi-panel-bg text-muted-foreground hover:text-foreground transition-colors text-[11px] font-bold tracking-wider"
-          title="Proposals Library"
-        >
-          <Library className="w-3.5 h-3.5" />
-          Proposals
-        </Link>
 
         <Link to="/catalog" className="text-muted-foreground hover:text-foreground transition-colors" title="Manage catalog">
           <span>{catalogCount} items</span>
