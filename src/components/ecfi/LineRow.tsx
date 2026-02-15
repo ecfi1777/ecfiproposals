@@ -1,13 +1,14 @@
 import { LineItem, UNIT_OPTIONS, fmt } from "@/lib/ecfi-utils";
 import { calcCYPerUnit } from "@/lib/calcCYPerUnit";
 import { ComboBox } from "./ComboBox";
+import type { CatalogItem } from "@/hooks/useCatalog";
 
 interface LineRowProps {
   line: LineItem;
   onChange: (updated: LineItem) => void;
   onDelete: () => void;
-  items: string[];
-  onSaveNew: (item: string) => void;
+  items: CatalogItem[];
+  onSaveNew: (description: string) => void;
   idx: number;
 }
 
@@ -39,6 +40,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
       <ComboBox
         value={line.description}
         onChange={(v) => onChange({ ...line, description: v })}
+        onSelectItem={(item) => onChange({ ...line, description: item.description, unit: item.default_unit })}
         items={items}
         onSaveNew={onSaveNew}
         placeholder="Description..."

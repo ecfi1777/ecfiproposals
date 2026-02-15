@@ -1,23 +1,26 @@
 import { useState, useRef, useEffect } from "react";
+import type { CatalogItem } from "@/hooks/useCatalog";
 
 interface ComboBoxProps {
   value: string;
   onChange: (value: string) => void;
-  items: string[];
-  onSaveNew?: (item: string) => void;
+  onSelectItem?: (item: CatalogItem) => void;
+  items: CatalogItem[];
+  onSaveNew?: (description: string) => void;
   placeholder?: string;
 }
 
-export function ComboBox({ value, onChange, items, onSaveNew, placeholder }: ComboBoxProps) {
+export function ComboBox({ value, onChange, onSelectItem, items, onSaveNew, placeholder }: ComboBoxProps) {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("");
   const ref = useRef<HTMLDivElement>(null);
 
+  const searchTerm = (filter || value || "").toLowerCase();
   const filtered = items
-    .filter((it) => it.toLowerCase().includes((filter || value || "").toLowerCase()))
+    .filter((it) => it.description.toLowerCase().includes(searchTerm))
     .slice(0, 30);
 
-  const isNew = value && value.trim() && !items.some((i) => i.toLowerCase() === value.toLowerCase());
+  const isNew = value && value.trim() && !items.some((i) => i.description.toLowerCase() === value.trim().toLowerCase());
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -56,16 +59,18 @@ export function ComboBox({ value, onChange, items, onSaveNew, placeholder }: Com
       </div>
       {open && filtered.length > 0 && (
         <div className="absolute top-full left-0 right-0 z-[999] bg-ecfi-dropdown-bg border border-ecfi-dropdown-border max-h-[220px] overflow-y-auto shadow-xl">
-          {filtered.map((item, i) => (
+          {filtered.map((item) => (
             <div
-              key={i}
+              key={item.id}
               onClick={() => {
-                onChange(item);
+                onChange(item.description);
+                onSelectItem?.(item);
                 setOpen(false);
               }}
               className="px-2.5 py-[7px] cursor-pointer text-[12px] text-muted-foreground border-b border-ecfi-panel-border font-mono hover:bg-ecfi-dropdown-hover hover:text-ecfi-gold-text transition-colors"
             >
-              {item}
+              {item.description}
+              <span className="ml-2 text-[10px] text-ecfi-subtle">{item.default_unit}</span>
             </div>
           ))}
         </div>

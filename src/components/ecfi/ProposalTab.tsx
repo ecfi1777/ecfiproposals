@@ -1,7 +1,14 @@
-import { useState } from "react";
-import { LineItem, emptyLine, emptySlabLine, calcSection, calcTotalYards, fmtCurrency, fmt } from "@/lib/ecfi-utils";
+import { useState, useMemo } from "react";
+import { LineItem, emptyLine, emptySlabLine, calcSection, calcTotalYards, fmtCurrency } from "@/lib/ecfi-utils";
 import { LineRow, SectionHeader } from "./LineRow";
 import { VolumeBreakdown } from "./VolumeBreakdown";
+import type { CatalogItem } from "@/hooks/useCatalog";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface ProposalTabProps {
   proposal: {
@@ -17,8 +24,8 @@ interface ProposalTabProps {
   setFtgLines: (fn: LineItem[] | ((prev: LineItem[]) => LineItem[])) => void;
   slabLines: LineItem[];
   setSlabLines: (fn: LineItem[] | ((prev: LineItem[]) => LineItem[])) => void;
-  catalog: string[];
-  onSaveNew: (item: string) => void;
+  catalog: CatalogItem[];
+  onSaveNew: (description: string, section: string, unit: string) => void;
 }
 
 export function ProposalTab({
@@ -33,6 +40,9 @@ export function ProposalTab({
 }: ProposalTabProps) {
   const [showVolBreakdown, setShowVolBreakdown] = useState(false);
 
+  const ftgCatalog = useMemo(() => catalog.filter((c) => c.section === "ftg_wall"), [catalog]);
+  const slabCatalog = useMemo(() => catalog.filter((c) => c.section === "slabs"), [catalog]);
+
   const ftgTotals = calcSection(ftgLines);
   const slabTotals = calcSection(slabLines);
   const grandStd = ftgTotals.std + slabTotals.std;
@@ -41,36 +51,121 @@ export function ProposalTab({
   const slabYards = calcTotalYards(slabLines);
   const totalYards = ftgYards + slabYards;
 
-  const fields: [string, string, (v: string) => void, string, string?][] = [
-    ["Builder", proposal.builder, (v) => setProposal((p: any) => ({ ...p, builder: v })), "Builder Name"],
-    ["Date", proposal.date, (v) => setProposal((p: any) => ({ ...p, date: v })), "", "date"],
-    ["County", proposal.county, (v) => setProposal((p: any) => ({ ...p, county: v })), "County Name"],
-    ["Job Location", proposal.location, (v) => setProposal((p: any) => ({ ...p, location: v })), "Address, Subdivision, Owner Name"],
-    ["Foundation Type", proposal.foundType, (v) => setProposal((p: any) => ({ ...p, foundType: v })), "Custom"],
-    ["Foundation Size", proposal.foundSize, (v) => setProposal((p: any) => ({ ...p, foundSize: v })), "Overall Measurement"],
-  ];
+  const dateValue = proposal.date ? new Date(proposal.date + "T00:00:00") : undefined;
+
+  const inputClass = "w-full px-2.5 py-2 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-sm font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold";
+  const labelClass = "text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 block";
 
   const sections = [
-    { title: "Footings & Walls", lines: ftgLines, setLines: setFtgLines, totals: ftgTotals, yards: ftgYards, colorClass: "bg-ecfi-gold", newLine: emptyLine },
-    { title: "Slabs", lines: slabLines, setLines: setSlabLines, totals: slabTotals, yards: slabYards, colorClass: "bg-ecfi-vol-blue", newLine: emptySlabLine },
+    {
+      title: "Footings & Walls",
+      lines: ftgLines,
+      setLines: setFtgLines,
+      totals: ftgTotals,
+      yards: ftgYards,
+      colorClass: "bg-ecfi-gold",
+      newLine: emptyLine,
+      catalogItems: ftgCatalog,
+      sectionKey: "ftg_wall",
+    },
+    {
+      title: "Slabs",
+      lines: slabLines,
+      setLines: setSlabLines,
+      totals: slabTotals,
+      yards: slabYards,
+      colorClass: "bg-ecfi-vol-blue",
+      newLine: emptySlabLine,
+      catalogItems: slabCatalog,
+      sectionKey: "slabs",
+    },
   ];
 
   return (
     <div>
       {/* Header fields */}
       <div className="grid grid-cols-3 gap-4 mb-7 p-5 bg-ecfi-panel-bg border border-ecfi-panel-border">
-        {fields.map(([lbl, val, set, ph, type], i) => (
-          <div key={i}>
-            <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 block">{lbl}</label>
-            <input
-              type={type || "text"}
-              value={val}
-              onChange={(e) => set(e.target.value)}
-              className="w-full px-2.5 py-2 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-sm font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
-              placeholder={ph}
-            />
-          </div>
-        ))}
+        {/* Row 1 */}
+        <div>
+          <label className={labelClass}>Builder</label>
+          <input
+            value={proposal.builder}
+            onChange={(e) => setProposal((p: any) => ({ ...p, builder: e.target.value }))}
+            className={inputClass}
+            placeholder="Builder Name"
+          />
+        </div>
+        <div>
+          <label className={labelClass}>Date</label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-mono text-sm border-ecfi-input-border bg-ecfi-input-bg hover:bg-ecfi-input-bg h-auto px-2.5 py-2",
+                  !dateValue && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateValue ? format(dateValue, "MM/dd/yyyy") : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={dateValue}
+                onSelect={(d) => {
+                  if (d) setProposal((p: any) => ({ ...p, date: format(d, "yyyy-MM-dd") }));
+                }}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div /> {/* empty cell to fill grid */}
+
+        {/* Row 2 */}
+        <div>
+          <label className={labelClass}>Job Location</label>
+          <input
+            value={proposal.location}
+            onChange={(e) => setProposal((p: any) => ({ ...p, location: e.target.value }))}
+            className={inputClass}
+            placeholder="Address, Subdivision, Owner Name"
+          />
+        </div>
+        <div>
+          <label className={labelClass}>County</label>
+          <input
+            value={proposal.county}
+            onChange={(e) => setProposal((p: any) => ({ ...p, county: e.target.value }))}
+            className={inputClass}
+            placeholder="County Name"
+          />
+        </div>
+        <div /> {/* empty cell */}
+
+        {/* Row 3 */}
+        <div>
+          <label className={labelClass}>Foundation Type</label>
+          <input
+            value={proposal.foundType}
+            onChange={(e) => setProposal((p: any) => ({ ...p, foundType: e.target.value }))}
+            className={inputClass}
+            placeholder="Custom"
+          />
+        </div>
+        <div>
+          <label className={labelClass}>Foundation Size</label>
+          <input
+            value={proposal.foundSize}
+            onChange={(e) => setProposal((p: any) => ({ ...p, foundSize: e.target.value }))}
+            className={inputClass}
+            placeholder={`49'-4" x 32'-4"`}
+          />
+        </div>
+        <div /> {/* empty cell */}
       </div>
 
       {/* Line item sections */}
@@ -105,8 +200,8 @@ export function ProposalTab({
                 });
               }}
               onDelete={() => sec.setLines((prev) => prev.filter((_, i) => i !== idx))}
-              items={catalog}
-              onSaveNew={onSaveNew}
+              items={sec.catalogItems}
+              onSaveNew={(desc) => onSaveNew(desc, sec.sectionKey, "LF")}
             />
           ))}
         </div>
