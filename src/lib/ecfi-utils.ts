@@ -25,6 +25,8 @@ export interface ProposalData {
   concretePerYard: string;
   laborPerYard: string;
   otherCosts: string;
+  otherCostsNote: string;
+  concreteYardsOverride: string;
 }
 
 export const emptyLine = (): LineItem => ({

@@ -6,6 +6,8 @@ interface CostAnalysisTabProps {
     concretePerYard: string;
     laborPerYard: string;
     otherCosts: string;
+    otherCostsNote: string;
+    concreteYardsOverride: string;
   };
   setProposal: (fn: (prev: any) => any) => void;
   ftgLines: LineItem[];
@@ -42,7 +44,12 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
   const proposalTotal = grandStd + grandOpt;
   const ftgYards = calcTotalYards(ftgLines);
   const slabYards = calcTotalYards(slabLines);
-  const totalYards = ftgYards + slabYards;
+  const autoTotalYards = ftgYards + slabYards;
+
+  const hasYardsOverride = proposal.concreteYardsOverride !== "";
+  const totalYards = hasYardsOverride
+    ? parseFloat(proposal.concreteYardsOverride) || 0
+    : autoTotalYards;
 
   const concreteCost = (parseFloat(proposal.concretePerYard) || 0) * totalYards;
   const laborCost = (parseFloat(proposal.laborPerYard) || 0) * totalYards;
@@ -56,25 +63,41 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
 
   return (
     <div className="grid grid-cols-2 gap-6">
-      {/* Left column */}
+      {/* Left column — Inputs */}
       <div>
-         <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
+        <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
           <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Job Cost Inputs</h3>
-          <div className="mb-5">
-            <label className={labelClass}>Proposal Total (auto)</label>
-            <div className="text-2xl font-extrabold py-2">{fmtCurrency(proposalTotal)}</div>
-            <div className="text-[11px] text-muted-foreground">Std: {fmtCurrency(grandStd)} + Opt: {fmtCurrency(grandOpt)}</div>
-          </div>
+
+          {/* Concrete Yards — auto with override */}
           <div className="mb-5 p-4 bg-ecfi-vol-breakdown-bg border border-ecfi-vol-breakdown-border">
             <label className="text-[10px] text-ecfi-vol-blue-text font-bold uppercase tracking-widest mb-1 block">
-              Concrete Volume (auto-calculated from line items)
+              Total Concrete Yards
             </label>
-            <div className="text-[28px] font-extrabold text-ecfi-vol-blue-text py-1">{totalYards.toFixed(2)} CY</div>
-            <div className="text-[11px] text-ecfi-vol-blue-text/60">
-              Ftg/Walls: {ftgYards.toFixed(2)} CY &nbsp;+&nbsp; Slabs: {slabYards.toFixed(2)} CY
+            <div className="flex items-end gap-4">
+              <div className="flex-1">
+                <div className={`text-[28px] font-extrabold py-1 ${hasYardsOverride ? "text-ecfi-override-orange-text" : "text-ecfi-vol-blue-text"}`}>
+                  {totalYards.toFixed(2)} CY
+                </div>
+                <div className="text-[11px] text-ecfi-vol-blue-text/60">
+                  Auto: {autoTotalYards.toFixed(2)} CY &nbsp;(Ftg/Walls: {ftgYards.toFixed(2)} + Slabs: {slabYards.toFixed(2)})
+                </div>
+              </div>
+              <div className="w-32">
+                <label className="text-[9px] text-ecfi-override-orange-text font-bold uppercase tracking-wider mb-1 block">
+                  Override CY
+                </label>
+                <input
+                  value={proposal.concreteYardsOverride}
+                  onChange={(e) => setProposal((p: any) => ({ ...p, concreteYardsOverride: e.target.value }))}
+                  className={`${inputClass} ${hasYardsOverride ? "!border-ecfi-override-orange-text" : ""}`}
+                  placeholder="—"
+                />
+              </div>
             </div>
           </div>
+
           <div className="h-px bg-ecfi-panel-border my-4" />
+
           <div className="mb-4">
             <label className={labelClass}>Concrete Cost ($ per Yard)</label>
             <input value={proposal.concretePerYard} onChange={(e) => setProposal((p: any) => ({ ...p, concretePerYard: e.target.value }))} className={inputClass} placeholder="e.g. 185" />
@@ -85,7 +108,20 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
           </div>
           <div className="mb-4">
             <label className={labelClass}>Other Job Costs ($)</label>
-            <input value={proposal.otherCosts} onChange={(e) => setProposal((p: any) => ({ ...p, otherCosts: e.target.value }))} className={inputClass} placeholder="Pump, winterization, etc." />
+            <div className="flex gap-3">
+              <input
+                value={proposal.otherCosts}
+                onChange={(e) => setProposal((p: any) => ({ ...p, otherCosts: e.target.value }))}
+                className={`${inputClass} w-32 flex-shrink-0`}
+                placeholder="0"
+              />
+              <input
+                value={proposal.otherCostsNote}
+                onChange={(e) => setProposal((p: any) => ({ ...p, otherCostsNote: e.target.value }))}
+                className={`${inputClass} flex-1`}
+                placeholder="pump rental, winterization, etc."
+              />
+            </div>
           </div>
         </div>
 
@@ -117,14 +153,32 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
         </div>
       </div>
 
-      {/* Right column */}
+      {/* Right column — Revenue, Costs, Profitability */}
       <div>
+        {/* Revenue */}
+        <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
+          <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Revenue (from Proposal)</h3>
+          <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
+            <span className="text-muted-foreground">Standard Total</span>
+            <span className="font-bold text-ecfi-std-green-text">{fmtCurrency(grandStd)}</span>
+          </div>
+          <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
+            <span className="text-muted-foreground">Optional Total</span>
+            <span className="font-bold text-ecfi-gold-text">{fmtCurrency(grandOpt)}</span>
+          </div>
+          <div className="flex justify-between py-3 border-b-2 border-ecfi-panel-border">
+            <span className="font-extrabold text-sm">GRAND TOTAL</span>
+            <span className="font-extrabold text-lg">{fmtCurrency(proposalTotal)}</span>
+          </div>
+        </div>
+
+        {/* Cost Breakdown */}
         <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
           <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Cost Breakdown</h3>
           {[
             [`Concrete (${totalYards.toFixed(1)} yd × ${fmtCurrency(parseFloat(proposal.concretePerYard) || 0)}/yd)`, concreteCost],
             [`Labor (${totalYards.toFixed(1)} yd × ${fmtCurrency(parseFloat(proposal.laborPerYard) || 0)}/yd)`, laborCost],
-            ["Other Costs", otherCostVal],
+            [`Other Costs${proposal.otherCostsNote ? ` — ${proposal.otherCostsNote}` : ""}`, otherCostVal],
           ].map(([lbl, val], i) => (
             <div key={i} className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
               <span className="text-muted-foreground">{lbl as string}</span>
@@ -137,8 +191,9 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
           </div>
         </div>
 
+        {/* Profitability */}
         <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border">
-          <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Margin Analysis</h3>
+          <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Profitability</h3>
           <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
             <span className="text-muted-foreground">Revenue</span>
             <span className="font-bold">{fmtCurrency(proposalTotal)}</span>
@@ -153,6 +208,8 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
               {fmtCurrency(grossProfit)}
             </span>
           </div>
+
+          {/* Gross Margin Visual */}
           <div className="mt-5">
             <div className="flex justify-between mb-2">
               <span className="text-[12px] text-muted-foreground font-bold uppercase tracking-wider">Gross Margin</span>
@@ -160,9 +217,9 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
                 {grossMargin.toFixed(1)}%
               </span>
             </div>
-             <div className="w-full h-3 bg-ecfi-panel-border overflow-hidden">
+            <div className="w-full h-3 bg-ecfi-panel-border overflow-hidden">
               <div
-                 className="h-full transition-all duration-500"
+                className="h-full transition-all duration-500"
                 style={{
                   width: `${Math.min(Math.max(grossMargin, 0), 100)}%`,
                   background:
@@ -180,6 +237,8 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
               <span className="text-[10px] text-ecfi-std-green-text">30%+</span>
             </div>
           </div>
+
+          {/* Per-Yard Metrics */}
           <div className="mt-6 p-4 bg-background border border-ecfi-panel-border">
             <div className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase mb-3">Per-Yard Metrics</div>
             <div className="grid grid-cols-3 gap-4">
