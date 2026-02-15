@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useProposal } from "@/hooks/useProposal";
 import { useCatalog } from "@/hooks/useCatalog";
 import { calcSection, calcTotalYards } from "@/lib/ecfi-utils";
@@ -10,9 +11,13 @@ import { PreviewTab } from "@/components/ecfi/PreviewTab";
 type TabKey = "proposal" | "costs" | "preview";
 
 const Index = () => {
-  const { proposal, setProposal, ftgLines, setFtgLines, slabLines, setSlabLines, saving } = useProposal();
+  const {
+    proposal, setProposal, ftgLines, setFtgLines, slabLines, setSlabLines,
+    saving, lastSaved, saveProposal, newProposal, loadProposal,
+  } = useProposal();
   const { catalog, addItem } = useCatalog();
   const [activeTab, setActiveTab] = useState<TabKey>("proposal");
+  const [searchParams, setSearchParams] = useSearchParams();
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("ecfi-theme") === "dark";
@@ -20,10 +25,23 @@ const Index = () => {
     return false;
   });
 
+  // Load proposal from URL param
+  useEffect(() => {
+    const id = searchParams.get("id");
+    if (id && id !== proposal.id) {
+      loadProposal(id);
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
     localStorage.setItem("ecfi-theme", darkMode ? "dark" : "light");
   }, [darkMode]);
+
+  const handleNew = () => {
+    newProposal();
+    setSearchParams({});
+  };
 
   const ftgTotals = calcSection(ftgLines);
   const slabTotals = calcSection(slabLines);
@@ -47,6 +65,9 @@ const Index = () => {
         saving={saving}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
+        onSave={saveProposal}
+        onNew={handleNew}
+        lastSaved={lastSaved}
       />
 
       {/* Tabs */}
