@@ -1,5 +1,5 @@
 import { fmtCurrency } from "@/lib/ecfi-utils";
-import { Sun, Moon, LogOut, Save, FilePlus, Clock } from "lucide-react";
+import { Sun, Moon, LogOut, FilePlus, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -10,7 +10,6 @@ interface TopNavProps {
   saving: boolean;
   darkMode: boolean;
   setDarkMode: (v: boolean) => void;
-  onSave?: () => void;
   onNew?: () => void;
   lastSaved?: Date | null;
 }
@@ -24,7 +23,7 @@ function timeAgo(d: Date): string {
   return `${hrs}h ago`;
 }
 
-export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMode, setDarkMode, onSave, onNew, lastSaved }: TopNavProps) {
+export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMode, setDarkMode, onNew, lastSaved }: TopNavProps) {
   const { profile, signOut } = useAuth();
 
   return (
@@ -37,7 +36,6 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMo
         </div>
       </div>
       <div className="flex gap-3 items-center text-[11px]">
-        {/* Save indicator */}
         {lastSaved && !saving && (
           <span className="flex items-center gap-1 text-muted-foreground text-[10px]">
             <Clock className="w-3 h-3" />
@@ -46,7 +44,6 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMo
         )}
         {saving && <span className="text-ecfi-gold-text text-[10px] animate-pulse">Saving...</span>}
 
-        {/* Action buttons */}
         {onNew && (
           <button
             onClick={onNew}
@@ -57,18 +54,6 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMo
             New
           </button>
         )}
-        {onSave && (
-          <button
-            onClick={onSave}
-            disabled={saving}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-ecfi-gold text-primary-foreground font-bold text-[11px] tracking-wider hover:opacity-90 disabled:opacity-50 transition-opacity"
-            title="Save Proposal"
-          >
-            <Save className="w-3.5 h-3.5" />
-            Save
-          </button>
-        )}
-
 
         <Link to="/catalog" className="text-muted-foreground hover:text-foreground transition-colors" title="Manage catalog">
           <span>{catalogCount} items</span>

@@ -73,7 +73,7 @@ const Index = () => {
         saving={saving}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
-        onSave={saveProposal}
+        
         onNew={handleNew}
         lastSaved={lastSaved}
       />
@@ -107,6 +107,9 @@ const Index = () => {
             setSlabLines={setSlabLines}
             catalog={catalog}
             onSaveNew={addItem}
+            onSave={saveProposal}
+            onClear={handleNew}
+            saving={saving}
           />
         )}
         {activeTab === "costs" && (
