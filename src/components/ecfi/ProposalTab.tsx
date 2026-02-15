@@ -4,11 +4,16 @@ import { LineRow, SectionHeader } from "./LineRow";
 import { VolumeBreakdown } from "./VolumeBreakdown";
 import type { CatalogItem } from "@/hooks/useCatalog";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Save, Eraser } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ProposalTabProps {
   proposal: {
@@ -26,6 +31,9 @@ interface ProposalTabProps {
   setSlabLines: (fn: LineItem[] | ((prev: LineItem[]) => LineItem[])) => void;
   catalog: CatalogItem[];
   onSaveNew: (description: string, section: string, unit: string) => void;
+  onSave?: () => void;
+  onClear?: () => void;
+  saving?: boolean;
 }
 
 export function ProposalTab({
@@ -37,6 +45,9 @@ export function ProposalTab({
   setSlabLines,
   catalog,
   onSaveNew,
+  onSave,
+  onClear,
+  saving,
 }: ProposalTabProps) {
   const [showVolBreakdown, setShowVolBreakdown] = useState(false);
 
@@ -82,7 +93,7 @@ export function ProposalTab({
   ];
 
   return (
-    <div>
+    <div className="pb-20">
       {/* Header fields */}
       <div className="grid grid-cols-3 gap-4 mb-7 p-5 bg-ecfi-panel-bg border border-ecfi-panel-border">
         {/* Row 1 */}
@@ -234,6 +245,44 @@ export function ProposalTab({
         </div>
 
         {showVolBreakdown && <VolumeBreakdown ftgLines={ftgLines} slabLines={slabLines} />}
+      </div>
+
+      {/* Sticky footer */}
+      <div className="fixed bottom-0 left-0 right-0 bg-ecfi-panel-bg/95 backdrop-blur-sm border-t border-ecfi-panel-border px-6 py-3 flex items-center justify-between z-50">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="flex items-center gap-2 px-4 py-2 border border-destructive text-destructive font-bold text-[12px] font-mono tracking-wider hover:bg-destructive/10 transition-colors">
+              <Eraser className="w-4 h-4" />
+              Clear Form
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Clear Proposal?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will erase all data in the current form including header fields, all line items, and pricing. This cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={onClear}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Yes, Clear Everything
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <button
+          onClick={onSave}
+          disabled={saving}
+          className="flex items-center gap-2 px-6 py-2.5 bg-ecfi-std-green text-white font-extrabold text-[13px] font-mono tracking-wider hover:opacity-90 disabled:opacity-50 transition-opacity"
+        >
+          <Save className="w-4 h-4" />
+          {saving ? "Saving..." : "Save Proposal"}
+        </button>
       </div>
     </div>
   );
