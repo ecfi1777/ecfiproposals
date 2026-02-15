@@ -1,5 +1,5 @@
 import { fmtCurrency } from "@/lib/ecfi-utils";
-import { Sun, Moon, LogOut } from "lucide-react";
+import { Sun, Moon, LogOut, Save, FilePlus, Library, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -10,9 +10,21 @@ interface TopNavProps {
   saving: boolean;
   darkMode: boolean;
   setDarkMode: (v: boolean) => void;
+  onSave?: () => void;
+  onNew?: () => void;
+  lastSaved?: Date | null;
 }
 
-export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMode, setDarkMode }: TopNavProps) {
+function timeAgo(d: Date): string {
+  const secs = Math.round((Date.now() - d.getTime()) / 1000);
+  if (secs < 60) return "just now";
+  const mins = Math.round(secs / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.round(mins / 60);
+  return `${hrs}h ago`;
+}
+
+export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMode, setDarkMode, onSave, onNew, lastSaved }: TopNavProps) {
   const { profile, signOut } = useAuth();
 
   return (
@@ -24,8 +36,48 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMo
           <div className="text-[10px] text-muted-foreground tracking-widest uppercase">Eastern Concrete Foundation, Inc.</div>
         </div>
       </div>
-      <div className="flex gap-5 items-center text-[11px]">
+      <div className="flex gap-3 items-center text-[11px]">
+        {/* Save indicator */}
+        {lastSaved && !saving && (
+          <span className="flex items-center gap-1 text-muted-foreground text-[10px]">
+            <Clock className="w-3 h-3" />
+            Saved {timeAgo(lastSaved)}
+          </span>
+        )}
         {saving && <span className="text-ecfi-gold-text text-[10px] animate-pulse">Saving...</span>}
+
+        {/* Action buttons */}
+        {onNew && (
+          <button
+            onClick={onNew}
+            className="flex items-center gap-1.5 px-3 py-1.5 border border-ecfi-panel-border hover:bg-ecfi-panel-bg text-muted-foreground hover:text-foreground transition-colors text-[11px] font-bold tracking-wider"
+            title="New Proposal"
+          >
+            <FilePlus className="w-3.5 h-3.5" />
+            New
+          </button>
+        )}
+        {onSave && (
+          <button
+            onClick={onSave}
+            disabled={saving}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-ecfi-gold text-primary-foreground font-bold text-[11px] tracking-wider hover:opacity-90 disabled:opacity-50 transition-opacity"
+            title="Save Proposal"
+          >
+            <Save className="w-3.5 h-3.5" />
+            Save
+          </button>
+        )}
+
+        <Link
+          to="/proposals"
+          className="flex items-center gap-1.5 px-3 py-1.5 border border-ecfi-panel-border hover:bg-ecfi-panel-bg text-muted-foreground hover:text-foreground transition-colors text-[11px] font-bold tracking-wider"
+          title="Proposals Library"
+        >
+          <Library className="w-3.5 h-3.5" />
+          Proposals
+        </Link>
+
         <Link to="/catalog" className="text-muted-foreground hover:text-foreground transition-colors" title="Manage catalog">
           <span>{catalogCount} items</span>
         </Link>
