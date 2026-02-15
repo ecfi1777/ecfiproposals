@@ -7,8 +7,9 @@ import { TopNav } from "@/components/ecfi/TopNav";
 import { ProposalTab } from "@/components/ecfi/ProposalTab";
 import { CostAnalysisTab } from "@/components/ecfi/CostAnalysisTab";
 import { PreviewTab } from "@/components/ecfi/PreviewTab";
+import { ProposalsTab } from "@/components/ecfi/ProposalsTab";
 
-type TabKey = "proposal" | "costs" | "preview";
+type TabKey = "proposal" | "costs" | "preview" | "proposals";
 
 const Index = () => {
   const {
@@ -29,7 +30,7 @@ const Index = () => {
   useEffect(() => {
     const id = searchParams.get("id");
     if (id && id !== proposal.id) {
-      loadProposal(id);
+      loadProposal(id).then(() => setActiveTab("proposal"));
     }
   }, [searchParams]);
 
@@ -41,6 +42,12 @@ const Index = () => {
   const handleNew = () => {
     newProposal();
     setSearchParams({});
+    setActiveTab("proposal");
+  };
+
+  const handleLoadProposal = (id: string) => {
+    setSearchParams({ id });
+    setActiveTab("proposal");
   };
 
   const ftgTotals = calcSection(ftgLines);
@@ -54,6 +61,7 @@ const Index = () => {
     { key: "proposal", label: "Proposal" },
     { key: "costs", label: "Cost Analysis" },
     { key: "preview", label: "Preview" },
+    { key: "proposals", label: "Proposals" },
   ];
 
   return (
@@ -111,6 +119,9 @@ const Index = () => {
         )}
         {activeTab === "preview" && (
           <PreviewTab proposal={proposal} ftgLines={ftgLines} slabLines={slabLines} />
+        )}
+        {activeTab === "proposals" && (
+          <ProposalsTab onLoad={handleLoadProposal} />
         )}
       </div>
     </div>
