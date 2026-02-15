@@ -1,4 +1,5 @@
-import { LineItem, calcSection, calcTotalYards, fmtCurrency } from "@/lib/ecfi-utils";
+import { useState } from "react";
+import { LineItem, calcSection, calcTotalYards, fmtCurrency, isRebarEligible, calcRebarForLine, calcTotalRebarLF } from "@/lib/ecfi-utils";
 import { calcCYPerUnit } from "@/lib/calcCYPerUnit";
 
 interface CostAnalysisTabProps {
@@ -8,6 +9,7 @@ interface CostAnalysisTabProps {
     otherCosts: string;
     otherCostsNote: string;
     concreteYardsOverride: string;
+    rebarCostPerLF: string;
   };
   setProposal: (fn: (prev: any) => any) => void;
   ftgLines: LineItem[];
@@ -51,10 +53,18 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
     ? parseFloat(proposal.concreteYardsOverride) || 0
     : autoTotalYards;
 
+  // Rebar calculations
+  const totalRebarLF = calcTotalRebarLF(ftgLines);
+  const rebarCostPerLF = parseFloat(proposal.rebarCostPerLF) || 0;
+  const rebarTotalCost = totalRebarLF * rebarCostPerLF;
+  const rebarLines = ftgLines.filter(
+    (l) => l.rebar && isRebarEligible(l.description) && (l.rebar.horizFtgBars > 0 || l.rebar.horizWallBars > 0 || l.rebar.vertSpacingInches > 0)
+  );
+
   const concreteCost = (parseFloat(proposal.concretePerYard) || 0) * totalYards;
   const laborCost = (parseFloat(proposal.laborPerYard) || 0) * totalYards;
   const otherCostVal = parseFloat(proposal.otherCosts) || 0;
-  const totalCost = concreteCost + laborCost + otherCostVal;
+  const totalCost = concreteCost + laborCost + otherCostVal + rebarTotalCost;
   const grossProfit = proposalTotal - totalCost;
   const grossMargin = proposalTotal > 0 ? (grossProfit / proposalTotal) * 100 : 0;
 
@@ -125,6 +135,76 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
           </div>
         </div>
 
+        {/* Rebar Summary */}
+        <div className="p-5 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
+          <h3 className="text-[12px] font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-3">Rebar</h3>
+          {rebarLines.length > 0 ? (
+            <>
+              <div className="overflow-x-auto mb-3">
+                <table className="w-full text-[11px] font-mono">
+                  <thead>
+                    <tr className="border-b border-ecfi-panel-border text-muted-foreground">
+                      <th className="text-left py-1.5 font-bold uppercase tracking-wider">Description</th>
+                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-12">Qty</th>
+                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-10">H.Ftg</th>
+                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-10">H.Wall</th>
+                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-12">V.Spc"</th>
+                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-16">Ftg LF</th>
+                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-16">Wall LF</th>
+                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-14">Vert LF</th>
+                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-16">Total LF</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rebarLines.map((l) => {
+                      const r = calcRebarForLine(l);
+                      return (
+                        <tr key={l.id} className="border-b border-ecfi-panel-border/50">
+                          <td className="py-1.5 text-muted-foreground truncate max-w-[160px]">{l.description}</td>
+                          <td className="text-right py-1.5">{l.qty}</td>
+                          <td className="text-right py-1.5">{l.rebar!.horizFtgBars}</td>
+                          <td className="text-right py-1.5">{l.rebar!.horizWallBars}</td>
+                          <td className="text-right py-1.5">{l.rebar!.vertSpacingInches || "-"}</td>
+                          <td className="text-right py-1.5 text-ecfi-vol-blue-text">{r.horizFtgLF.toFixed(0)}</td>
+                          <td className="text-right py-1.5 text-ecfi-vol-blue-text">{r.horizWallLF.toFixed(0)}</td>
+                          <td className="text-right py-1.5 text-ecfi-vol-blue-text">{r.vertLF.toFixed(0)}</td>
+                          <td className="text-right py-1.5 font-bold">{r.totalLF.toFixed(0)}</td>
+                        </tr>
+                      );
+                    })}
+                    <tr className="border-t-2 border-ecfi-panel-border">
+                      <td colSpan={8} className="text-right py-2 font-extrabold uppercase tracking-wider text-[10px]">Total Rebar</td>
+                      <td className="text-right py-2 font-extrabold text-[13px]">{totalRebarLF.toFixed(0)} LF</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex items-center gap-3 mt-3 p-3 bg-background border border-ecfi-panel-border">
+                <div className="flex-1">
+                  <label className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider mb-1 block">
+                    Rebar Cost ($ per LF)
+                  </label>
+                  <input
+                    value={proposal.rebarCostPerLF}
+                    onChange={(e) => setProposal((p: any) => ({ ...p, rebarCostPerLF: e.target.value }))}
+                    className={`${inputClass} w-28`}
+                    placeholder="e.g. 0.75"
+                  />
+                </div>
+                <div className="text-right">
+                  <div className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Rebar Total</div>
+                  <div className="text-lg font-extrabold">{fmtCurrency(rebarTotalCost)}</div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-[12px] text-muted-foreground/50 italic py-3">
+              No rebar configured — click the grid icon on eligible wall+footing line items in the Proposal tab.
+            </div>
+          )}
+        </div>
+
         {/* Volume Breakdown by Line */}
         <div className="p-5 bg-ecfi-panel-bg border border-ecfi-panel-border">
           <h3 className="text-[12px] font-extrabold text-ecfi-vol-blue-text tracking-widest uppercase mb-3">Volume Breakdown by Line</h3>
@@ -178,6 +258,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
           {[
             [`Concrete (${totalYards.toFixed(1)} yd × ${fmtCurrency(parseFloat(proposal.concretePerYard) || 0)}/yd)`, concreteCost],
             [`Labor (${totalYards.toFixed(1)} yd × ${fmtCurrency(parseFloat(proposal.laborPerYard) || 0)}/yd)`, laborCost],
+            [`Rebar (${totalRebarLF.toFixed(0)} LF × ${fmtCurrency(rebarCostPerLF)}/LF)`, rebarTotalCost],
             [`Other Costs${proposal.otherCostsNote ? ` — ${proposal.otherCostsNote}` : ""}`, otherCostVal],
           ].map(([lbl, val], i) => (
             <div key={i} className="flex justify-between py-2.5 border-b border-ecfi-panel-border">

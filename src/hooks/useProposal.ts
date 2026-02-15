@@ -17,6 +17,7 @@ export function useProposal() {
     otherCosts: "",
     otherCostsNote: "",
     concreteYardsOverride: "",
+    rebarCostPerLF: "",
   });
   const [ftgLines, setFtgLines] = useState<LineItem[]>(makeRows(emptyLine, 8));
   const [slabLines, setSlabLines] = useState<LineItem[]>(makeRows(emptySlabLine, 8));
