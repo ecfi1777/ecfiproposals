@@ -1,16 +1,21 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Plus, Pencil, Trash2, Search, X, Check } from "lucide-react";
 import { toast } from "sonner";
 
 interface CatalogItem {
   id: string;
-  name: string;
+  description: string;
+  category: string;
+  section: string;
+  default_unit: string;
   created_at: string;
 }
 
 export default function CatalogPage() {
+  const { user } = useAuth();
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -27,29 +32,40 @@ export default function CatalogPage() {
   }, [darkMode]);
 
   const fetchItems = async () => {
+    if (!user) return;
     setLoading(true);
     const { data, error } = await supabase
-      .from("item_catalog")
-      .select("*")
-      .order("name");
+      .from("catalog_items")
+      .select("id, description, category, section, default_unit, created_at")
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .order("sort_order")
+      .order("description");
     if (!error && data) setItems(data);
     setLoading(false);
   };
 
-  useEffect(() => { fetchItems(); }, []);
+  useEffect(() => { if (user) fetchItems(); }, [user]);
 
   const filtered = items.filter((it) =>
-    it.name.toLowerCase().includes(search.toLowerCase())
+    it.description.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleAdd = async () => {
-    const name = newItem.trim();
-    if (!name) return;
-    if (items.some((it) => it.name.toLowerCase() === name.toLowerCase())) {
+    if (!user) return;
+    const description = newItem.trim();
+    if (!description) return;
+    if (items.some((it) => it.description.toLowerCase() === description.toLowerCase())) {
       toast.error("Item already exists");
       return;
     }
-    const { error } = await supabase.from("item_catalog").insert({ name });
+    const { error } = await supabase.from("catalog_items").insert({
+      user_id: user.id,
+      description,
+      category: "custom",
+      section: "ftg_wall",
+      default_unit: "EA",
+    });
     if (error) {
       toast.error("Failed to add item");
     } else {
@@ -60,13 +76,13 @@ export default function CatalogPage() {
   };
 
   const handleUpdate = async (id: string) => {
-    const name = editValue.trim();
-    if (!name) return;
-    if (items.some((it) => it.id !== id && it.name.toLowerCase() === name.toLowerCase())) {
+    const description = editValue.trim();
+    if (!description) return;
+    if (items.some((it) => it.id !== id && it.description.toLowerCase() === description.toLowerCase())) {
       toast.error("Item name already exists");
       return;
     }
-    const { error } = await supabase.from("item_catalog").update({ name }).eq("id", id);
+    const { error } = await supabase.from("catalog_items").update({ description }).eq("id", id);
     if (error) {
       toast.error("Failed to update item");
     } else {
@@ -76,9 +92,9 @@ export default function CatalogPage() {
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Delete "${name}" from catalog?`)) return;
-    const { error } = await supabase.from("item_catalog").delete().eq("id", id);
+  const handleDelete = async (id: string, description: string) => {
+    if (!window.confirm(`Delete "${description}" from catalog?`)) return;
+    const { error } = await supabase.from("catalog_items").delete().eq("id", id);
     if (error) {
       toast.error("Failed to delete item");
     } else {
@@ -89,7 +105,6 @@ export default function CatalogPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-mono">
-      {/* Nav */}
       <header className="bg-ecfi-nav-bg border-b border-ecfi-nav-border px-6 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-[12px] tracking-wider">
@@ -105,7 +120,6 @@ export default function CatalogPage() {
       </header>
 
       <div className="p-6 max-w-[900px] mx-auto">
-        {/* Add new item */}
         <div className="flex gap-2 mb-5">
           <input
             value={newItem}
@@ -124,7 +138,6 @@ export default function CatalogPage() {
           </button>
         </div>
 
-        {/* Search */}
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -144,9 +157,13 @@ export default function CatalogPage() {
           {filtered.length} item{filtered.length !== 1 ? "s" : ""} {search ? "matching" : "total"}
         </div>
 
-        {/* Item list */}
         {loading ? (
           <div className="text-muted-foreground text-sm py-8 text-center">Loading catalog...</div>
+        ) : items.length === 0 ? (
+          <div className="text-center py-12 border border-ecfi-panel-border bg-ecfi-panel-bg">
+            <div className="text-muted-foreground text-sm mb-2">Your catalog is empty</div>
+            <div className="text-[11px] text-muted-foreground/70">Add items above or use "+ Save" in the proposal builder to build your catalog as you work.</div>
+          </div>
         ) : (
           <div className="border border-ecfi-panel-border">
             {filtered.map((item, i) => (
@@ -175,16 +192,17 @@ export default function CatalogPage() {
                   </>
                 ) : (
                   <>
-                    <span className="flex-1 text-[13px] font-mono">{item.name}</span>
+                    <span className="flex-1 text-[13px] font-mono">{item.description}</span>
+                    <span className="text-[10px] text-ecfi-subtle mr-2">{item.default_unit}</span>
                     <button
-                      onClick={() => { setEditingId(item.id); setEditValue(item.name); }}
+                      onClick={() => { setEditingId(item.id); setEditValue(item.description); }}
                       className="text-muted-foreground hover:text-ecfi-gold-text p-1 transition-colors"
                       title="Edit"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(item.id, item.name)}
+                      onClick={() => handleDelete(item.id, item.description)}
                       className="text-muted-foreground hover:text-destructive p-1 transition-colors"
                       title="Delete"
                     >
