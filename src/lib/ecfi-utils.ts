@@ -3,6 +3,12 @@ import { calcCYPerUnit } from "./calcCYPerUnit";
 export const UNIT_OPTIONS = ["LF", "SF", "EA", "CY", "HR", "LS"] as const;
 export type UnitOption = typeof UNIT_OPTIONS[number];
 
+export interface RebarData {
+  horizFtgBars: number;
+  horizWallBars: number;
+  vertSpacingInches: number;
+}
+
 export interface LineItem {
   id: string;
   qty: string;
@@ -12,6 +18,7 @@ export interface LineItem {
   unitPriceOpt: string;
   section: "ftg" | "slab";
   cyOverride: string;
+  rebar?: RebarData;
 }
 
 export interface ProposalData {
@@ -27,6 +34,7 @@ export interface ProposalData {
   otherCosts: string;
   otherCostsNote: string;
   concreteYardsOverride: string;
+  rebarCostPerLF: string;
 }
 
 export const emptyLine = (): LineItem => ({
@@ -87,3 +95,40 @@ export const calcVolumeSplit = (lines: LineItem[]) => {
   });
   return { wall, ftg, slab, other, total: wall + ftg + slab + other };
 };
+
+/** Check if a description qualifies for rebar (wall with footings) */
+export const isRebarEligible = (desc: string): boolean =>
+  /Wall\s*-\s*with/i.test(desc) && /Foot/i.test(desc);
+
+/** Parse wall height in feet from description like "8' x 8\" Wall - with ..." */
+export const parseWallHeight = (desc: string): number => {
+  const m = desc.match(/^(\d+)'\s*x/i);
+  return m ? parseFloat(m[1]) : 0;
+};
+
+/** Calculate rebar linear feet for a single line item */
+export const calcRebarForLine = (line: LineItem): {
+  horizFtgLF: number; horizWallLF: number; vertLF: number; totalLF: number;
+} => {
+  const empty = { horizFtgLF: 0, horizWallLF: 0, vertLF: 0, totalLF: 0 };
+  if (!line.rebar || !line.qty || !isRebarEligible(line.description)) return empty;
+  const qty = parseFloat(line.qty) || 0;
+  const { horizFtgBars, horizWallBars, vertSpacingInches } = line.rebar;
+
+  const horizFtgLF = qty * horizFtgBars;
+  const horizWallLF = qty * horizWallBars;
+
+  let vertLF = 0;
+  if (vertSpacingInches > 0) {
+    const numVert = Math.ceil(qty / (vertSpacingInches / 12));
+    const wallHt = parseWallHeight(line.description);
+    const barLength = wallHt - 0.25; // minus 3 inches
+    if (barLength > 0) vertLF = numVert * barLength;
+  }
+
+  return { horizFtgLF, horizWallLF, vertLF, totalLF: horizFtgLF + horizWallLF + vertLF };
+};
+
+/** Calculate total rebar LF across all lines */
+export const calcTotalRebarLF = (lines: LineItem[]): number =>
+  lines.reduce((sum, l) => sum + calcRebarForLine(l).totalLF, 0);

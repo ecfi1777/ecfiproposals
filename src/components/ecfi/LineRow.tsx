@@ -1,6 +1,7 @@
-import { LineItem, UNIT_OPTIONS, fmt } from "@/lib/ecfi-utils";
+import { LineItem, UNIT_OPTIONS, fmt, isRebarEligible, RebarData } from "@/lib/ecfi-utils";
 import { calcCYPerUnit } from "@/lib/calcCYPerUnit";
 import { ComboBox } from "./ComboBox";
+import { RebarPopup } from "./RebarPopup";
 import type { CatalogItem } from "@/hooks/useCatalog";
 
 interface LineRowProps {
@@ -18,6 +19,12 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
   const volCalc = calcCYPerUnit(line.description);
   const autoYards = line.qty ? parseFloat(line.qty) * volCalc.cy : 0;
   const isOverridden = line.cyOverride !== "";
+  const showRebar = line.section === "ftg" && isRebarEligible(line.description);
+  const hasRebarData = !!(line.rebar && (line.rebar.horizFtgBars > 0 || line.rebar.horizWallBars > 0 || line.rebar.vertSpacingInches > 0));
+
+  const handleRebarSave = (data: RebarData) => {
+    onChange({ ...line, rebar: data });
+  };
 
   return (
     <div className="flex gap-1.5 items-center mb-1">
@@ -37,14 +44,19 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
           <option key={u} value={u}>{u}</option>
         ))}
       </select>
-      <ComboBox
-        value={line.description}
-        onChange={(v) => onChange({ ...line, description: v })}
-        onSelectItem={(item) => onChange({ ...line, description: item.description, unit: item.default_unit })}
-        items={items}
-        onSaveNew={onSaveNew}
-        placeholder="Description..."
-      />
+      <div className="flex-1 flex items-center gap-0.5">
+        <ComboBox
+          value={line.description}
+          onChange={(v) => onChange({ ...line, description: v })}
+          onSelectItem={(item) => onChange({ ...line, description: item.description, unit: item.default_unit })}
+          items={items}
+          onSaveNew={onSaveNew}
+          placeholder="Description..."
+        />
+        {showRebar && (
+          <RebarPopup rebar={line.rebar} onSave={handleRebarSave} hasData={hasRebarData} />
+        )}
+      </div>
       <input
         value={line.unitPriceStd}
         onChange={(e) => onChange({ ...line, unitPriceStd: e.target.value })}
@@ -109,3 +121,4 @@ export function SectionHeader() {
     </div>
   );
 }
+
