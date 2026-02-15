@@ -147,6 +147,8 @@ export function useProposal() {
             });
           }
         }
+        // Delete existing price history for this proposal, then insert fresh
+        await supabase.from("price_history").delete().eq("proposal_id", proposalId);
         await supabase.from("price_history").insert(historyRows);
       }
 
