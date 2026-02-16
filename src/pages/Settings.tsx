@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check, ChevronDown, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -396,7 +396,21 @@ function CatalogTab() {
 }
 
 export default function SettingsPage({ embedded }: { embedded?: boolean }) {
-  const [activeTab, setActiveTab] = useState<TabKey>("catalog");
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const VALID_SUBTABS: TabKey[] = ["catalog", "formulas", "pricing"];
+  const subtabParam = searchParams.get("subtab") as TabKey | null;
+  const activeTab: TabKey = subtabParam && VALID_SUBTABS.includes(subtabParam) ? subtabParam : "catalog";
+
+  const setActiveTab = (tab: TabKey) => {
+    const params = new URLSearchParams(searchParams);
+    if (tab === "catalog") {
+      params.delete("subtab");
+    } else {
+      params.set("subtab", tab);
+    }
+    setSearchParams(params, { replace: true });
+  };
 
   if (embedded) {
     return (
