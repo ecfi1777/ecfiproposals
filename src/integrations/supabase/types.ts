@@ -289,6 +289,53 @@ export type Database = {
           },
         ]
       }
+      proposal_versions: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          proposal_id: string
+          snapshot_data: Json
+          total_cy: number | null
+          total_optional: number | null
+          total_standard: number | null
+          user_id: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          proposal_id: string
+          snapshot_data?: Json
+          total_cy?: number | null
+          total_optional?: number | null
+          total_standard?: number | null
+          user_id: string
+          version_number?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          proposal_id?: string
+          snapshot_data?: Json
+          total_cy?: number | null
+          total_optional?: number | null
+          total_standard?: number | null
+          user_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_versions_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposals: {
         Row: {
           builder: string | null
