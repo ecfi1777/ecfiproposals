@@ -25,15 +25,15 @@ const freshProposal = (): ProposalData => ({
 export function useProposal() {
   const { user } = useAuth();
   const [proposal, setProposal] = useState<ProposalData>(freshProposal());
-  const [ftgLines, setFtgLines] = useState<LineItem[]>(makeRows(emptyLine, 8));
-  const [slabLines, setSlabLines] = useState<LineItem[]>(makeRows(emptySlabLine, 8));
+  const [ftgLines, setFtgLines] = useState<LineItem[]>(makeRows(emptyLine, 3));
+  const [slabLines, setSlabLines] = useState<LineItem[]>(makeRows(emptySlabLine, 3));
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   const newProposal = useCallback(() => {
     setProposal(freshProposal());
-    setFtgLines(makeRows(emptyLine, 8));
-    setSlabLines(makeRows(emptySlabLine, 8));
+    setFtgLines(makeRows(emptyLine, 3));
+    setSlabLines(makeRows(emptySlabLine, 3));
     setLastSaved(null);
   }, []);
 
@@ -225,8 +225,8 @@ export function useProposal() {
       }
 
       // Pad to minimum 8 rows
-      while (ftg.length < 8) ftg.push(emptyLine());
-      while (slab.length < 8) slab.push(emptySlabLine());
+      while (ftg.length < 3) ftg.push(emptyLine());
+      while (slab.length < 3) slab.push(emptySlabLine());
 
       setFtgLines(ftg);
       setSlabLines(slab);
