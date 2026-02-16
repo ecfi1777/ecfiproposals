@@ -20,12 +20,16 @@ export function CostBreakdownPanel({ data }: { data: CostBreakdownData }) {
     rebarCostPerLF, otherCostVal, otherCostsNote, concretePerYard, laborPerYard, totalCost,
   } = data;
 
+  // Rounded-up volume for display in cost lines
+  const orderYards = Math.ceil(totalYards * 2) / 2;
+
   return (
     <div className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-      <h3 className="text-sm font-semibold text-[var(--text-main)] tracking-widest uppercase mb-5">Cost Breakdown</h3>
+      <h3 className="text-sm font-semibold text-[var(--text-main)] tracking-widest uppercase mb-1">Cost Breakdown</h3>
+      <p className="text-[10px] text-[var(--text-muted)] mb-5">Concrete volume rounded up to nearest ½ yard for ordering.</p>
       {[
-        [`Concrete (${totalYards.toFixed(1)} yd × ${fmtCurrency(concretePerYard)}/yd)`, concreteCost],
-        [`Labor (${totalYards.toFixed(1)} yd × ${fmtCurrency(laborPerYard)}/yd)`, laborCost],
+        [`Concrete (${orderYards.toFixed(1)} yd × ${fmtCurrency(concretePerYard)}/yd)`, concreteCost],
+        [`Labor (${orderYards.toFixed(1)} yd × ${fmtCurrency(laborPerYard)}/yd)`, laborCost],
         [`Rebar (${totalRebarLF.toFixed(0)} LF × ${fmtCurrency(rebarCostPerLF)}/LF)`, rebarTotalCost],
         [`Other Costs${otherCostsNote ? ` — ${otherCostsNote}` : ""}`, otherCostVal],
       ].map(([lbl, val], i) => (
