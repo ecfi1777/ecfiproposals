@@ -18,7 +18,6 @@ interface CostAnalysisTabProps {
   slabLines: LineItem[];
 }
 
-/** Check if a line is a pass-through item (pump, winterization) */
 const isPassThrough = (desc: string): boolean =>
   /concrete\s*pump/i.test(desc) || /winter\s*concrete/i.test(desc);
 
@@ -62,19 +61,19 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
   const grossProfit = foundationRevenue - totalCost;
   const grossMargin = foundationRevenue > 0 ? (grossProfit / foundationRevenue) * 100 : 0;
 
-  const inputClass = "w-full px-2.5 py-2 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-sm font-mono focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg";
-  const labelClass = "text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest mb-1 block";
+  const inputClass = "w-full px-2.5 py-2 border border-[var(--card-border)] bg-[var(--bg-main)] text-[var(--text-main)] text-sm font-mono focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg";
+  const labelClass = "text-[10px] text-[var(--text-secondary)] font-semibold uppercase tracking-widest mb-1 block";
 
   return (
-    <div className="grid grid-cols-2 gap-6">
+    <div className="grid grid-cols-2 gap-7">
       {/* Left column — Inputs */}
-      <div>
-        <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
-          <h3 className="text-sm font-extrabold text-[var(--primary-blue)] tracking-widest uppercase mb-5">Job Cost Inputs</h3>
+      <div className="space-y-6">
+        <div className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          <h3 className="text-sm font-semibold text-[var(--text-main)] tracking-widest uppercase mb-5">Job Cost Inputs</h3>
 
           {/* Concrete Yards — auto with override */}
-          <div className="mb-5 p-4 bg-ecfi-vol-breakdown-bg border border-ecfi-vol-breakdown-border">
-            <label className="text-[10px] text-ecfi-vol-blue-text font-bold uppercase tracking-widest mb-1 block">
+          <div className="mb-5 p-4 bg-[var(--section-bg)] border border-[var(--card-border)] rounded-lg">
+            <label className="text-[10px] text-ecfi-vol-blue-text font-semibold uppercase tracking-widest mb-1 block">
               Total Concrete Yards
             </label>
             <div className="flex items-end gap-4">
@@ -82,12 +81,12 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
                 <div className={`text-[28px] font-extrabold py-1 ${hasYardsOverride ? "text-ecfi-override-orange-text" : "text-ecfi-vol-blue-text"}`}>
                   {totalYards.toFixed(2)} CY
                 </div>
-                <div className="text-[11px] text-ecfi-vol-blue-text/60">
+                <div className="text-[11px] text-[var(--text-muted)]">
                   Auto: {autoTotalYards.toFixed(2)} CY &nbsp;(Ftg/Walls: {ftgYards.toFixed(2)} + Slabs: {slabYards.toFixed(2)})
                 </div>
               </div>
               <div className="w-32">
-                <label className="text-[9px] text-ecfi-override-orange-text font-bold uppercase tracking-wider mb-1 block">
+                <label className="text-[9px] text-ecfi-override-orange-text font-semibold uppercase tracking-wider mb-1 block">
                   Override CY
                 </label>
                 <input
@@ -100,7 +99,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
             </div>
           </div>
 
-          <div className="h-px bg-ecfi-panel-border my-4" />
+          <div className="h-px bg-[var(--card-border)] my-4" />
 
           <div className="mb-4">
             <label className={labelClass}>Concrete Cost ($ per Yard)</label>
@@ -130,31 +129,31 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
         </div>
 
         {/* Rebar Summary */}
-        <div className="p-5 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
-          <h3 className="text-[12px] font-extrabold text-[var(--primary-blue)] tracking-widest uppercase mb-3">Rebar</h3>
+        <div className="p-5 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          <h3 className="text-[12px] font-semibold text-[var(--text-main)] tracking-widest uppercase mb-3">Rebar</h3>
           {rebarLines.length > 0 ? (
             <>
               <div className="overflow-x-auto mb-3">
                 <table className="w-full text-[11px] font-mono">
                   <thead>
-                    <tr className="border-b border-ecfi-panel-border text-muted-foreground">
-                      <th className="text-left py-1.5 font-bold uppercase tracking-wider">Description</th>
-                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-12">Qty</th>
-                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-10">H.Ftg</th>
-                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-10">H.Wall</th>
-                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-12">V.Spc"</th>
-                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-16">Ftg LF</th>
-                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-16">Wall LF</th>
-                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-14">Vert LF</th>
-                      <th className="text-right py-1.5 font-bold uppercase tracking-wider w-16">Total LF</th>
+                    <tr className="border-b border-[var(--card-border)] text-[var(--text-muted)]">
+                      <th className="text-left py-1.5 font-semibold uppercase tracking-wider">Description</th>
+                      <th className="text-right py-1.5 font-semibold uppercase tracking-wider w-12">Qty</th>
+                      <th className="text-right py-1.5 font-semibold uppercase tracking-wider w-10">H.Ftg</th>
+                      <th className="text-right py-1.5 font-semibold uppercase tracking-wider w-10">H.Wall</th>
+                      <th className="text-right py-1.5 font-semibold uppercase tracking-wider w-12">V.Spc"</th>
+                      <th className="text-right py-1.5 font-semibold uppercase tracking-wider w-16">Ftg LF</th>
+                      <th className="text-right py-1.5 font-semibold uppercase tracking-wider w-16">Wall LF</th>
+                      <th className="text-right py-1.5 font-semibold uppercase tracking-wider w-14">Vert LF</th>
+                      <th className="text-right py-1.5 font-semibold uppercase tracking-wider w-16">Total LF</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rebarLines.map((l) => {
                       const r = calcRebarForLine(l);
                       return (
-                        <tr key={l.id} className="border-b border-ecfi-panel-border/50">
-                          <td className="py-1.5 text-muted-foreground truncate max-w-[160px]">{l.description}</td>
+                        <tr key={l.id} className="border-b border-[var(--card-border)]">
+                          <td className="py-1.5 text-[var(--text-secondary)] truncate max-w-[160px]">{l.description}</td>
                           <td className="text-right py-1.5">{l.qty}</td>
                           <td className="text-right py-1.5">{l.rebar!.horizFtgBars}</td>
                           <td className="text-right py-1.5">{l.rebar!.horizWallBars}</td>
@@ -162,21 +161,21 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
                           <td className="text-right py-1.5 text-ecfi-vol-blue-text">{r.horizFtgLF.toFixed(0)}</td>
                           <td className="text-right py-1.5 text-ecfi-vol-blue-text">{r.horizWallLF.toFixed(0)}</td>
                           <td className="text-right py-1.5 text-ecfi-vol-blue-text">{r.vertLF.toFixed(0)}</td>
-                          <td className="text-right py-1.5 font-bold">{r.totalLF.toFixed(0)}</td>
+                          <td className="text-right py-1.5 font-semibold">{r.totalLF.toFixed(0)}</td>
                         </tr>
                       );
                     })}
-                    <tr className="border-t-2 border-ecfi-panel-border">
-                      <td colSpan={8} className="text-right py-2 font-extrabold uppercase tracking-wider text-[10px]">Total Rebar</td>
-                      <td className="text-right py-2 font-extrabold text-[13px]">{totalRebarLF.toFixed(0)} LF</td>
+                    <tr className="border-t-2 border-[var(--card-border)]">
+                      <td colSpan={8} className="text-right py-2 font-semibold uppercase tracking-wider text-[10px]">Total Rebar</td>
+                      <td className="text-right py-2 font-semibold text-[13px]">{totalRebarLF.toFixed(0)} LF</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <div className="flex items-center gap-3 mt-3 p-3 bg-background border border-ecfi-panel-border">
+              <div className="flex items-center gap-3 mt-3 p-3 bg-[var(--section-bg)] border border-[var(--card-border)] rounded-lg">
                 <div className="flex-1">
-                  <label className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider mb-1 block">
+                  <label className="text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-1 block">
                     Rebar Cost ($ per LF)
                   </label>
                   <input
@@ -187,39 +186,39 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
                   />
                 </div>
                 <div className="text-right">
-                  <div className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider mb-1">Rebar Total</div>
-                  <div className="text-lg font-extrabold">{fmtCurrency(rebarTotalCost)}</div>
+                  <div className="text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-1">Rebar Total</div>
+                  <div className="text-lg font-semibold">{fmtCurrency(rebarTotalCost)}</div>
                 </div>
               </div>
             </>
           ) : (
-            <div className="text-[12px] text-muted-foreground/50 italic py-3">
+            <div className="text-[12px] text-[var(--text-muted)] italic py-3">
               No rebar configured — click the grid icon on eligible wall+footing line items in the Proposal tab.
             </div>
           )}
         </div>
 
         {/* Volume Breakdown by Line */}
-        <div className="p-5 bg-ecfi-panel-bg border border-ecfi-panel-border">
-          <h3 className="text-[12px] font-extrabold text-ecfi-vol-blue-text tracking-widest uppercase mb-3">Volume Breakdown by Line</h3>
-          <div className="text-[10px] text-muted-foreground mb-3">
+        <div className="p-5 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          <h3 className="text-[12px] font-semibold text-[var(--text-main)] tracking-widest uppercase mb-3">Volume Breakdown by Line</h3>
+          <div className="text-[10px] text-[var(--text-muted)] mb-3">
             <span className="text-ecfi-vol-blue-text">● Blue</span> = auto-calc &nbsp;
             <span className="text-ecfi-override-orange-text">● Orange</span> = manual override
           </div>
           {ftgLines.filter((l) => l.description).length > 0 && (
             <div className="mb-3">
-              <div className="text-[10px] font-bold text-[var(--primary-blue)] tracking-wider mb-1.5 uppercase">Footings & Walls</div>
+              <div className="text-[10px] font-semibold text-[var(--text-secondary)] tracking-wider mb-1.5 uppercase">Footings & Walls</div>
               {ftgLines.filter((l) => l.description).map((l, i) => <VolumeDetailRow key={i} line={l} />)}
-              <div className="text-right text-[12px] font-bold text-ecfi-vol-blue-text py-1.5 border-t border-ecfi-panel-border">
+              <div className="text-right text-[12px] font-semibold text-ecfi-vol-blue-text py-1.5 border-t border-[var(--card-border)]">
                 Subtotal: {ftgYards.toFixed(2)} CY
               </div>
             </div>
           )}
           {slabLines.filter((l) => l.description).length > 0 && (
             <div>
-              <div className="text-[10px] font-bold text-ecfi-vol-blue-text tracking-wider mb-1.5 uppercase">Slabs</div>
+              <div className="text-[10px] font-semibold text-[var(--text-secondary)] tracking-wider mb-1.5 uppercase">Slabs</div>
               {slabLines.filter((l) => l.description).map((l, i) => <VolumeDetailRow key={i} line={l} />)}
-              <div className="text-right text-[12px] font-bold text-ecfi-vol-blue-text py-1.5 border-t border-ecfi-panel-border">
+              <div className="text-right text-[12px] font-semibold text-ecfi-vol-blue-text py-1.5 border-t border-[var(--card-border)]">
                 Subtotal: {slabYards.toFixed(2)} CY
               </div>
             </div>
@@ -228,7 +227,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
       </div>
 
       {/* Right column — Revenue, Costs, Profitability */}
-      <div>
+      <div className="space-y-6">
         <RevenueSummaryPanel
           data={{ grandStd, grandOpt, proposalTotal, foundationRevenue, passThroughTotal }}
         />

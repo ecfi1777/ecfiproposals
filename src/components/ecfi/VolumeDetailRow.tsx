@@ -8,12 +8,12 @@ export function VolumeDetailRow({ line }: { line: LineItem }) {
   const isOverridden = line.cyOverride !== "";
   if (displayYards <= 0 && !line.description) return null;
   return (
-    <div className="flex justify-between py-1.5 border-b border-ecfi-panel-border text-[12px]">
-      <div className="text-muted-foreground flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+    <div className="flex justify-between py-1.5 border-b border-[var(--card-border)] text-[12px]">
+      <div className="text-[var(--text-secondary)] flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
         {line.qty} {line.unit} — {line.description || "(empty)"}
       </div>
       <div className="flex gap-3 items-center">
-        {volCalc.method && <span className="text-muted-foreground/50 text-[10px]">{volCalc.method}</span>}
+        {volCalc.method && <span className="text-[var(--text-muted)] text-[10px]">{volCalc.method}</span>}
         <span className={`font-semibold min-w-[60px] text-right ${isOverridden ? "text-ecfi-override-orange-text" : "text-ecfi-vol-blue-text"}`}>
           {displayYards > 0 ? displayYards.toFixed(2) + " CY" : "-"}
           {isOverridden && <span className="text-[9px] text-ecfi-override-orange-text ml-1">(manual)</span>}

@@ -99,7 +99,7 @@ export function ProposalsTab({ onLoad }: ProposalsTabProps) {
 
   const SortHeader = ({ label, field }: { label: string; field: SortKey }) => (
     <TableHead
-      className="cursor-pointer select-none hover:text-foreground transition-colors font-mono text-[11px] tracking-wider uppercase"
+      className="cursor-pointer select-none hover:text-[var(--text-main)] transition-colors font-mono text-[11px] tracking-wider uppercase text-[var(--text-muted)]"
       onClick={() => handleSort(field)}
     >
       <span className="flex items-center gap-1">
@@ -110,11 +110,11 @@ export function ProposalsTab({ onLoad }: ProposalsTabProps) {
   );
 
   return (
-    <div>
+    <div className="space-y-5">
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-5">
+      <div className="flex flex-wrap gap-3 p-4 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
           <input
             type="text"
             placeholder="Search builder, location, county..."
@@ -138,75 +138,77 @@ export function ProposalsTab({ onLoad }: ProposalsTabProps) {
 
       {/* Table */}
       {loading ? (
-        <div className="text-center text-muted-foreground py-12 text-sm">Loading proposals...</div>
+        <div className="text-center text-[var(--text-muted)] py-12 text-sm">Loading proposals...</div>
       ) : filtered.length === 0 ? (
-        <div className="text-center text-muted-foreground py-12 text-sm">
+        <div className="text-center text-[var(--text-muted)] py-12 text-sm">
           {proposals.length === 0 ? "No proposals yet. Create your first one!" : "No proposals match your filters."}
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <SortHeader label="Date" field="proposal_date" />
-              <SortHeader label="Builder" field="builder" />
-              <SortHeader label="Job Location" field="job_location" />
-              <SortHeader label="County" field="county" />
-              <SortHeader label="Status" field="status" />
-              <SortHeader label="Grand Total" field="grand_total" />
-              <TableHead className="w-[50px]" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.map((p) => (
-              <TableRow
-                key={p.id}
-                className="cursor-pointer hover:bg-ecfi-panel-bg/50"
-                onClick={() => onLoad(p.id)}
-              >
-                <TableCell className="font-mono text-[12px]">{p.proposal_date || "—"}</TableCell>
-                <TableCell className="font-mono text-[12px] font-bold">{p.builder || "—"}</TableCell>
-                <TableCell className="font-mono text-[12px]">{p.job_location || "—"}</TableCell>
-                <TableCell className="font-mono text-[12px]">{p.county || "—"}</TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <Select value={p.status || "draft"} onValueChange={(v) => updateStatus(p.id, v)}>
-                    <SelectTrigger className="h-7 w-[110px] font-mono text-[11px] capitalize">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {STATUSES.map((s) => (
-                        <SelectItem key={s} value={s} className="capitalize text-[12px]">{s}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-                <TableCell className="font-mono text-[12px] font-bold text-[var(--primary-blue)]">
-                  {p.grand_total ? fmtCurrency(p.grand_total) : "—"}
-                </TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button className="p-1 text-destructive hover:opacity-70" title="Delete">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Proposal?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will permanently delete the proposal for "{p.builder || "Untitled"}" and all its line items.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => deleteProposal(p.id)}>Delete</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </TableCell>
+        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-[var(--card-border)]">
+                <SortHeader label="Date" field="proposal_date" />
+                <SortHeader label="Builder" field="builder" />
+                <SortHeader label="Job Location" field="job_location" />
+                <SortHeader label="County" field="county" />
+                <SortHeader label="Status" field="status" />
+                <SortHeader label="Grand Total" field="grand_total" />
+                <TableHead className="w-[50px]" />
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((p) => (
+                <TableRow
+                  key={p.id}
+                  className="cursor-pointer hover:bg-[var(--section-bg)] border-b border-[var(--card-border)]"
+                  onClick={() => onLoad(p.id)}
+                >
+                  <TableCell className="font-mono text-[12px] text-[var(--text-secondary)]">{p.proposal_date || "—"}</TableCell>
+                  <TableCell className="font-mono text-[12px] font-semibold text-[var(--text-main)]">{p.builder || "—"}</TableCell>
+                  <TableCell className="font-mono text-[12px] text-[var(--text-secondary)]">{p.job_location || "—"}</TableCell>
+                  <TableCell className="font-mono text-[12px] text-[var(--text-secondary)]">{p.county || "—"}</TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Select value={p.status || "draft"} onValueChange={(v) => updateStatus(p.id, v)}>
+                      <SelectTrigger className="h-7 w-[110px] font-mono text-[11px] capitalize">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATUSES.map((s) => (
+                          <SelectItem key={s} value={s} className="capitalize text-[12px]">{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell className="font-mono text-[12px] font-semibold text-[var(--primary-blue)]">
+                    {p.grand_total ? fmtCurrency(p.grand_total) : "—"}
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button className="p-1 text-[var(--danger)] hover:opacity-70" title="Delete">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Proposal?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently delete the proposal for "{p.builder || "Untitled"}" and all its line items.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteProposal(p.id)} className="bg-[var(--danger)] text-white hover:opacity-90">Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </div>
   );

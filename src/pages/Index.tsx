@@ -59,7 +59,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-mono">
+    <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] font-mono">
       <TopNav
         catalogCount={catalog.length}
         totalYards={totalYards}
@@ -70,14 +70,14 @@ const Index = () => {
       />
 
       {/* Tabs */}
-      <div className="flex border-b border-ecfi-nav-border bg-ecfi-tab-bg px-6">
+      <div className="flex border-b border-[var(--card-border)] bg-[var(--card-bg)] px-6">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={`px-6 py-2.5 font-bold text-[13px] tracking-widest uppercase border-b-2 transition-all font-mono ${
               activeTab === t.key
-                ? "bg-ecfi-tab-active-bg text-[var(--primary-blue)] border-[var(--primary-blue)]"
+                ? "bg-[var(--card-bg)] text-[var(--primary-blue)] border-[var(--primary-blue)]"
                 : "text-[var(--text-secondary)] border-transparent hover:text-[var(--primary-blue)]"
             }`}
           >

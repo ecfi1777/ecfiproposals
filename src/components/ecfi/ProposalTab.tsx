@@ -64,8 +64,8 @@ export function ProposalTab({
 
   const dateValue = proposal.date ? new Date(proposal.date + "T00:00:00") : undefined;
 
-  const inputClass = "w-full px-2.5 py-2 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-sm font-mono focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg";
-  const labelClass = "text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest mb-1 block";
+  const inputClass = "w-full px-2.5 py-2 border border-[var(--card-border)] bg-[var(--bg-main)] text-[var(--text-main)] text-sm font-mono focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg";
+  const labelClass = "text-[10px] text-[var(--text-secondary)] font-semibold uppercase tracking-widest mb-1 block";
 
   const sections = [
     {
@@ -93,9 +93,9 @@ export function ProposalTab({
   ];
 
   return (
-    <div className="pb-20">
+    <div className="pb-20 space-y-7">
       {/* Header fields */}
-      <div className="grid grid-cols-3 gap-4 mb-7 p-5 bg-ecfi-panel-bg border border-ecfi-panel-border">
+      <div className="grid grid-cols-3 gap-4 p-5 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         {/* Row 1 */}
         <div>
           <label className={labelClass}>Builder</label>
@@ -113,8 +113,8 @@ export function ProposalTab({
               <Button
                 variant="outline"
                 className={cn(
-                  "w-full justify-start text-left font-mono text-sm border-ecfi-input-border bg-ecfi-input-bg hover:bg-ecfi-input-bg h-auto px-2.5 py-2",
-                  !dateValue && "text-muted-foreground"
+                  "w-full justify-start text-left font-mono text-sm border-[var(--card-border)] bg-[var(--bg-main)] hover:bg-[var(--section-bg)] h-auto px-2.5 py-2 rounded-lg",
+                  !dateValue && "text-[var(--text-muted)]"
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -181,11 +181,11 @@ export function ProposalTab({
 
       {/* Line item sections */}
       {sections.map((sec, si) => (
-        <div key={si} className="mb-7">
+        <div key={si}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className={`w-1 h-6 ${sec.colorClass}`} />
-              <h2 className="text-base font-extrabold tracking-widest uppercase">{sec.title}</h2>
+              <div className={`w-1 h-6 rounded-sm ${sec.colorClass}`} />
+              <h2 className="text-base font-semibold tracking-widest uppercase text-[var(--text-main)]">{sec.title}</h2>
               <span className="text-[12px] text-ecfi-std-green-text font-semibold">{fmtCurrency(sec.totals.std)} std</span>
               {sec.totals.opt > 0 && <span className="text-[12px] text-[var(--text-secondary)] font-semibold">+ {fmtCurrency(sec.totals.opt)} opt</span>}
               <span className="text-[11px] text-ecfi-vol-blue-text font-semibold">{sec.yards.toFixed(1)} CY</span>
@@ -219,28 +219,28 @@ export function ProposalTab({
       ))}
 
       {/* Grand Totals Bar */}
-      <div className="bg-card border border-ecfi-panel-border overflow-hidden">
+      <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="flex justify-end gap-7 p-5 items-center">
           <div
             onClick={() => setShowVolBreakdown(!showVolBreakdown)}
-            className={`text-right cursor-pointer px-3 py-1 border border-ecfi-vol-breakdown-border transition-all select-none ${
-              showVolBreakdown ? "bg-ecfi-vol-breakdown-bg" : "hover:bg-ecfi-vol-breakdown-bg/50"
+            className={`text-right cursor-pointer px-3 py-1 border border-[var(--card-border)] rounded-lg transition-all select-none ${
+              showVolBreakdown ? "bg-[var(--section-bg)]" : "hover:bg-[var(--section-bg)]/50"
             }`}
           >
             <div className="text-[10px] text-ecfi-vol-blue-text tracking-wider uppercase flex items-center gap-1.5 justify-end">
               Total Concrete
               <span className={`text-sm inline-block transition-transform ${showVolBreakdown ? "rotate-180" : ""}`}>▾</span>
             </div>
-            <div className="text-xl font-extrabold text-ecfi-vol-blue-text">{totalYards.toFixed(1)} CY</div>
+            <div className="text-xl font-semibold text-ecfi-vol-blue-text">{totalYards.toFixed(1)} CY</div>
           </div>
-          <div className="w-px bg-ecfi-panel-border self-stretch" />
+          <div className="w-px bg-[var(--card-border)] self-stretch" />
           <div className="text-right">
-            <div className="text-[10px] text-muted-foreground tracking-wider uppercase">Grand Total (Std)</div>
-            <div className="text-xl font-extrabold text-ecfi-std-green-text">{fmtCurrency(grandStd)}</div>
+            <div className="text-[10px] text-[var(--text-muted)] tracking-wider uppercase">Grand Total (Std)</div>
+            <div className="text-xl font-semibold text-[var(--primary-blue)]">{fmtCurrency(grandStd)}</div>
           </div>
           <div className="text-right">
-            <div className="text-[10px] text-muted-foreground tracking-wider uppercase">Grand Total (Opt)</div>
-            <div className="text-xl font-extrabold text-[var(--text-secondary)]">{fmtCurrency(grandOpt)}</div>
+            <div className="text-[10px] text-[var(--text-muted)] tracking-wider uppercase">Grand Total (Opt)</div>
+            <div className="text-xl font-semibold text-[var(--text-secondary)]">{fmtCurrency(grandOpt)}</div>
           </div>
         </div>
 
@@ -248,7 +248,7 @@ export function ProposalTab({
       </div>
 
       {/* Sticky footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-ecfi-panel-bg/95 backdrop-blur-sm border-t border-ecfi-panel-border px-6 py-3 flex items-center justify-between z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-[var(--card-bg)]/95 backdrop-blur-sm border-t border-[var(--card-border)] px-6 py-3 flex items-center justify-between z-50">
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <button className="flex items-center gap-2 px-4 py-2 border border-[var(--danger)] text-[var(--danger)] font-bold text-[12px] font-mono tracking-wider hover:bg-[var(--danger)]/10 transition-colors rounded-lg">
@@ -267,7 +267,7 @@ export function ProposalTab({
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={onClear}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="bg-[var(--danger)] text-white hover:opacity-90"
               >
                 Yes, Clear Everything
               </AlertDialogAction>
