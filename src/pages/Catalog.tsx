@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Plus, Pencil, Trash2, Search, X, Check } from "lucide-react";
 import { toast } from "sonner";
-import { useDarkMode } from "@/hooks/useDarkMode";
 import type { CatalogItemWithTimestamp } from "@/types/catalog";
 
 export default function CatalogPage() {
@@ -15,7 +14,6 @@ export default function CatalogPage() {
   const [newItem, setNewItem] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
-  useDarkMode();
 
   const fetchItems = async () => {
     if (!user) return;

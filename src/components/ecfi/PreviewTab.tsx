@@ -137,7 +137,7 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
       {/* Printable document */}
       <div
         ref={printRef}
-        className="bg-white text-black max-w-[850px] mx-auto p-10 font-mono"
+        className="pdf-export bg-white text-black max-w-[850px] mx-auto p-10 font-mono"
         style={{ fontFamily: "'JetBrains Mono', 'Courier New', monospace" }}
       >
         {/* TOP: Branding */}

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useProposal } from "@/hooks/useProposal";
 import { useCatalog } from "@/hooks/useCatalog";
-import { useDarkMode } from "@/hooks/useDarkMode";
 import { calcSection, calcTotalYards } from "@/lib/ecfi-utils";
 import { TopNav } from "@/components/ecfi/TopNav";
 import { ProposalTab } from "@/components/ecfi/ProposalTab";
@@ -19,7 +18,6 @@ const Index = () => {
     saving, lastSaved, saveProposal, newProposal, loadProposal,
   } = useProposal();
   const { catalog, addItem } = useCatalog();
-  const { darkMode, toggleDarkMode } = useDarkMode();
   const [activeTab, setActiveTab] = useState<TabKey>("proposal");
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -67,8 +65,6 @@ const Index = () => {
         totalYards={totalYards}
         proposalTotal={proposalTotal}
         saving={saving}
-        darkMode={darkMode}
-        onToggleDarkMode={toggleDarkMode}
         onNew={handleNew}
         lastSaved={lastSaved}
       />

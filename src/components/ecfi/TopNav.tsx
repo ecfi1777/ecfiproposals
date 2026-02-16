@@ -1,5 +1,5 @@
 import { fmtCurrency } from "@/lib/ecfi-utils";
-import { Sun, Moon, LogOut, FilePlus, Clock } from "lucide-react";
+import { LogOut, FilePlus, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -8,8 +8,6 @@ interface TopNavProps {
   totalYards: number;
   proposalTotal: number;
   saving: boolean;
-  darkMode: boolean;
-  onToggleDarkMode: () => void;
   onNew?: () => void;
   lastSaved?: Date | null;
 }
@@ -23,7 +21,7 @@ function timeAgo(d: Date): string {
   return `${hrs}h ago`;
 }
 
-export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMode, onToggleDarkMode, onNew, lastSaved }: TopNavProps) {
+export function TopNav({ catalogCount, totalYards, proposalTotal, saving, onNew, lastSaved }: TopNavProps) {
   const { profile, signOut } = useAuth();
 
   return (
@@ -69,13 +67,6 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMo
             {profile.full_name}
           </span>
         )}
-        <button
-          onClick={onToggleDarkMode}
-          className="p-2 border border-ecfi-panel-border hover:bg-ecfi-panel-bg transition-colors"
-          title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-        </button>
         <button
           onClick={signOut}
           className="p-2 border border-ecfi-panel-border hover:bg-ecfi-panel-bg transition-colors text-destructive"
