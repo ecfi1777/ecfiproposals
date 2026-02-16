@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check, ChevronDown } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check, ChevronDown, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -159,18 +159,18 @@ function CatalogTab() {
   const [newItem, setNewItem] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [showInactive, setShowInactive] = useState(false);
 
   const fetchItems = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     const { data, error } = await supabase
       .from("catalog_items")
-      .select("id, description, category, section, default_unit, created_at")
+      .select("id, description, category, section, default_unit, created_at, is_active")
       .eq("user_id", user.id)
-      .eq("is_active", true)
       .order("sort_order")
       .order("description");
-    if (!error && data) setItems(data);
+    if (!error && data) setItems(data as any);
     setLoading(false);
   }, [user]);
 
@@ -178,11 +178,24 @@ function CatalogTab() {
     if (user) fetchItems();
   }, [user, fetchItems]);
 
-  const filtered = items.filter((it) =>
-    it.description.toLowerCase().includes(search.toLowerCase()) ||
-    it.category.toLowerCase().includes(search.toLowerCase()) ||
-    it.section.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleToggleActive = async (id: string, currentlyActive: boolean) => {
+    const { error } = await supabase.from("catalog_items").update({ is_active: !currentlyActive }).eq("id", id);
+    if (error) {
+      toast.error("Failed to update item");
+    } else {
+      toast.success(!currentlyActive ? "Item activated" : "Item deactivated");
+      fetchItems();
+    }
+  };
+
+  const filtered = items.filter((it) => {
+    const matchesSearch =
+      it.description.toLowerCase().includes(search.toLowerCase()) ||
+      it.category.toLowerCase().includes(search.toLowerCase()) ||
+      it.section.toLowerCase().includes(search.toLowerCase());
+    const matchesActive = showInactive ? true : (it as any).is_active !== false;
+    return matchesSearch && matchesActive;
+  });
 
   const handleAdd = async () => {
     if (!user) return;
@@ -277,8 +290,21 @@ function CatalogTab() {
         )}
       </div>
 
-      <div className="text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
-        {filtered.length} item{filtered.length !== 1 ? "s" : ""} {search ? "matching" : "total"}
+      <div className="flex items-center justify-between">
+        <div className="text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
+          {filtered.length} item{filtered.length !== 1 ? "s" : ""} {search ? "matching" : "total"}
+        </div>
+        <button
+          onClick={() => setShowInactive(!showInactive)}
+          className={`flex items-center gap-1.5 text-[11px] font-mono tracking-wider px-3 py-1.5 rounded-lg border transition-colors ${
+            showInactive
+              ? "bg-[var(--primary-blue-soft)] text-[var(--primary-blue)] border-[var(--primary-blue)]/30"
+              : "text-[var(--text-muted)] border-[var(--card-border)] hover:text-[var(--text-secondary)]"
+          }`}
+        >
+          {showInactive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+          {showInactive ? "SHOWING ALL" : "SHOW INACTIVE"}
+        </button>
       </div>
 
       {loading ? (
@@ -296,7 +322,7 @@ function CatalogTab() {
             <span className="w-[60px] text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-center">Unit</span>
             <span className="w-[70px] text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-center">Section</span>
             <span className="w-[70px] text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-center">Category</span>
-            <span className="w-[56px]" />
+            <span className="w-[80px]" />
           </div>
           {filtered.map((item, i) => (
             <div
@@ -324,26 +350,38 @@ function CatalogTab() {
                 </>
               ) : (
                 <>
-                  <span className="flex-1 text-[13px] font-mono text-[var(--text-main)]">{item.description}</span>
-                  <span className="w-[60px] text-[10px] text-[var(--text-muted)] text-center">{item.default_unit}</span>
-                  <span className="w-[70px] text-[10px] text-[var(--text-secondary)] text-center">{sectionLabel(item.section)}</span>
-                  <span className="w-[70px] text-[10px] text-[var(--text-muted)] text-center capitalize">{item.category}</span>
-                  <div className="w-[56px] flex justify-end gap-0.5">
-                    <button
-                      onClick={() => { setEditingId(item.id); setEditValue(item.description); }}
-                      className="text-[var(--text-muted)] hover:text-[var(--primary-blue)] p-1 transition-colors"
-                      title="Edit"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id, item.description)}
-                      className="text-[var(--text-muted)] hover:text-[var(--danger)] p-1 transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                  <span className={`flex-1 text-[13px] font-mono truncate ${(item as any).is_active === false ? "text-[var(--text-muted)] line-through" : "text-[var(--text-main)]"}`}>
+                    {item.description}
+                    {(item as any).is_active === false && (
+                      <span className="ml-2 text-[9px] bg-[var(--text-muted)]/15 text-[var(--text-muted)] px-1.5 py-0.5 rounded font-semibold tracking-wider no-underline inline-block">INACTIVE</span>
+                    )}
+                  </span>
+                    <span className="w-[60px] text-[10px] text-[var(--text-muted)] text-center">{item.default_unit}</span>
+                    <span className="w-[70px] text-[10px] text-[var(--text-secondary)] text-center">{sectionLabel(item.section)}</span>
+                    <span className="w-[70px] text-[10px] text-[var(--text-muted)] text-center capitalize">{item.category}</span>
+                    <div className="w-[80px] flex justify-end gap-0.5">
+                      <button
+                        onClick={() => handleToggleActive(item.id, (item as any).is_active !== false)}
+                        className={`p-1 transition-colors ${(item as any).is_active === false ? "text-[var(--text-muted)] hover:text-[var(--success)]" : "text-[var(--success)] hover:text-[var(--text-muted)]"}`}
+                        title={(item as any).is_active === false ? "Activate" : "Deactivate"}
+                      >
+                        {(item as any).is_active === false ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={() => { setEditingId(item.id); setEditValue(item.description); }}
+                        className="text-[var(--text-muted)] hover:text-[var(--primary-blue)] p-1 transition-colors"
+                        title="Edit"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id, item.description)}
+                        className="text-[var(--text-muted)] hover:text-[var(--danger)] p-1 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                 </>
               )}
             </div>
