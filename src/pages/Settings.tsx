@@ -1,15 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check, ChevronDown, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check, ChevronDown, Eye, EyeOff, Upload, List, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import type { CatalogItemWithTimestamp } from "@/types/catalog";
 
+import { ImportPriceHistory } from "@/components/ecfi/ImportPriceHistory";
+import { ImportCatalogItems } from "@/components/ecfi/ImportCatalogItems";
+
 const TABS = [
   { key: "catalog", label: "Item Catalog" },
   { key: "formulas", label: "Formulas" },
   { key: "pricing", label: "Default Pricing" },
+  { key: "import", label: "Import & Export" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -395,6 +399,57 @@ function CatalogTab() {
   );
 }
 
+function ImportExportTab() {
+  const [priceOpen, setPriceOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
+
+  return (
+    <div className="p-6 max-w-[900px] mx-auto space-y-4">
+      {/* Import Price History */}
+      <button
+        onClick={() => setPriceOpen(true)}
+        className="w-full border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl p-5 text-left hover:bg-[var(--section-bg)] transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-start gap-4"
+      >
+        <div className="p-2.5 bg-[var(--primary-blue-soft)] rounded-lg">
+          <Upload className="w-5 h-5 text-[var(--primary-blue)]" />
+        </div>
+        <div>
+          <div className="text-[13px] font-bold text-[var(--text-main)] tracking-wider">Import Price History</div>
+          <div className="text-[11px] text-[var(--text-muted)] mt-0.5">Bulk-import historical pricing from a CSV file</div>
+        </div>
+      </button>
+
+      {/* Import Catalog Items */}
+      <button
+        onClick={() => setCatalogOpen(true)}
+        className="w-full border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl p-5 text-left hover:bg-[var(--section-bg)] transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-start gap-4"
+      >
+        <div className="p-2.5 bg-[var(--primary-blue-soft)] rounded-lg">
+          <List className="w-5 h-5 text-[var(--primary-blue)]" />
+        </div>
+        <div>
+          <div className="text-[13px] font-bold text-[var(--text-main)] tracking-wider">Import Catalog Items</div>
+          <div className="text-[11px] text-[var(--text-muted)] mt-0.5">Bulk-add new items to your catalog from a CSV</div>
+        </div>
+      </button>
+
+      {/* Export — coming soon */}
+      <div className="w-full border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl p-5 text-left opacity-50 cursor-not-allowed shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-start gap-4">
+        <div className="p-2.5 bg-[var(--section-bg)] rounded-lg">
+          <Download className="w-5 h-5 text-[var(--text-muted)]" />
+        </div>
+        <div>
+          <div className="text-[13px] font-bold text-[var(--text-main)] tracking-wider">Export</div>
+          <div className="text-[11px] text-[var(--text-muted)] mt-0.5">Coming soon — export your catalog and price history as CSV</div>
+        </div>
+      </div>
+
+      <ImportPriceHistory open={priceOpen} onClose={() => setPriceOpen(false)} />
+      <ImportCatalogItems open={catalogOpen} onClose={() => setCatalogOpen(false)} />
+    </div>
+  );
+}
+
 export default function SettingsPage({ embedded }: { embedded?: boolean }) {
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -434,6 +489,7 @@ export default function SettingsPage({ embedded }: { embedded?: boolean }) {
         {activeTab === "catalog" && <CatalogTab />}
         {activeTab === "formulas" && <FormulasTab />}
         {activeTab === "pricing" && <DefaultPricingPlaceholder />}
+        {activeTab === "import" && <ImportExportTab />}
       </div>
     );
   }
@@ -481,6 +537,7 @@ export default function SettingsPage({ embedded }: { embedded?: boolean }) {
       {activeTab === "catalog" && <CatalogTab />}
       {activeTab === "formulas" && <FormulasTab />}
       {activeTab === "pricing" && <DefaultPricingPlaceholder />}
+      {activeTab === "import" && <ImportExportTab />}
     </div>
   );
 }
