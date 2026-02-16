@@ -22,7 +22,7 @@ export function CostBreakdownPanel({ data }: { data: CostBreakdownData }) {
 
   return (
     <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
-      <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Cost Breakdown</h3>
+      <h3 className="text-sm font-extrabold text-[var(--primary-blue)] tracking-widest uppercase mb-5">Cost Breakdown</h3>
       {[
         [`Concrete (${totalYards.toFixed(1)} yd × ${fmtCurrency(concretePerYard)}/yd)`, concreteCost],
         [`Labor (${totalYards.toFixed(1)} yd × ${fmtCurrency(laborPerYard)}/yd)`, laborCost],

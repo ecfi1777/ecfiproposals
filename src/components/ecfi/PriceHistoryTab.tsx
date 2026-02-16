@@ -180,7 +180,7 @@ export function PriceHistoryTab({ onLoadProposal }: PriceHistoryTabProps) {
                 <div className="flex items-center gap-6 text-xs shrink-0 ml-4">
                   <div className="text-center">
                     <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Avg</div>
-                    <div className="font-bold text-ecfi-gold-text">{fmtCurrency(item.avgPrice)}</div>
+                    <div className="font-bold text-[var(--primary-blue)]">{fmtCurrency(item.avgPrice)}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Range</div>
@@ -219,7 +219,7 @@ export function PriceHistoryTab({ onLoadProposal }: PriceHistoryTabProps) {
                           <td className="p-2">{r.county || "—"}</td>
                           <td className="p-2 text-right">{r.qty ?? "—"}</td>
                           <td className="p-2">{r.unit}</td>
-                          <td className="p-2 text-right font-bold text-ecfi-gold-text">{fmtCurrency(r.unit_price)}</td>
+                          <td className="p-2 text-right font-bold text-[var(--primary-blue)]">{fmtCurrency(r.unit_price)}</td>
                           <td className="p-2 capitalize">{r.pricing_type}</td>
                           <td className="p-2">
                             {r.proposal_id && (

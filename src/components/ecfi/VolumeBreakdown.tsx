@@ -74,7 +74,7 @@ export function VolumeBreakdown({ ftgLines, slabLines }: VolumeBreakdownProps) {
       <div className="grid grid-cols-2 gap-5">
         <div>
           <div className="flex justify-between items-center mb-2.5">
-            <span className="text-[11px] font-bold text-ecfi-gold-text tracking-widest uppercase">Footings & Walls Section</span>
+            <span className="text-[11px] font-bold text-[var(--primary-blue)] tracking-widest uppercase">Footings & Walls Section</span>
             <span className="text-sm font-extrabold text-ecfi-vol-blue-text">{ftgYards.toFixed(2)} CY</span>
           </div>
           {ftgLines.filter((l) => l.description && l.qty).length === 0 && (

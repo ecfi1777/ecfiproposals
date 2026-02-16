@@ -120,7 +120,7 @@ export function ProposalsTab({ onLoad }: ProposalsTabProps) {
             placeholder="Search builder, location, county..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 bg-ecfi-panel-bg border border-ecfi-panel-border text-sm font-mono focus:outline-none focus:border-ecfi-gold"
+            className="w-full pl-10 pr-3 py-2 bg-[var(--bg-main)] border border-[var(--card-border)] text-sm font-mono rounded-lg focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)]"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -179,7 +179,7 @@ export function ProposalsTab({ onLoad }: ProposalsTabProps) {
                     </SelectContent>
                   </Select>
                 </TableCell>
-                <TableCell className="font-mono text-[12px] font-bold text-ecfi-gold-text">
+                <TableCell className="font-mono text-[12px] font-bold text-[var(--primary-blue)]">
                   {p.grand_total ? fmtCurrency(p.grand_total) : "—"}
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>

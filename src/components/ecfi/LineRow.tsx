@@ -33,12 +33,12 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
         value={line.qty}
         onChange={(e) => onChange({ ...line, qty: e.target.value })}
         placeholder="QTY"
-        className="w-[55px] px-2 py-1.5 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
+        className="w-[55px] px-2 py-1.5 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-[13px] font-mono text-right focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg"
       />
       <select
         value={line.unit}
         onChange={(e) => onChange({ ...line, unit: e.target.value })}
-        className="w-[52px] px-1 py-1.5 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-[13px] font-mono cursor-pointer focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
+        className="w-[52px] px-1 py-1.5 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-[13px] font-mono cursor-pointer focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg"
       >
         {UNIT_OPTIONS.map((u) => (
           <option key={u} value={u}>{u}</option>
@@ -61,7 +61,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
         value={line.unitPriceStd}
         onChange={(e) => onChange({ ...line, unitPriceStd: e.target.value })}
         placeholder="Std $"
-        className="w-[72px] px-2 py-1.5 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
+        className="w-[72px] px-2 py-1.5 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-[13px] font-mono text-right focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg"
       />
       <div className={`w-[82px] text-right text-[13px] font-mono ${totalStd ? "text-ecfi-std-green-text" : "text-ecfi-subtle"}`}>
         {totalStd ? fmt(totalStd) : "-"}
@@ -70,9 +70,9 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
         value={line.unitPriceOpt}
         onChange={(e) => onChange({ ...line, unitPriceOpt: e.target.value })}
         placeholder="Opt $"
-        className="w-[72px] px-2 py-1.5 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
+        className="w-[72px] px-2 py-1.5 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-[13px] font-mono text-right focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg"
       />
-      <div className={`w-[82px] text-right text-[13px] font-mono ${totalOpt ? "text-ecfi-gold-text" : "text-ecfi-subtle"}`}>
+      <div className={`w-[82px] text-right text-[13px] font-mono ${totalOpt ? "text-[var(--text-secondary)]" : "text-ecfi-subtle"}`}>
         {totalOpt ? fmt(totalOpt) : "-"}
       </div>
       <div className="w-[72px] relative" title={volCalc.method ? `Auto: ${volCalc.method}\n${autoYards.toFixed(2)} CY` : "No auto-calc — type to override"}>
@@ -83,7 +83,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
             if (line.cyOverride === "" || line.cyOverride === autoYards.toFixed(2)) onChange({ ...line, cyOverride: "" });
           }}
           placeholder="-"
-          className={`w-full px-2 py-1.5 border text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold ${
+          className={`w-full px-2 py-1.5 border text-[13px] font-mono text-right focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg ${
             isOverridden
               ? "text-ecfi-override-orange-text bg-ecfi-override-orange/10 border-ecfi-override-orange/30"
               : autoYards > 0
@@ -97,7 +97,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
       </div>
       <button
         onClick={onDelete}
-        className="bg-transparent border border-destructive/30 text-destructive/70 cursor-pointer px-[7px] py-1 text-[13px] hover:bg-destructive/10 transition-colors"
+        className="bg-transparent border border-[var(--danger)]/30 text-[var(--danger)] cursor-pointer px-[7px] py-1 text-[13px] hover:bg-[var(--danger)]/10 transition-colors rounded-lg"
       >
         ×
       </button>
@@ -115,7 +115,7 @@ export function SectionHeader() {
       <span className="w-[72px] text-[9px] text-muted-foreground font-bold text-right uppercase tracking-wider">STD $/U</span>
       <span className="w-[82px] text-[9px] text-ecfi-std-green-text font-bold text-right uppercase tracking-wider">STD TOT</span>
       <span className="w-[72px] text-[9px] text-muted-foreground font-bold text-right uppercase tracking-wider">OPT $/U</span>
-      <span className="w-[82px] text-[9px] text-ecfi-gold-text font-bold text-right uppercase tracking-wider">OPT TOT</span>
+      <span className="w-[82px] text-[9px] text-[var(--text-secondary)] font-bold text-right uppercase tracking-wider">OPT TOT</span>
       <span className="w-[72px] text-[9px] text-ecfi-vol-blue-text font-bold text-right uppercase tracking-wider">CY</span>
       <span className="w-[30px]" />
     </div>

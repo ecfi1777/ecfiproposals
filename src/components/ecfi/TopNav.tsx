@@ -40,7 +40,7 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, onNew,
             Saved {timeAgo(lastSaved)}
           </span>
         )}
-        {saving && <span className="text-ecfi-gold-text text-[10px] animate-pulse">Saving...</span>}
+        {saving && <span className="text-[var(--primary-blue)] text-[10px] animate-pulse">Saving...</span>}
 
         {onNew && (
           <button
@@ -59,7 +59,7 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, onNew,
         <span className="text-ecfi-vol-blue-text">
           <span className="font-extrabold text-sm">{totalYards.toFixed(1)}</span> CY
         </span>
-        <span className="text-ecfi-gold-text">
+        <span className="text-[var(--primary-blue)]">
           <span className="font-extrabold text-sm">{fmtCurrency(proposalTotal)}</span>
         </span>
         {profile?.full_name && (

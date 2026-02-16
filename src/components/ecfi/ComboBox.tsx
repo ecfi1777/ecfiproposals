@@ -101,7 +101,7 @@ export function ComboBox({ value, onChange, onSelectItem, items, onSaveNew, plac
           }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder || "Search or type..."}
-          className="w-full px-2 py-1.5 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-[13px] font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold"
+          className="w-full px-2 py-1.5 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-[13px] font-mono focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)]"
         />
         {isNew && onSaveNew && (
           <button
@@ -122,8 +122,8 @@ export function ComboBox({ value, onChange, onSelectItem, items, onSaveNew, plac
               onMouseEnter={() => setHighlightIndex(idx)}
               className={`px-2.5 py-[7px] cursor-pointer text-[12px] border-b border-ecfi-panel-border font-mono transition-colors ${
                 idx === highlightIndex
-                  ? "bg-ecfi-dropdown-hover text-ecfi-gold-text"
-                  : "text-muted-foreground hover:bg-ecfi-dropdown-hover hover:text-ecfi-gold-text"
+                  ? "bg-[var(--primary-blue-soft)] text-[var(--primary-blue)]"
+                  : "text-muted-foreground hover:bg-[var(--primary-blue-soft)] hover:text-[var(--primary-blue)]"
               }`}
             >
               {item.description}
