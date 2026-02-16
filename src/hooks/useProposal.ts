@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ProposalData, LineItem, emptyLine, emptySlabLine, calcSection, calcTotalYards } from "@/lib/ecfi-utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,7 +15,7 @@ const freshProposal = (): ProposalData => ({
   foundType: "Custom",
   foundSize: "",
   concretePerYard: "",
-  laborPerYard: "60",
+  laborPerYard: "",
   otherCosts: "",
   otherCostsNote: "",
   concreteYardsOverride: "",
@@ -29,13 +29,65 @@ export function useProposal() {
   const [slabLines, setSlabLines] = useState<LineItem[]>(makeRows(emptySlabLine, 3));
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [defaultsLoaded, setDefaultsLoaded] = useState(false);
 
-  const newProposal = useCallback(() => {
-    setProposal(freshProposal());
+  // Load default costs into initial fresh proposal on first mount
+  useEffect(() => {
+    if (!user || defaultsLoaded) return;
+    setDefaultsLoaded(true);
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("user_settings")
+          .select("setting_value")
+          .eq("user_id", user.id)
+          .eq("setting_key", "default_costs")
+          .maybeSingle();
+        if (data?.setting_value && typeof data.setting_value === "object") {
+          const dc = data.setting_value as Record<string, number | null>;
+          setProposal((p) => {
+            // Only apply if this is still a fresh (unsaved) proposal
+            if (p.id) return p;
+            return {
+              ...p,
+              concretePerYard: dc.concrete_per_yard != null ? String(dc.concrete_per_yard) : p.concretePerYard,
+              laborPerYard: dc.labor_per_yard != null ? String(dc.labor_per_yard) : p.laborPerYard,
+            };
+          });
+        }
+      } catch {
+        // fall back silently
+      }
+    })();
+  }, [user, defaultsLoaded]);
+
+  const newProposal = useCallback(async () => {
+    const fresh = freshProposal();
+
+    // Load default costs from user settings
+    if (user) {
+      try {
+        const { data } = await supabase
+          .from("user_settings")
+          .select("setting_value")
+          .eq("user_id", user.id)
+          .eq("setting_key", "default_costs")
+          .maybeSingle();
+        if (data?.setting_value && typeof data.setting_value === "object") {
+          const dc = data.setting_value as Record<string, number | null>;
+          if (dc.concrete_per_yard != null) fresh.concretePerYard = String(dc.concrete_per_yard);
+          if (dc.labor_per_yard != null) fresh.laborPerYard = String(dc.labor_per_yard);
+        }
+      } catch {
+        // silently fall back to hardcoded defaults
+      }
+    }
+
+    setProposal(fresh);
     setFtgLines(makeRows(emptyLine, 3));
     setSlabLines(makeRows(emptySlabLine, 3));
     setLastSaved(null);
-  }, []);
+  }, [user]);
 
   const saveProposal = useCallback(async () => {
     if (!user) { toast.error("You must be logged in to save."); return; }
@@ -56,7 +108,7 @@ export function useProposal() {
         foundation_type: proposal.foundType || "Custom",
         foundation_size: proposal.foundSize || "",
         concrete_per_yard: proposal.concretePerYard ? parseFloat(proposal.concretePerYard) : null,
-        labor_per_yard: proposal.laborPerYard ? parseFloat(proposal.laborPerYard) : 60,
+        labor_per_yard: proposal.laborPerYard ? parseFloat(proposal.laborPerYard) : null,
         other_costs: proposal.otherCosts ? parseFloat(proposal.otherCosts) : 0,
         other_costs_note: proposal.otherCostsNote || "",
         concrete_yards_override: proposal.concreteYardsOverride ? parseFloat(proposal.concreteYardsOverride) : null,
@@ -193,7 +245,7 @@ export function useProposal() {
         foundType: p.foundation_type || "Custom",
         foundSize: p.foundation_size || "",
         concretePerYard: p.concrete_per_yard?.toString() || "",
-        laborPerYard: p.labor_per_yard?.toString() || "60",
+        laborPerYard: p.labor_per_yard?.toString() || "",
         otherCosts: p.other_costs?.toString() || "",
         otherCostsNote: p.other_costs_note || "",
         concreteYardsOverride: p.concrete_yards_override?.toString() || "",

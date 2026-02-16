@@ -8,11 +8,12 @@ import type { CatalogItemWithTimestamp } from "@/types/catalog";
 
 import { ImportPriceHistory } from "@/components/ecfi/ImportPriceHistory";
 import { ImportCatalogItems } from "@/components/ecfi/ImportCatalogItems";
+import { DefaultCostsTab } from "@/components/ecfi/DefaultCostsTab";
 
 const TABS = [
   { key: "catalog", label: "Item Catalog" },
   { key: "formulas", label: "Formulas" },
-  { key: "pricing", label: "Default Pricing" },
+  { key: "costs", label: "Default Costs" },
   { key: "import", label: "Import & Export" },
 ] as const;
 
@@ -144,16 +145,7 @@ function FormulasTab() {
   );
 }
 
-function DefaultPricingPlaceholder() {
-  return (
-    <div className="p-6 max-w-[900px] mx-auto">
-      <div className="border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl p-10 text-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="text-[var(--text-secondary)] text-sm font-semibold mb-1">Default Pricing</div>
-        <div className="text-[var(--text-muted)] text-xs">Coming soon — default unit prices for catalog items.</div>
-      </div>
-    </div>
-  );
-}
+
 
 function CatalogTab() {
   const { user } = useAuth();
@@ -437,7 +429,7 @@ function ImportExportTab() {
 export default function SettingsPage({ embedded }: { embedded?: boolean }) {
   const [searchParams, setSearchParams] = useSearchParams();
   
-  const VALID_SUBTABS: TabKey[] = ["catalog", "formulas", "pricing", "import"];
+  const VALID_SUBTABS: TabKey[] = ["catalog", "formulas", "costs", "import"];
   const subtabParam = searchParams.get("subtab") as TabKey | null;
   const activeTab: TabKey = subtabParam && VALID_SUBTABS.includes(subtabParam) ? subtabParam : "catalog";
 
@@ -472,7 +464,7 @@ export default function SettingsPage({ embedded }: { embedded?: boolean }) {
         </div>
         {activeTab === "catalog" && <CatalogTab />}
         {activeTab === "formulas" && <FormulasTab />}
-        {activeTab === "pricing" && <DefaultPricingPlaceholder />}
+        {activeTab === "costs" && <DefaultCostsTab />}
         {activeTab === "import" && <ImportExportTab />}
       </div>
     );
@@ -520,7 +512,7 @@ export default function SettingsPage({ embedded }: { embedded?: boolean }) {
 
       {activeTab === "catalog" && <CatalogTab />}
       {activeTab === "formulas" && <FormulasTab />}
-      {activeTab === "pricing" && <DefaultPricingPlaceholder />}
+      {activeTab === "costs" && <DefaultCostsTab />}
       {activeTab === "import" && <ImportExportTab />}
     </div>
   );
