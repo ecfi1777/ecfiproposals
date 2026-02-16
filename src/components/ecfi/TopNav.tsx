@@ -53,7 +53,7 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, onNew,
           </button>
         )}
 
-        <Link to="/catalog" className="text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors" title="Manage catalog">
+        <Link to="/settings" className="text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors" title="Manage catalog">
           <span>{catalogCount} items</span>
         </Link>
         <Link
