@@ -138,17 +138,9 @@ const Index = () => {
     });
   };
 
-  // Guarded tab switching
   const handleTabClick = (tab: TabKey) => {
     if (tab === activeTab) return;
-    // Tabs that would navigate away from editing context
-    const editTabs: TabKey[] = ["proposal", "costs", "preview"];
-    const isLeavingEdit = editTabs.includes(activeTab) && !editTabs.includes(tab);
-    if (isLeavingEdit && isDirty) {
-      guardAction(() => setActiveTab(tab));
-    } else {
-      setActiveTab(tab);
-    }
+    setActiveTab(tab);
   };
 
   const ftgTotals = calcSection(ftgLines);
