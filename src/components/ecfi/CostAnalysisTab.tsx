@@ -106,7 +106,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
             <input value={proposal.concretePerYard} onChange={(e) => setProposal((p: ProposalData) => ({ ...p, concretePerYard: e.target.value }))} className={inputClass} placeholder="e.g. 185" />
           </div>
           <div className="mb-4">
-            <label className={labelClass}>Labor ($ per Yard) — default $60</label>
+            <label className={labelClass}>Labor ($ per Yard)</label>
             <input value={proposal.laborPerYard} onChange={(e) => setProposal((p: ProposalData) => ({ ...p, laborPerYard: e.target.value }))} className={inputClass} />
           </div>
           <div className="mb-4">
