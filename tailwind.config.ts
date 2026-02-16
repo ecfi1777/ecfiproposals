@@ -88,7 +88,12 @@ export default {
 			'ecfi-vol-breakdown-border': 'hsl(var(--ecfi-vol-breakdown-border))',
 			'ecfi-preview-bg': 'hsl(var(--ecfi-preview-bg))',
 			'ecfi-preview-panel': 'hsl(var(--ecfi-preview-panel))',
-			'ecfi-preview-border': 'hsl(var(--ecfi-preview-border))'
+			'ecfi-preview-border': 'hsl(var(--ecfi-preview-border))',
+			'ecfi-vol-tint': 'hsl(var(--ecfi-vol-tint))',
+			'ecfi-ftg-tint': 'hsl(var(--ecfi-ftg-tint))',
+			'ecfi-wall-tint': 'hsl(var(--ecfi-wall-tint))',
+			'ecfi-slab-tint': 'hsl(var(--ecfi-slab-tint))',
+			'ecfi-override-tint': 'hsl(var(--ecfi-override-tint))'
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

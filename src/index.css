@@ -33,18 +33,25 @@
     /* ECFI semantic colors (data visualization — not branding) */
     --ecfi-std-green: 147 50% 36%;
     --ecfi-std-green-text: 147 50% 36%;
-    --ecfi-vol-blue: 217 81% 53%;
-    --ecfi-vol-blue-text: 217 81% 53%;
-    --ecfi-wall-purple: 263 67% 58%;
-    --ecfi-wall-purple-text: 263 67% 58%;
-    --ecfi-ftg-orange: 20 83% 48%;
-    --ecfi-ftg-orange-text: 20 83% 48%;
-    --ecfi-slab-green: 142 64% 38%;
-    --ecfi-slab-green-text: 142 64% 38%;
-    --ecfi-override-orange: 38 72% 44%;
-    --ecfi-override-orange-text: 38 72% 44%;
+    --ecfi-vol-blue: 238 44% 57%;
+    --ecfi-vol-blue-text: 238 44% 57%;
+    --ecfi-wall-purple: 213 29% 42%;
+    --ecfi-wall-purple-text: 213 29% 42%;
+    --ecfi-ftg-orange: 215 16% 35%;
+    --ecfi-ftg-orange-text: 215 16% 35%;
+    --ecfi-slab-green: 172 45% 34%;
+    --ecfi-slab-green-text: 172 45% 34%;
+    --ecfi-override-orange: 38 75% 43%;
+    --ecfi-override-orange-text: 38 75% 43%;
     --ecfi-danger: 0 72% 51%;
     --ecfi-danger-text: 0 72% 51%;
+
+    /* Category tint backgrounds */
+    --ecfi-vol-tint: 233 100% 97%;
+    --ecfi-ftg-tint: 214 32% 91%;
+    --ecfi-wall-tint: 210 47% 94%;
+    --ecfi-slab-tint: 168 38% 93%;
+    --ecfi-override-tint: 40 100% 95%;
 
     --ecfi-nav-bg: 0 0% 100%;
     --ecfi-nav-border: 214 20% 88%;
