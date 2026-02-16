@@ -176,13 +176,20 @@ export default function CatalogPage() {
           </div>
         ) : (
           <div className="border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+            <div className="grid grid-cols-[1fr_50px_90px_100px_auto] items-center gap-2 px-4 py-2 text-[10px] text-[var(--text-muted)] tracking-wider uppercase border-b border-[var(--card-border)]">
+              <span>Description</span>
+              <span>Unit</span>
+              <span>Section</span>
+              <span>Category</span>
+              <span></span>
+            </div>
             {filtered.map((item, i) => (
               <div
                 key={item.id}
-                className={`flex items-center gap-2 px-4 py-2.5 ${i > 0 ? "border-t border-[var(--card-border)]" : ""} hover:bg-[var(--section-bg)] transition-colors`}
+                className={`grid grid-cols-[1fr_50px_90px_100px_auto] items-center gap-2 px-4 py-2.5 ${i > 0 ? "border-t border-[var(--card-border)]" : ""} hover:bg-[var(--section-bg)] transition-colors`}
               >
                 {editingId === item.id ? (
-                  <>
+                  <div className="col-span-5 flex items-center gap-2">
                     <input
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
@@ -199,35 +206,41 @@ export default function CatalogPage() {
                     <button onClick={() => setEditingId(null)} className="text-[var(--text-muted)] hover:text-[var(--text-main)] p-1">
                       <X className="w-4 h-4" />
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <>
-                    <span className={`flex-1 text-[13px] font-mono ${(item as any).is_active === false ? "text-[var(--text-muted)] line-through" : "text-[var(--text-main)]"}`}>{item.description}</span>
-                    {(item as any).is_active === false && (
-                      <span className="text-[9px] bg-[var(--text-muted)]/15 text-[var(--text-muted)] px-1.5 py-0.5 rounded font-semibold tracking-wider mr-1">INACTIVE</span>
-                    )}
-                    <span className="text-[10px] text-[var(--text-muted)] mr-2">{item.default_unit}</span>
-                    <button
-                      onClick={() => handleToggleActive(item.id, (item as any).is_active !== false)}
-                      className={`p-1 transition-colors ${(item as any).is_active === false ? "text-[var(--text-muted)] hover:text-[var(--success)]" : "text-[var(--success)] hover:text-[var(--text-muted)]"}`}
-                      title={(item as any).is_active === false ? "Activate" : "Deactivate"}
-                    >
-                      {(item as any).is_active === false ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                    </button>
-                    <button
-                      onClick={() => { setEditingId(item.id); setEditValue(item.description); }}
-                      className="text-[var(--text-muted)] hover:text-[var(--primary-blue)] p-1 transition-colors"
-                      title="Edit"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id, item.description)}
-                      className="text-[var(--text-muted)] hover:text-[var(--danger)] p-1 transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <span className={`text-[13px] font-mono truncate ${(item as any).is_active === false ? "text-[var(--text-muted)] line-through" : "text-[var(--text-main)]"}`}>
+                      {item.description}
+                      {(item as any).is_active === false && (
+                        <span className="ml-2 text-[9px] bg-[var(--text-muted)]/15 text-[var(--text-muted)] px-1.5 py-0.5 rounded font-semibold tracking-wider no-underline inline-block">INACTIVE</span>
+                      )}
+                    </span>
+                    <span className="text-[11px] text-[var(--text-muted)]">{item.default_unit}</span>
+                    <span className="text-[11px] text-[var(--text-muted)] truncate">{item.section}</span>
+                    <span className="text-[11px] text-[var(--text-muted)] truncate">{item.category}</span>
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        onClick={() => handleToggleActive(item.id, (item as any).is_active !== false)}
+                        className={`p-1 transition-colors ${(item as any).is_active === false ? "text-[var(--text-muted)] hover:text-[var(--success)]" : "text-[var(--success)] hover:text-[var(--text-muted)]"}`}
+                        title={(item as any).is_active === false ? "Activate" : "Deactivate"}
+                      >
+                        {(item as any).is_active === false ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={() => { setEditingId(item.id); setEditValue(item.description); }}
+                        className="text-[var(--text-muted)] hover:text-[var(--primary-blue)] p-1 transition-colors"
+                        title="Edit"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id, item.description)}
+                        className="text-[var(--text-muted)] hover:text-[var(--danger)] p-1 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
