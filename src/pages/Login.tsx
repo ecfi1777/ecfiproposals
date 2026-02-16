@@ -46,8 +46,8 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-background font-mono px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-block bg-ecfi-gold text-primary-foreground font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
-          <p className="text-xs text-muted-foreground tracking-widest uppercase">
+          <div className="inline-block bg-black text-white font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
+          <p className="text-xs text-foreground tracking-widest uppercase">
             {forgotMode ? "Reset Password" : "Proposal Builder"}
           </p>
         </div>
@@ -55,12 +55,12 @@ export default function Login() {
         {forgotMode ? (
           resetSent ? (
             <div className="space-y-4 text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-foreground">
                 If an account exists with that email, you'll receive a password reset link.
               </p>
               <Button
                 variant="outline"
-                className="w-full font-mono font-bold tracking-widest uppercase"
+                className="w-full font-mono font-bold tracking-widest uppercase border-foreground text-foreground"
                 onClick={() => { setForgotMode(false); setResetSent(false); setResetEmail(""); }}
               >
                 Back to Sign In
@@ -69,7 +69,7 @@ export default function Login() {
           ) : (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div>
-                <label className="text-xs font-bold tracking-wider uppercase text-muted-foreground">Email</label>
+                <label className="text-xs font-bold tracking-wider uppercase text-foreground">Email</label>
                 <Input
                   type="email"
                   value={resetEmail}
@@ -79,13 +79,13 @@ export default function Login() {
                   placeholder="you@ecfi.com"
                 />
               </div>
-              <Button type="submit" disabled={resetSubmitting} className="w-full font-mono font-bold tracking-widest uppercase">
+              <Button type="submit" disabled={resetSubmitting} className="w-full font-mono font-bold tracking-widest uppercase bg-[#2563eb] hover:bg-[#1d4ed8] text-white">
                 {resetSubmitting ? "Sending..." : "Send Reset Link"}
               </Button>
               <button
                 type="button"
                 onClick={() => setForgotMode(false)}
-                className="w-full text-xs text-muted-foreground hover:underline"
+                className="w-full text-xs text-foreground hover:underline"
               >
                 Back to Sign In
               </button>
@@ -95,7 +95,7 @@ export default function Login() {
           <>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="text-xs font-bold tracking-wider uppercase text-muted-foreground">Email</label>
+                <label className="text-xs font-bold tracking-wider uppercase text-foreground">Email</label>
                 <Input
                   type="email"
                   value={email}
@@ -106,7 +106,7 @@ export default function Login() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold tracking-wider uppercase text-muted-foreground">Password</label>
+                <label className="text-xs font-bold tracking-wider uppercase text-foreground">Password</label>
                 <div className="relative mt-1">
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -128,19 +128,19 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setForgotMode(true)}
-                  className="text-xs text-ecfi-gold-text hover:underline font-bold mt-1"
+                  className="text-xs text-foreground hover:underline font-bold mt-1"
                 >
                   Forgot password?
                 </button>
               </div>
-              <Button type="submit" disabled={submitting} className="w-full font-mono font-bold tracking-widest uppercase">
+              <Button type="submit" disabled={submitting} className="w-full font-mono font-bold tracking-widest uppercase bg-[#2563eb] hover:bg-[#1d4ed8] text-white">
                 {submitting ? "Signing in..." : "Sign In"}
               </Button>
             </form>
 
-            <p className="text-center text-xs text-muted-foreground">
+            <p className="text-center text-xs text-foreground">
               No account?{" "}
-              <Link to="/signup" className="text-ecfi-gold-text hover:underline font-bold">
+              <Link to="/signup" className="text-foreground hover:underline font-bold">
                 Sign Up
               </Link>
             </p>

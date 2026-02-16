@@ -16,19 +16,15 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for recovery token in URL hash
     const hash = window.location.hash;
     if (hash.includes("type=recovery")) {
       setValid(true);
     }
-
-    // Also listen for auth state change with recovery event
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         setValid(true);
       }
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -57,8 +53,8 @@ export default function ResetPassword() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background font-mono px-4">
         <div className="w-full max-w-sm text-center space-y-4">
-          <div className="inline-block bg-ecfi-gold text-primary-foreground font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
-          <p className="text-sm text-muted-foreground">Loading reset form...</p>
+          <div className="inline-block bg-black text-white font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
+          <p className="text-sm text-foreground">Loading reset form...</p>
         </div>
       </div>
     );
@@ -68,13 +64,13 @@ export default function ResetPassword() {
     <div className="min-h-screen flex items-center justify-center bg-background font-mono px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-block bg-ecfi-gold text-primary-foreground font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
-          <p className="text-xs text-muted-foreground tracking-widest uppercase">Set New Password</p>
+          <div className="inline-block bg-black text-white font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
+          <p className="text-xs text-foreground tracking-widest uppercase">Set New Password</p>
         </div>
 
         <form onSubmit={handleReset} className="space-y-4">
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-muted-foreground">New Password</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-foreground">New Password</label>
             <div className="relative mt-1">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -96,7 +92,7 @@ export default function ResetPassword() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-muted-foreground">Confirm Password</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-foreground">Confirm Password</label>
             <Input
               type={showPassword ? "text" : "password"}
               value={confirmPassword}
@@ -107,7 +103,7 @@ export default function ResetPassword() {
               placeholder="••••••••"
             />
           </div>
-          <Button type="submit" disabled={submitting} className="w-full font-mono font-bold tracking-widest uppercase">
+          <Button type="submit" disabled={submitting} className="w-full font-mono font-bold tracking-widest uppercase bg-[#2563eb] hover:bg-[#1d4ed8] text-white">
             {submitting ? "Updating..." : "Update Password"}
           </Button>
         </form>
