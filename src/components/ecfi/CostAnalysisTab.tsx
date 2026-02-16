@@ -202,8 +202,8 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
         <div className="p-5 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <h3 className="text-[12px] font-semibold text-[var(--text-main)] tracking-widest uppercase mb-3">Volume Breakdown by Line</h3>
           <div className="text-[10px] text-[var(--text-muted)] mb-3">
-            <span className="text-ecfi-vol-blue-text">● Blue</span> = auto-calc &nbsp;
-            <span className="text-ecfi-override-orange-text">● Orange</span> = manual override
+            <span className="text-ecfi-vol-blue-text">● Volume</span> = auto-calc &nbsp;
+            <span className="text-ecfi-override-orange-text">● Override</span> = manual override
           </div>
           {ftgLines.filter((l) => l.description).length > 0 && (
             <div className="mb-3">
