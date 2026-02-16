@@ -357,8 +357,34 @@ function CatalogTab() {
   );
 }
 
-export default function SettingsPage() {
+export default function SettingsPage({ embedded }: { embedded?: boolean }) {
   const [activeTab, setActiveTab] = useState<TabKey>("catalog");
+
+  if (embedded) {
+    return (
+      <div className="text-[var(--text-main)] font-mono">
+        {/* Tab bar */}
+        <div className="bg-[var(--card-bg)] border-b border-[var(--card-border)] px-6 flex gap-0">
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-5 py-3 text-[12px] font-bold tracking-wider transition-colors border-b-2 ${
+                activeTab === tab.key
+                  ? "text-[var(--primary-blue)] border-[var(--primary-blue)]"
+                  : "text-[var(--text-secondary)] border-transparent hover:text-[var(--primary-blue)]"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        {activeTab === "catalog" && <CatalogTab />}
+        {activeTab === "formulas" && <FormulasTab />}
+        {activeTab === "pricing" && <DefaultPricingPlaceholder />}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] font-mono">
@@ -384,7 +410,6 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      {/* Tab bar */}
       <div className="bg-[var(--card-bg)] border-b border-[var(--card-border)] px-6 flex gap-0">
         {TABS.map((tab) => (
           <button
@@ -401,7 +426,6 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      {/* Tab content */}
       {activeTab === "catalog" && <CatalogTab />}
       {activeTab === "formulas" && <FormulasTab />}
       {activeTab === "pricing" && <DefaultPricingPlaceholder />}

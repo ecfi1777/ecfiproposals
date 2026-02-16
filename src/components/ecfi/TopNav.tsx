@@ -1,14 +1,8 @@
-import { fmtCurrency } from "@/lib/ecfi-utils";
-import { LogOut, FilePlus, Clock, Settings } from "lucide-react";
-import { Link } from "react-router-dom";
+import { LogOut, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface TopNavProps {
-  catalogCount: number;
-  totalYards: number;
-  proposalTotal: number;
   saving: boolean;
-  onNew?: () => void;
   lastSaved?: Date | null;
 }
 
@@ -21,7 +15,7 @@ function timeAgo(d: Date): string {
   return `${hrs}h ago`;
 }
 
-export function TopNav({ catalogCount, totalYards, proposalTotal, saving, onNew, lastSaved }: TopNavProps) {
+export function TopNav({ saving, lastSaved }: TopNavProps) {
   const { profile, signOut } = useAuth();
 
   return (
@@ -42,33 +36,6 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, onNew,
         )}
         {saving && <span className="text-[var(--primary-blue)] text-[10px] animate-pulse">Saving...</span>}
 
-        {onNew && (
-          <button
-            onClick={onNew}
-            className="flex items-center gap-1.5 px-3 py-1.5 border border-[var(--card-border)] hover:bg-[var(--section-bg)] text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors text-[11px] font-bold tracking-wider rounded-lg"
-            title="New Proposal"
-          >
-            <FilePlus className="w-3.5 h-3.5" />
-            New
-          </button>
-        )}
-
-        <Link to="/settings" className="text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors" title="Manage catalog">
-          <span>{catalogCount} items</span>
-        </Link>
-        <Link
-          to="/settings"
-          className="p-2 border border-[var(--card-border)] hover:bg-[var(--section-bg)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-main)] rounded-lg"
-          title="Settings"
-        >
-          <Settings className="w-4 h-4" />
-        </Link>
-        <span className="text-ecfi-vol-blue-text">
-          <span className="font-extrabold text-sm">{totalYards.toFixed(1)}</span> CY
-        </span>
-        <span className="text-[var(--primary-blue)]">
-          <span className="font-extrabold text-sm">{fmtCurrency(proposalTotal)}</span>
-        </span>
         {profile?.full_name && (
           <span className="text-[var(--text-muted)] text-[10px] font-bold tracking-wider uppercase">
             {profile.full_name}
