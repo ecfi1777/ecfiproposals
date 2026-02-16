@@ -50,6 +50,7 @@ export function ProposalTab({
   saving,
 }: ProposalTabProps) {
   const [showVolBreakdown, setShowVolBreakdown] = useState(false);
+  const [openHistoryKey, setOpenHistoryKey] = useState<string | null>(null);
 
   const ftgCatalog = useMemo(() => catalog.filter((c) => c.section === "ftg_wall"), [catalog]);
   const slabCatalog = useMemo(() => catalog.filter((c) => c.section === "slabs"), [catalog]);
@@ -203,6 +204,9 @@ export function ProposalTab({
               key={line.id}
               line={line}
               idx={idx}
+              sectionPrefix={si === 0 ? "ftg" : "slab"}
+              openHistoryKey={openHistoryKey}
+              onHistoryOpenChange={setOpenHistoryKey}
               onChange={(updated) => {
                 sec.setLines((prev) => {
                   const next = [...prev];
