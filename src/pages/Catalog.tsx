@@ -111,7 +111,7 @@ export default function CatalogPage() {
             <ArrowLeft className="w-4 h-4" />
             BACK
           </Link>
-          <div className="bg-ecfi-gold text-black font-extrabold text-base px-3 py-1.5 tracking-widest">ECFI</div>
+          <div className="bg-black text-white font-extrabold text-base px-3 py-1.5 tracking-widest">ECFI</div>
           <div>
             <div className="text-base font-bold tracking-wider">Item Catalog</div>
             <div className="text-[10px] text-muted-foreground tracking-widest uppercase">{items.length} items</div>
