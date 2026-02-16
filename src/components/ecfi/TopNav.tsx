@@ -29,7 +29,7 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMo
   return (
     <header className="bg-ecfi-nav-bg border-b border-ecfi-nav-border px-6 py-3.5 flex items-center justify-between">
       <div className="flex items-center gap-4">
-        <div className="bg-ecfi-gold text-primary-foreground font-extrabold text-base px-3 py-1.5 tracking-widest">ECFI</div>
+        <div className="bg-black text-white font-extrabold text-base px-3 py-1.5 tracking-widest">ECFI</div>
         <div>
           <div className="text-base font-bold tracking-wider">Proposal Builder</div>
           <div className="text-[10px] text-muted-foreground tracking-widest uppercase">Eastern Concrete Foundation, Inc.</div>
