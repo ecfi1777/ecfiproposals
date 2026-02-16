@@ -5,8 +5,9 @@ export interface CostBreakdownData {
   concreteCost: number;
   laborCost: number;
   rebarTotalCost: number;
-  totalRebarLF: number;
-  rebarCostPerLF: number;
+  adjustedSticks: number;
+  costPerStick: number;
+  wastePercent: number;
   otherCostVal: number;
   otherCostsNote: string;
   concretePerYard: number;
@@ -16,12 +17,19 @@ export interface CostBreakdownData {
 
 export function CostBreakdownPanel({ data }: { data: CostBreakdownData }) {
   const {
-    totalYards, concreteCost, laborCost, rebarTotalCost, totalRebarLF,
-    rebarCostPerLF, otherCostVal, otherCostsNote, concretePerYard, laborPerYard, totalCost,
+    totalYards, concreteCost, laborCost, rebarTotalCost, adjustedSticks,
+    costPerStick, wastePercent, otherCostVal, otherCostsNote, concretePerYard, laborPerYard, totalCost,
   } = data;
 
-  // Rounded-up volume for display in cost lines
   const orderYards = Math.ceil(totalYards * 2) / 2;
+
+  // Build rebar label
+  let rebarLabel: string;
+  if (wastePercent > 0) {
+    rebarLabel = `Rebar (${adjustedSticks.toLocaleString()} sticks w/ ${wastePercent}% waste × ${fmtCurrency(costPerStick)}/stick)`;
+  } else {
+    rebarLabel = `Rebar (${adjustedSticks.toLocaleString()} sticks × ${fmtCurrency(costPerStick)}/stick)`;
+  }
 
   return (
     <div className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
@@ -30,7 +38,7 @@ export function CostBreakdownPanel({ data }: { data: CostBreakdownData }) {
       {[
         [`Concrete (${orderYards.toFixed(1)} yd × ${fmtCurrency(concretePerYard)}/yd)`, concreteCost],
         [`Labor (${orderYards.toFixed(1)} yd × ${fmtCurrency(laborPerYard)}/yd)`, laborCost],
-        [`Rebar (${totalRebarLF.toFixed(0)} LF × ${fmtCurrency(rebarCostPerLF)}/LF)`, rebarTotalCost],
+        [rebarLabel, rebarTotalCost],
         [`Other Costs${otherCostsNote ? ` — ${otherCostsNote}` : ""}`, otherCostVal],
       ].map(([lbl, val], i) => (
         <div key={i} className="flex justify-between py-2.5 border-b border-[var(--card-border)]">
