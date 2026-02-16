@@ -1,5 +1,5 @@
 import { fmtCurrency } from "@/lib/ecfi-utils";
-import { LogOut, FilePlus, Clock } from "lucide-react";
+import { LogOut, FilePlus, Clock, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -55,6 +55,13 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, onNew,
 
         <Link to="/catalog" className="text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors" title="Manage catalog">
           <span>{catalogCount} items</span>
+        </Link>
+        <Link
+          to="/settings"
+          className="p-2 border border-[var(--card-border)] hover:bg-[var(--section-bg)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-main)] rounded-lg"
+          title="Settings"
+        >
+          <Settings className="w-4 h-4" />
         </Link>
         <span className="text-ecfi-vol-blue-text">
           <span className="font-extrabold text-sm">{totalYards.toFixed(1)}</span> CY
