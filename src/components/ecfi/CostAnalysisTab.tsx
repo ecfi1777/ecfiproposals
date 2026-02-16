@@ -4,10 +4,14 @@ import { VolumeDetailRow } from "./VolumeDetailRow";
 import { RevenueSummaryPanel } from "./RevenueSummaryPanel";
 import { CostBreakdownPanel } from "./CostBreakdownPanel";
 import { ProfitabilityPanel } from "./ProfitabilityPanel";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { openCostAnalysisReport } from "./CostAnalysisReport";
+import { ChevronRight, ChevronDown, Printer } from "lucide-react";
 
 interface CostAnalysisTabProps {
   proposal: {
+    builder: string;
+    date: string;
+    location: string;
     concretePerYard: string;
     laborPerYard: string;
     otherCosts: string;
@@ -97,7 +101,17 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
   const hasAnyRebar = rebarLines.length > 0 || lineItemRebarLines.length > 0;
 
   return (
-    <div className="grid grid-cols-2 gap-7">
+    <div>
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => openCostAnalysisReport(proposal, ftgLines, slabLines)}
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] text-[12px] font-semibold uppercase tracking-wider rounded-lg hover:bg-[var(--section-bg)] transition-colors shadow-sm"
+        >
+          <Printer size={14} />
+          Print Report
+        </button>
+      </div>
+      <div className="grid grid-cols-2 gap-7">
       {/* Left column — Inputs */}
       <div className="space-y-6">
         <div className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
@@ -402,6 +416,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
           data={{ foundationRevenue, totalCost, grossProfit, grossMargin, totalYards }}
         />
       </div>
+    </div>
     </div>
   );
 }
