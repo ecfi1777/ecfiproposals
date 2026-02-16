@@ -3,6 +3,7 @@ import { LineItem, UNIT_OPTIONS, fmt, isRebarEligible, RebarData } from "@/lib/e
 import { calcCYPerUnit } from "@/lib/calcCYPerUnit";
 import { ComboBox } from "./ComboBox";
 import { RebarPopup } from "./RebarPopup";
+import { PriceHistoryPopup } from "./PriceHistoryPopup";
 import type { CatalogItem } from "@/hooks/useCatalog";
 import {
   AlertDialog,
@@ -22,9 +23,12 @@ interface LineRowProps {
   items: CatalogItem[];
   onSaveNew: (description: string) => void;
   idx: number;
+  sectionPrefix: string;
+  openHistoryKey: string | null;
+  onHistoryOpenChange: (key: string | null) => void;
 }
 
-export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: LineRowProps) {
+export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx, sectionPrefix, openHistoryKey, onHistoryOpenChange }: LineRowProps) {
   const totalStd = line.qty && line.unitPriceStd ? parseFloat(line.qty) * parseFloat(line.unitPriceStd) : 0;
   const totalOpt = line.qty && line.unitPriceOpt ? parseFloat(line.qty) * parseFloat(line.unitPriceOpt) : 0;
   const volCalc = calcCYPerUnit(line.description);
@@ -78,6 +82,12 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
         {showRebar && (
           <RebarPopup rebar={line.rebar} onSave={handleRebarSave} hasData={hasRebarData} />
         )}
+        <PriceHistoryPopup
+          description={line.description}
+          popoverKey={`${sectionPrefix}-${idx}`}
+          openKey={openHistoryKey}
+          onOpenChange={onHistoryOpenChange}
+        />
       </div>
       <input
         value={line.unitPriceStd}
