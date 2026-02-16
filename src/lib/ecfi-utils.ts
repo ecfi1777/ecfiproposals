@@ -32,6 +32,7 @@ export interface ProposalData {
   concretePerYard: string;
   laborPerYard: string;
   otherCosts: string;
+  otherCostsMode: "$" | "%";
   otherCostsNote: string;
   concreteYardsOverride: string;
   rebarCostPerStick: string;

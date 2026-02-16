@@ -15,6 +15,7 @@ interface CostAnalysisTabProps {
     concreteYardsOverride: string;
     rebarCostPerStick: string;
     rebarWastePercent: string;
+    otherCostsMode: "$" | "%";
   };
   setProposal: (fn: (prev: ProposalData) => ProposalData) => void;
   ftgLines: LineItem[];
@@ -75,7 +76,9 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
   const orderYards = Math.ceil(totalYards * 2) / 2;
   const concreteCost = concretePerYard * orderYards;
   const laborCost = laborPerYard * orderYards;
-  const otherCostVal = parseFloat(proposal.otherCosts) || 0;
+  const otherCostsRaw = parseFloat(proposal.otherCosts) || 0;
+  const baseCost = concreteCost + laborCost + rebarTotalCost;
+  const otherCostVal = proposal.otherCostsMode === "%" ? (baseCost * otherCostsRaw / 100) : otherCostsRaw;
   const totalCost = concreteCost + laborCost + otherCostVal + rebarTotalCost;
   const grossProfit = foundationRevenue - totalCost;
   const grossMargin = foundationRevenue > 0 ? (grossProfit / foundationRevenue) * 100 : 0;
@@ -139,13 +142,27 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
             <input value={proposal.laborPerYard} onChange={(e) => setProposal((p: ProposalData) => ({ ...p, laborPerYard: e.target.value }))} className={inputClass} />
           </div>
           <div className="mb-4">
-            <label className={labelClass}>Other Job Costs ($)</label>
+            <label className={labelClass}>
+              Other Job Costs
+              <span className="inline-flex ml-2 border border-[var(--card-border)] rounded-md overflow-hidden text-[9px]">
+                <button
+                  type="button"
+                  onClick={() => setProposal((p: ProposalData) => ({ ...p, otherCostsMode: "$" }))}
+                  className={`px-2 py-0.5 transition-colors ${proposal.otherCostsMode === "$" ? "bg-[var(--primary-blue)] text-white" : "text-[var(--text-muted)] hover:bg-[var(--section-bg)]"}`}
+                >$</button>
+                <button
+                  type="button"
+                  onClick={() => setProposal((p: ProposalData) => ({ ...p, otherCostsMode: "%" }))}
+                  className={`px-2 py-0.5 transition-colors ${proposal.otherCostsMode === "%" ? "bg-[var(--primary-blue)] text-white" : "text-[var(--text-muted)] hover:bg-[var(--section-bg)]"}`}
+                >%</button>
+              </span>
+            </label>
             <div className="flex gap-3">
               <input
                 value={proposal.otherCosts}
                 onChange={(e) => setProposal((p: ProposalData) => ({ ...p, otherCosts: e.target.value }))}
                 className={`${inputClass} w-32 flex-shrink-0`}
-                placeholder="0"
+                placeholder={proposal.otherCostsMode === "%" ? "e.g. 10" : "0"}
               />
               <input
                 value={proposal.otherCostsNote}
@@ -154,6 +171,11 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
                 placeholder="pump rental, winterization, etc."
               />
             </div>
+            {proposal.otherCostsMode === "%" && otherCostsRaw > 0 && (
+              <div className="text-[10px] text-[var(--text-muted)] mt-1 font-mono">
+                {otherCostsRaw}% of {fmtCurrency(baseCost)} = {fmtCurrency(otherCostVal)}
+              </div>
+            )}
           </div>
         </div>
 
