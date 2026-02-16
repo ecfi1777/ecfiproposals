@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 type TabKey = "proposal" | "costs" | "preview" | "proposals" | "price-history" | "settings";
+const VALID_TABS: TabKey[] = ["proposal", "costs", "preview", "proposals", "price-history", "settings"];
 
 const Index = () => {
   const {
@@ -24,22 +25,42 @@ const Index = () => {
     saving, lastSaved, saveProposal, newProposal, loadProposal,
   } = useProposal();
   const { catalog, addItem } = useCatalog();
-  const [activeTab, setActiveTab] = useState<TabKey>("proposal");
   const [searchParams, setSearchParams] = useSearchParams();
   const [showNewConfirm, setShowNewConfirm] = useState(false);
+
+  // Derive active tab from URL
+  const tabParam = searchParams.get("tab") as TabKey | null;
+  const activeTab: TabKey = tabParam && VALID_TABS.includes(tabParam) ? tabParam : "proposal";
+
+  const setActiveTab = (tab: TabKey) => {
+    const params = new URLSearchParams(searchParams);
+    if (tab === "proposal") {
+      params.delete("tab");
+    } else {
+      params.set("tab", tab);
+    }
+    // Clear subtab when switching away from settings
+    if (tab !== "settings") {
+      params.delete("subtab");
+    }
+    setSearchParams(params, { replace: true });
+  };
 
   useEffect(() => {
     const id = searchParams.get("id");
     if (id && id !== proposal.id) {
-      loadProposal(id).then(() => setActiveTab("proposal"));
+      loadProposal(id).then(() => {
+        const params = new URLSearchParams(searchParams);
+        params.delete("tab");
+        setSearchParams(params, { replace: true });
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams.get("id")]);
 
   const doNew = () => {
     newProposal();
     setSearchParams({});
-    setActiveTab("proposal");
   };
 
   const handleNewClick = () => {
@@ -65,7 +86,6 @@ const Index = () => {
 
   const handleLoadProposal = (id: string) => {
     setSearchParams({ id });
-    setActiveTab("proposal");
   };
 
   const ftgTotals = calcSection(ftgLines);
