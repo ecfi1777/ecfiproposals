@@ -43,11 +43,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background font-mono px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)] font-mono px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
           <div className="inline-block bg-black text-white font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
-          <p className="text-xs text-foreground tracking-widest uppercase">
+          <p className="text-xs text-[var(--text-secondary)] tracking-widest uppercase">
             {forgotMode ? "Reset Password" : "Proposal Builder"}
           </p>
         </div>
@@ -55,12 +55,12 @@ export default function Login() {
         {forgotMode ? (
           resetSent ? (
             <div className="space-y-4 text-center">
-              <p className="text-sm text-foreground">
+              <p className="text-sm text-[var(--text-secondary)]">
                 If an account exists with that email, you'll receive a password reset link.
               </p>
               <Button
                 variant="outline"
-                className="w-full font-mono font-bold tracking-widest uppercase border-foreground text-foreground"
+                className="w-full font-mono font-bold tracking-widest uppercase border-[var(--card-border)] text-[var(--text-main)]"
                 onClick={() => { setForgotMode(false); setResetSent(false); setResetEmail(""); }}
               >
                 Back to Sign In
@@ -69,7 +69,7 @@ export default function Login() {
           ) : (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div>
-                <label className="text-xs font-bold tracking-wider uppercase text-foreground">Email</label>
+                <label className="text-xs font-bold tracking-wider uppercase text-[var(--text-main)]">Email</label>
                 <Input
                   type="email"
                   value={resetEmail}
@@ -85,7 +85,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setForgotMode(false)}
-                className="w-full text-xs text-foreground hover:underline"
+                className="w-full text-xs text-[var(--text-secondary)] hover:underline"
               >
                 Back to Sign In
               </button>
@@ -95,7 +95,7 @@ export default function Login() {
           <>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="text-xs font-bold tracking-wider uppercase text-foreground">Email</label>
+                <label className="text-xs font-bold tracking-wider uppercase text-[var(--text-main)]">Email</label>
                 <Input
                   type="email"
                   value={email}
@@ -106,7 +106,7 @@ export default function Login() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold tracking-wider uppercase text-foreground">Password</label>
+                <label className="text-xs font-bold tracking-wider uppercase text-[var(--text-main)]">Password</label>
                 <div className="relative mt-1">
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -128,7 +128,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setForgotMode(true)}
-                  className="text-xs text-foreground hover:underline font-bold mt-1"
+                  className="text-xs text-[var(--text-secondary)] hover:underline font-bold mt-1"
                 >
                   Forgot password?
                 </button>
@@ -138,9 +138,9 @@ export default function Login() {
               </Button>
             </form>
 
-            <p className="text-center text-xs text-foreground">
+            <p className="text-center text-xs text-[var(--text-secondary)]">
               No account?{" "}
-              <Link to="/signup" className="text-foreground hover:underline font-bold">
+              <Link to="/signup" className="text-[var(--primary-blue)] hover:underline font-bold">
                 Sign Up
               </Link>
             </p>

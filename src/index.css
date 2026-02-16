@@ -30,9 +30,7 @@
     --ring: 333 71% 50%;
     --radius: 8px;
 
-    /* ECFI semantic colors */
-    --ecfi-gold: 43 86% 49%;
-    --ecfi-gold-text: 40 86% 38%;
+    /* ECFI semantic colors (data visualization — not branding) */
     --ecfi-std-green: 147 50% 36%;
     --ecfi-std-green-text: 147 50% 36%;
     --ecfi-vol-blue: 217 81% 53%;
