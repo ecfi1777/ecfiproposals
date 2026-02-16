@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 export default {
-  darkMode: ["class"],
+  darkMode: ["class"], // kept for shadcn compatibility
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",
   theme: {
@@ -57,8 +57,6 @@ export default {
 				border: 'hsl(var(--sidebar-border))',
 				ring: 'hsl(var(--sidebar-ring))'
 			},
-			'ecfi-gold': 'hsl(var(--ecfi-gold))',
-			'ecfi-gold-text': 'hsl(var(--ecfi-gold-text))',
 			'ecfi-std-green': 'hsl(var(--ecfi-std-green))',
 			'ecfi-std-green-text': 'hsl(var(--ecfi-std-green-text))',
 			'ecfi-vol-blue': 'hsl(var(--ecfi-vol-blue))',

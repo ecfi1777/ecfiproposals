@@ -39,16 +39,16 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background font-mono px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)] font-mono px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
           <div className="inline-block bg-black text-white font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
-          <p className="text-xs text-foreground tracking-widest uppercase">Create Account</p>
+          <p className="text-xs text-[var(--text-secondary)] tracking-widest uppercase">Create Account</p>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-foreground">Full Name</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-[var(--text-main)]">Full Name</label>
             <Input
               type="text"
               value={fullName}
@@ -59,7 +59,7 @@ export default function Signup() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-foreground">Email</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-[var(--text-main)]">Email</label>
             <Input
               type="email"
               value={email}
@@ -70,7 +70,7 @@ export default function Signup() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-foreground">Password</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-[var(--text-main)]">Password</label>
             <div className="relative mt-1">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -96,9 +96,9 @@ export default function Signup() {
           </Button>
         </form>
 
-        <p className="text-center text-xs text-foreground">
+        <p className="text-center text-xs text-[var(--text-secondary)]">
           Already have an account?{" "}
-          <Link to="/login" className="text-foreground hover:underline font-bold">
+          <Link to="/login" className="text-[var(--primary-blue)] hover:underline font-bold">
             Sign In
           </Link>
         </p>

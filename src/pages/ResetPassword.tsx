@@ -51,26 +51,26 @@ export default function ResetPassword() {
 
   if (!valid) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background font-mono px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)] font-mono px-4">
         <div className="w-full max-w-sm text-center space-y-4">
           <div className="inline-block bg-black text-white font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
-          <p className="text-sm text-foreground">Loading reset form...</p>
+          <p className="text-sm text-[var(--text-secondary)]">Loading reset form...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background font-mono px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)] font-mono px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
           <div className="inline-block bg-black text-white font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
-          <p className="text-xs text-foreground tracking-widest uppercase">Set New Password</p>
+          <p className="text-xs text-[var(--text-secondary)] tracking-widest uppercase">Set New Password</p>
         </div>
 
         <form onSubmit={handleReset} className="space-y-4">
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-foreground">New Password</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-[var(--text-main)]">New Password</label>
             <div className="relative mt-1">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -92,7 +92,7 @@ export default function ResetPassword() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-foreground">Confirm Password</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-[var(--text-main)]">Confirm Password</label>
             <Input
               type={showPassword ? "text" : "password"}
               value={confirmPassword}

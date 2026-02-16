@@ -119,7 +119,7 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
       <div className="flex justify-end gap-3 mb-4 max-w-[850px] mx-auto print:hidden">
         <button
           onClick={handlePrint}
-          className="flex items-center gap-2 border-2 border-black bg-white text-black px-4 py-2 font-bold text-[12px] font-mono tracking-wider hover:bg-gray-100 transition-colors"
+          className="flex items-center gap-2 border border-[var(--card-border)] bg-[var(--section-bg)] text-[var(--text-main)] px-4 py-2 font-bold text-[12px] font-mono tracking-wider hover:bg-[var(--card-border)] transition-colors rounded-lg"
         >
           <Printer className="w-4 h-4" />
           Print
@@ -127,7 +127,7 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
         <button
           onClick={handleExportPDF}
           disabled={exporting}
-          className="flex items-center gap-2 bg-[#c5960a] text-white px-4 py-2 font-bold text-[12px] font-mono tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="flex items-center gap-2 bg-[var(--primary-blue)] text-white px-4 py-2 font-bold text-[12px] font-mono tracking-wider hover:bg-[var(--primary-blue-hover)] transition-colors disabled:opacity-50 rounded-lg"
         >
           <Download className="w-4 h-4" />
           {exporting ? "Exporting..." : "Export PDF"}
