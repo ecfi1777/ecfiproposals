@@ -21,22 +21,22 @@ export function CostBreakdownPanel({ data }: { data: CostBreakdownData }) {
   } = data;
 
   return (
-    <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
-      <h3 className="text-sm font-extrabold text-[var(--primary-blue)] tracking-widest uppercase mb-5">Cost Breakdown</h3>
+    <div className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <h3 className="text-sm font-semibold text-[var(--text-main)] tracking-widest uppercase mb-5">Cost Breakdown</h3>
       {[
         [`Concrete (${totalYards.toFixed(1)} yd × ${fmtCurrency(concretePerYard)}/yd)`, concreteCost],
         [`Labor (${totalYards.toFixed(1)} yd × ${fmtCurrency(laborPerYard)}/yd)`, laborCost],
         [`Rebar (${totalRebarLF.toFixed(0)} LF × ${fmtCurrency(rebarCostPerLF)}/LF)`, rebarTotalCost],
         [`Other Costs${otherCostsNote ? ` — ${otherCostsNote}` : ""}`, otherCostVal],
       ].map(([lbl, val], i) => (
-        <div key={i} className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
-          <span className="text-muted-foreground">{lbl as string}</span>
-          <span className="font-bold">{fmtCurrency(val as number)}</span>
+        <div key={i} className="flex justify-between py-2.5 border-b border-[var(--card-border)]">
+          <span className="text-[var(--text-secondary)]">{lbl as string}</span>
+          <span className="font-semibold text-[var(--text-main)]">{fmtCurrency(val as number)}</span>
         </div>
       ))}
-      <div className="flex justify-between py-3 border-b-2 border-ecfi-panel-border">
-        <span className="font-extrabold text-sm">TOTAL COST</span>
-        <span className="text-ecfi-danger-text font-extrabold text-lg">{fmtCurrency(totalCost)}</span>
+      <div className="flex justify-between py-3 border-b-2 border-[var(--card-border)]">
+        <span className="font-semibold text-sm text-[var(--text-main)]">TOTAL COST</span>
+        <span className="text-[var(--danger)] font-semibold text-lg">{fmtCurrency(totalCost)}</span>
       </div>
     </div>
   );

@@ -88,29 +88,29 @@ export default function CatalogPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-mono">
-      <header className="bg-ecfi-nav-bg border-b border-ecfi-nav-border px-6 py-3.5 flex items-center justify-between">
+    <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] font-mono">
+      <header className="bg-[var(--card-bg)] border-b border-[var(--card-border)] px-6 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-[12px] tracking-wider">
+          <Link to="/" className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors text-[12px] tracking-wider">
             <ArrowLeft className="w-4 h-4" />
             BACK
           </Link>
           <div className="bg-black text-white font-extrabold text-base px-3 py-1.5 tracking-widest">ECFI</div>
           <div>
-            <div className="text-base font-bold tracking-wider">Item Catalog</div>
-            <div className="text-[10px] text-muted-foreground tracking-widest uppercase">{items.length} items</div>
+            <div className="text-base font-bold tracking-wider text-[var(--text-main)]">Item Catalog</div>
+            <div className="text-[10px] text-[var(--text-muted)] tracking-widest uppercase">{items.length} items</div>
           </div>
         </div>
       </header>
 
-      <div className="p-6 max-w-[900px] mx-auto">
-        <div className="flex gap-2 mb-5">
+      <div className="p-6 max-w-[900px] mx-auto space-y-5">
+        <div className="flex gap-2">
           <input
             value={newItem}
             onChange={(e) => setNewItem(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAdd()}
             placeholder="Add new catalog item..."
-            className="flex-1 px-3 py-2.5 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-sm font-mono rounded-lg focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)]"
+            className="flex-1 px-3 py-2.5 border border-[var(--card-border)] bg-[var(--bg-main)] text-[var(--text-main)] text-sm font-mono rounded-lg focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)]"
           />
           <button
             onClick={handleAdd}
@@ -122,38 +122,38 @@ export default function CatalogPage() {
           </button>
         </div>
 
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search catalog..."
-            className="w-full pl-9 pr-8 py-2 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-sm font-mono rounded-lg focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)]"
+            className="w-full pl-9 pr-8 py-2 border border-[var(--card-border)] bg-[var(--bg-main)] text-[var(--text-main)] text-sm font-mono rounded-lg focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)]"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-main)]">
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        <div className="text-[10px] text-muted-foreground tracking-wider uppercase mb-2">
+        <div className="text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
           {filtered.length} item{filtered.length !== 1 ? "s" : ""} {search ? "matching" : "total"}
         </div>
 
         {loading ? (
-          <div className="text-muted-foreground text-sm py-8 text-center">Loading catalog...</div>
+          <div className="text-[var(--text-muted)] text-sm py-8 text-center">Loading catalog...</div>
         ) : items.length === 0 ? (
-          <div className="text-center py-12 border border-ecfi-panel-border bg-ecfi-panel-bg">
-            <div className="text-muted-foreground text-sm mb-2">Your catalog is empty</div>
-            <div className="text-[11px] text-muted-foreground/70">Add items above or use "+ Save" in the proposal builder to build your catalog as you work.</div>
+          <div className="text-center py-12 border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl">
+            <div className="text-[var(--text-secondary)] text-sm mb-2">Your catalog is empty</div>
+            <div className="text-[11px] text-[var(--text-muted)]">Add items above or use "+ Save" in the proposal builder to build your catalog as you work.</div>
           </div>
         ) : (
-          <div className="border border-ecfi-panel-border">
+          <div className="border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
             {filtered.map((item, i) => (
               <div
                 key={item.id}
-                className={`flex items-center gap-2 px-4 py-2.5 ${i > 0 ? "border-t border-ecfi-panel-border" : ""} hover:bg-ecfi-panel-bg transition-colors`}
+                className={`flex items-center gap-2 px-4 py-2.5 ${i > 0 ? "border-t border-[var(--card-border)]" : ""} hover:bg-[var(--section-bg)] transition-colors`}
               >
                 {editingId === item.id ? (
                   <>
@@ -165,29 +165,29 @@ export default function CatalogPage() {
                         if (e.key === "Escape") setEditingId(null);
                       }}
                       autoFocus
-                      className="flex-1 px-2 py-1 border border-[var(--primary-blue)] bg-[var(--bg-main)] text-foreground text-[13px] font-mono rounded-lg focus:outline-none focus:ring-[3px] focus:ring-[var(--primary-blue-soft)]"
+                      className="flex-1 px-2 py-1 border border-[var(--primary-blue)] bg-[var(--bg-main)] text-[var(--text-main)] text-[13px] font-mono rounded-lg focus:outline-none focus:ring-[3px] focus:ring-[var(--primary-blue-soft)]"
                     />
                     <button onClick={() => handleUpdate(item.id)} className="text-[var(--primary-blue)] hover:opacity-80 p-1">
                       <Check className="w-4 h-4" />
                     </button>
-                    <button onClick={() => setEditingId(null)} className="text-muted-foreground hover:text-foreground p-1">
+                    <button onClick={() => setEditingId(null)} className="text-[var(--text-muted)] hover:text-[var(--text-main)] p-1">
                       <X className="w-4 h-4" />
                     </button>
                   </>
                 ) : (
                   <>
-                    <span className="flex-1 text-[13px] font-mono">{item.description}</span>
-                    <span className="text-[10px] text-ecfi-subtle mr-2">{item.default_unit}</span>
+                    <span className="flex-1 text-[13px] font-mono text-[var(--text-main)]">{item.description}</span>
+                    <span className="text-[10px] text-[var(--text-muted)] mr-2">{item.default_unit}</span>
                     <button
                       onClick={() => { setEditingId(item.id); setEditValue(item.description); }}
-                      className="text-muted-foreground hover:text-[var(--primary-blue)] p-1 transition-colors"
+                      className="text-[var(--text-muted)] hover:text-[var(--primary-blue)] p-1 transition-colors"
                       title="Edit"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(item.id, item.description)}
-                      className="text-muted-foreground hover:text-destructive p-1 transition-colors"
+                      className="text-[var(--text-muted)] hover:text-[var(--danger)] p-1 transition-colors"
                       title="Delete"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -197,7 +197,7 @@ export default function CatalogPage() {
               </div>
             ))}
             {filtered.length === 0 && (
-              <div className="text-muted-foreground text-sm py-6 text-center">No items found</div>
+              <div className="text-[var(--text-muted)] text-sm py-6 text-center">No items found</div>
             )}
           </div>
         )}

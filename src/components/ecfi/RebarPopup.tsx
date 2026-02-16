@@ -34,8 +34,8 @@ export function RebarPopup({ rebar, onSave, hasData }: RebarPopupProps) {
   };
 
   const inputClass =
-    "w-full px-2 py-1.5 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-[13px] font-mono text-right focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg";
-  const labelClass = "text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1 block";
+    "w-full px-2 py-1.5 border border-[var(--card-border)] bg-[var(--bg-main)] text-[var(--text-main)] text-[13px] font-mono text-right focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg";
+  const labelClass = "text-[10px] text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-1 block";
 
   return (
     <Popover open={open} onOpenChange={handleOpen}>
@@ -45,7 +45,7 @@ export function RebarPopup({ rebar, onSave, hasData }: RebarPopupProps) {
           className={`p-1 transition-colors ${
             hasData
               ? "text-[var(--primary-blue)] hover:text-[var(--primary-blue-hover)]"
-              : "text-muted-foreground/40 hover:text-muted-foreground/70"
+              : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
           }`}
           title="Rebar configuration"
         >
@@ -53,11 +53,11 @@ export function RebarPopup({ rebar, onSave, hasData }: RebarPopupProps) {
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-72 p-4 bg-ecfi-panel-bg border border-ecfi-panel-border font-mono"
+        className="w-72 p-4 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-lg font-mono"
         align="start"
         sideOffset={4}
       >
-        <h4 className="text-[11px] font-extrabold text-[var(--primary-blue)] tracking-widest uppercase mb-4">
+        <h4 className="text-[11px] font-semibold text-[var(--text-main)] tracking-widest uppercase mb-4">
           Rebar Configuration
         </h4>
 
