@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { ProposalData, LineItem, emptyLine, emptySlabLine, calcSection, calcTotalYards } from "@/lib/ecfi-utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,6 +32,37 @@ export function useProposal() {
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [defaultsLoaded, setDefaultsLoaded] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const skipDirtyRef = useRef(false);
+
+  // Wrap setProposal to auto-mark dirty
+  const setProposalTracked = useCallback((fn: (prev: ProposalData) => ProposalData) => {
+    setProposal((prev) => {
+      const next = fn(prev);
+      if (!skipDirtyRef.current) setIsDirty(true);
+      return next;
+    });
+  }, []);
+
+  // Wrap setFtgLines to auto-mark dirty
+  const setFtgLinesTracked = useCallback((fn: LineItem[] | ((prev: LineItem[]) => LineItem[])) => {
+    setFtgLines((prev) => {
+      const next = typeof fn === "function" ? fn(prev) : fn;
+      if (!skipDirtyRef.current) setIsDirty(true);
+      return next;
+    });
+  }, []);
+
+  // Wrap setSlabLines to auto-mark dirty
+  const setSlabLinesTracked = useCallback((fn: LineItem[] | ((prev: LineItem[]) => LineItem[])) => {
+    setSlabLines((prev) => {
+      const next = typeof fn === "function" ? fn(prev) : fn;
+      if (!skipDirtyRef.current) setIsDirty(true);
+      return next;
+    });
+  }, []);
+
+  const markClean = useCallback(() => setIsDirty(false), []);
 
   // Load default costs into initial fresh proposal on first mount
   useEffect(() => {
@@ -46,8 +77,8 @@ export function useProposal() {
           .maybeSingle();
         if (data?.setting_value && typeof data.setting_value === "object") {
           const dc = data.setting_value as Record<string, number | null>;
+          skipDirtyRef.current = true;
           setProposal((p) => {
-            // Only apply if this is still a fresh (unsaved) proposal
             if (p.id) return p;
             return {
               ...p,
@@ -55,6 +86,7 @@ export function useProposal() {
               laborPerYard: dc.labor_per_yard != null ? String(dc.labor_per_yard) : p.laborPerYard,
             };
           });
+          skipDirtyRef.current = false;
         }
       } catch {
         // fall back silently
@@ -67,7 +99,6 @@ export function useProposal() {
   const newProposal = useCallback(async () => {
     const fresh = freshProposal();
 
-    // Load default costs from user settings
     if (user) {
       try {
         const { data } = await supabase
@@ -82,14 +113,17 @@ export function useProposal() {
           if (dc.labor_per_yard != null) fresh.laborPerYard = String(dc.labor_per_yard);
         }
       } catch {
-        // silently fall back to hardcoded defaults
+        // silently fall back
       }
     }
 
+    skipDirtyRef.current = true;
     setProposal(fresh);
     setFtgLines(makeRows(emptyLine, 3));
     setSlabLines(makeRows(emptySlabLine, 3));
     setLastSaved(null);
+    setIsDirty(false);
+    skipDirtyRef.current = false;
   }, [user]);
 
   const saveProposal = useCallback(async () => {
@@ -123,17 +157,13 @@ export function useProposal() {
       let proposalId = proposal.id;
 
       if (proposalId) {
-        // Update existing
         const { error } = await supabase
           .from("proposals_v2")
           .update(proposalRow)
           .eq("id", proposalId);
         if (error) throw error;
-
-        // Delete old line items to re-insert
         await supabase.from("proposal_line_items").delete().eq("proposal_id", proposalId);
       } else {
-        // Insert new
         const { data, error } = await supabase
           .from("proposals_v2")
           .insert(proposalRow)
@@ -141,10 +171,11 @@ export function useProposal() {
           .single();
         if (error) throw error;
         proposalId = data.id;
+        skipDirtyRef.current = true;
         setProposal((p) => ({ ...p, id: proposalId }));
+        skipDirtyRef.current = false;
       }
 
-      // Save line items
       const allLines = [
         ...ftgLines.map((l, i) => ({ ...l, sortOrder: i, sectionLabel: "ftg_wall" })),
         ...slabLines.map((l, i) => ({ ...l, sortOrder: i + 100, sectionLabel: "slabs" })),
@@ -168,10 +199,8 @@ export function useProposal() {
         if (error) throw error;
       }
 
-      // Always delete existing price history for this proposal first
       await supabase.from("price_history").delete().eq("proposal_id", proposalId);
 
-      // Write price history for priced items
       const pricedLines = allLines.filter((l) => l.qty && (l.unitPriceStd || l.unitPriceOpt));
       if (pricedLines.length > 0) {
         const historyRows: {
@@ -220,6 +249,7 @@ export function useProposal() {
       }
 
       setLastSaved(new Date());
+      setIsDirty(false);
       toast.success("Proposal saved successfully");
     } catch (err: unknown) {
       console.error("Save failed:", err);
@@ -239,6 +269,7 @@ export function useProposal() {
         .single();
       if (error) throw error;
 
+      skipDirtyRef.current = true;
       setProposal({
         id: p.id,
         builder: p.builder || "",
@@ -281,15 +312,17 @@ export function useProposal() {
         else ftg.push(item);
       }
 
-      // Pad to minimum 8 rows
       while (ftg.length < 3) ftg.push(emptyLine());
       while (slab.length < 3) slab.push(emptySlabLine());
 
       setFtgLines(ftg);
       setSlabLines(slab);
       setLastSaved(new Date());
+      setIsDirty(false);
+      skipDirtyRef.current = false;
       toast.success("Proposal loaded");
     } catch (err: unknown) {
+      skipDirtyRef.current = false;
       console.error("Load failed:", err);
       toast.error("Failed to load proposal: " + (err instanceof Error ? err.message : "Unknown error"));
     } finally {
@@ -299,15 +332,17 @@ export function useProposal() {
 
   return {
     proposal,
-    setProposal,
+    setProposal: setProposalTracked,
     ftgLines,
-    setFtgLines,
+    setFtgLines: setFtgLinesTracked,
     slabLines,
-    setSlabLines,
+    setSlabLines: setSlabLinesTracked,
     saving,
     lastSaved,
     saveProposal,
     newProposal,
     loadProposal,
+    isDirty,
+    markClean,
   };
 }

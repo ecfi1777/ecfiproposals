@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useProposal } from "@/hooks/useProposal";
 import { useCatalog } from "@/hooks/useCatalog";
@@ -22,11 +22,15 @@ const VALID_TABS: TabKey[] = ["proposal", "costs", "preview", "proposals", "pric
 const Index = () => {
   const {
     proposal, setProposal, ftgLines, setFtgLines, slabLines, setSlabLines,
-    saving, lastSaved, saveProposal, newProposal, loadProposal,
+    saving, lastSaved, saveProposal, newProposal, loadProposal, isDirty,
   } = useProposal();
   const { catalog, addItem } = useCatalog();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showNewConfirm, setShowNewConfirm] = useState(false);
+
+  // Unsaved changes dialog state
+  const [unsavedDialog, setUnsavedDialog] = useState(false);
+  const pendingActionRef = useRef<(() => void) | null>(null);
 
   // Derive active tab from URL
   const tabParam = searchParams.get("tab") as TabKey | null;
@@ -39,16 +43,58 @@ const Index = () => {
     } else {
       params.set("tab", tab);
     }
-    // Clear subtab when switching away from settings
     if (tab !== "settings") {
       params.delete("subtab");
     }
     setSearchParams(params, { replace: true });
   };
 
+  // Guard: check dirty state before executing an action
+  const guardAction = useCallback((action: () => void) => {
+    if (isDirty) {
+      pendingActionRef.current = action;
+      setUnsavedDialog(true);
+    } else {
+      action();
+    }
+  }, [isDirty]);
+
+  const handleUnsavedSaveAndContinue = async () => {
+    setUnsavedDialog(false);
+    await saveProposal();
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (action) action();
+  };
+
+  const handleUnsavedDiscard = () => {
+    setUnsavedDialog(false);
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (action) action();
+  };
+
+  const handleUnsavedCancel = () => {
+    setUnsavedDialog(false);
+    pendingActionRef.current = null;
+  };
+
+  // beforeunload protection
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
   useEffect(() => {
     const id = searchParams.get("id");
     if (id && id !== proposal.id) {
+      // Loading from URL param (e.g. initial page load with ?id=...)
       loadProposal(id).then(() => {
         const params = new URLSearchParams(searchParams);
         params.delete("tab");
@@ -64,9 +110,11 @@ const Index = () => {
   };
 
   const handleNewClick = () => {
-    // Check if there's any data worth saving
     const hasData = proposal.builder || ftgLines.some(l => l.description) || slabLines.some(l => l.description);
-    if (hasData) {
+    if (isDirty && hasData) {
+      // Use the existing 3-button "new proposal" dialog for this specific case
+      setShowNewConfirm(true);
+    } else if (hasData) {
       setShowNewConfirm(true);
     } else {
       doNew();
@@ -85,7 +133,22 @@ const Index = () => {
   };
 
   const handleLoadProposal = (id: string) => {
-    setSearchParams({ id });
+    guardAction(() => {
+      setSearchParams({ id });
+    });
+  };
+
+  // Guarded tab switching
+  const handleTabClick = (tab: TabKey) => {
+    if (tab === activeTab) return;
+    // Tabs that would navigate away from editing context
+    const editTabs: TabKey[] = ["proposal", "costs", "preview"];
+    const isLeavingEdit = editTabs.includes(activeTab) && !editTabs.includes(tab);
+    if (isLeavingEdit && isDirty) {
+      guardAction(() => setActiveTab(tab));
+    } else {
+      setActiveTab(tab);
+    }
   };
 
   const ftgTotals = calcSection(ftgLines);
@@ -106,7 +169,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] font-mono">
-      <TopNav saving={saving} lastSaved={lastSaved} />
+      <TopNav saving={saving} lastSaved={lastSaved} isDirty={isDirty} proposalBuilder={proposal.builder} />
 
       {/* Tabs */}
       <div className="flex items-center border-b border-[var(--card-border)] bg-[var(--card-bg)] px-6">
@@ -125,7 +188,7 @@ const Index = () => {
         {tabs.map((t) => (
           <button
             key={t.key}
-            onClick={() => setActiveTab(t.key)}
+            onClick={() => handleTabClick(t.key)}
             className={`px-6 py-2.5 font-bold text-[13px] tracking-widest uppercase border-b-2 transition-all font-mono ${
               activeTab === t.key
                 ? "bg-[var(--card-bg)] text-[var(--primary-blue)] border-[var(--primary-blue)]"
@@ -198,6 +261,35 @@ const Index = () => {
               className="bg-[var(--primary-blue)] text-white hover:bg-[var(--primary-blue-hover)]"
             >
               Save & Start New
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unsaved Changes dialog — for loading proposals / navigating away */}
+      <AlertDialog open={unsavedDialog} onOpenChange={(open) => { if (!open) handleUnsavedCancel(); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              {proposal.id
+                ? "You have unsaved changes on your current proposal. If you leave now, your changes will be lost."
+                : "You have an unsaved new proposal. If you leave now, it will be lost."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel onClick={handleUnsavedCancel}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUnsavedDiscard}
+              className="border border-[var(--card-border)] bg-transparent text-[var(--text-main)] hover:bg-[var(--section-bg)]"
+            >
+              Discard Changes
+            </AlertDialogAction>
+            <AlertDialogAction
+              onClick={handleUnsavedSaveAndContinue}
+              className="bg-[var(--primary-blue)] text-white hover:bg-[var(--primary-blue-hover)]"
+            >
+              Save & Continue
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
