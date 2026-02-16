@@ -34,7 +34,6 @@ export function useProposal() {
   // Load default costs into initial fresh proposal on first mount
   useEffect(() => {
     if (!user || defaultsLoaded) return;
-    setDefaultsLoaded(true);
     (async () => {
       try {
         const { data } = await supabase
@@ -57,9 +56,11 @@ export function useProposal() {
         }
       } catch {
         // fall back silently
+      } finally {
+        setDefaultsLoaded(true);
       }
     })();
-  }, [user, defaultsLoaded]);
+  }, [user]);
 
   const newProposal = useCallback(async () => {
     const fresh = freshProposal();
