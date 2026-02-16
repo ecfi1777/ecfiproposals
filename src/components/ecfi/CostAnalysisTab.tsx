@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { LineItem, calcSection, calcTotalYards, fmtCurrency, isRebarEligible, calcRebarForLine, calcTotalRebarLF } from "@/lib/ecfi-utils";
-import { calcCYPerUnit } from "@/lib/calcCYPerUnit";
+import { LineItem, ProposalData, calcSection, calcTotalYards, fmtCurrency, isRebarEligible, calcRebarForLine, calcTotalRebarLF } from "@/lib/ecfi-utils";
+import { VolumeDetailRow } from "./VolumeDetailRow";
+import { RevenueSummaryPanel } from "./RevenueSummaryPanel";
+import { CostBreakdownPanel } from "./CostBreakdownPanel";
+import { ProfitabilityPanel } from "./ProfitabilityPanel";
 
 interface CostAnalysisTabProps {
   proposal: {
@@ -11,31 +13,9 @@ interface CostAnalysisTabProps {
     concreteYardsOverride: string;
     rebarCostPerLF: string;
   };
-  setProposal: (fn: (prev: any) => any) => void;
+  setProposal: (fn: (prev: ProposalData) => ProposalData) => void;
   ftgLines: LineItem[];
   slabLines: LineItem[];
-}
-
-function VolumeDetailRow({ line }: { line: LineItem }) {
-  const volCalc = calcCYPerUnit(line.description);
-  const autoYards = line.qty ? parseFloat(line.qty) * volCalc.cy : 0;
-  const displayYards = line.cyOverride !== "" ? parseFloat(line.cyOverride) || 0 : autoYards;
-  const isOverridden = line.cyOverride !== "";
-  if (displayYards <= 0 && !line.description) return null;
-  return (
-    <div className="flex justify-between py-1.5 border-b border-ecfi-panel-border text-[12px]">
-      <div className="text-muted-foreground flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-        {line.qty} {line.unit} — {line.description || "(empty)"}
-      </div>
-      <div className="flex gap-3 items-center">
-        {volCalc.method && <span className="text-muted-foreground/50 text-[10px]">{volCalc.method}</span>}
-        <span className={`font-semibold min-w-[60px] text-right ${isOverridden ? "text-ecfi-override-orange-text" : "text-ecfi-vol-blue-text"}`}>
-          {displayYards > 0 ? displayYards.toFixed(2) + " CY" : "-"}
-          {isOverridden && <span className="text-[9px] text-ecfi-override-orange-text ml-1">(manual)</span>}
-        </span>
-      </div>
-    </div>
-  );
 }
 
 /** Check if a line is a pass-through item (pump, winterization) */
@@ -52,7 +32,6 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
   // Foundation Revenue excludes pass-through items (pumps, winterization)
   const allLines = [...ftgLines, ...slabLines];
   const foundationLines = allLines.filter((l) => !isPassThrough(l.description));
-  const passThroughLines = allLines.filter((l) => isPassThrough(l.description));
   const foundationTotals = calcSection(foundationLines);
   const foundationRevenue = foundationTotals.std + foundationTotals.opt;
   const passThroughTotal = proposalTotal - foundationRevenue;
@@ -74,8 +53,10 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
     (l) => l.rebar && isRebarEligible(l.description) && (l.rebar.horizFtgBars > 0 || l.rebar.horizWallBars > 0 || l.rebar.vertSpacingInches > 0)
   );
 
-  const concreteCost = (parseFloat(proposal.concretePerYard) || 0) * totalYards;
-  const laborCost = (parseFloat(proposal.laborPerYard) || 0) * totalYards;
+  const concretePerYard = parseFloat(proposal.concretePerYard) || 0;
+  const laborPerYard = parseFloat(proposal.laborPerYard) || 0;
+  const concreteCost = concretePerYard * totalYards;
+  const laborCost = laborPerYard * totalYards;
   const otherCostVal = parseFloat(proposal.otherCosts) || 0;
   const totalCost = concreteCost + laborCost + otherCostVal + rebarTotalCost;
   const grossProfit = foundationRevenue - totalCost;
@@ -111,7 +92,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
                 </label>
                 <input
                   value={proposal.concreteYardsOverride}
-                  onChange={(e) => setProposal((p: any) => ({ ...p, concreteYardsOverride: e.target.value }))}
+                  onChange={(e) => setProposal((p: ProposalData) => ({ ...p, concreteYardsOverride: e.target.value }))}
                   className={`${inputClass} ${hasYardsOverride ? "!border-ecfi-override-orange-text" : ""}`}
                   placeholder="—"
                 />
@@ -123,24 +104,24 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
 
           <div className="mb-4">
             <label className={labelClass}>Concrete Cost ($ per Yard)</label>
-            <input value={proposal.concretePerYard} onChange={(e) => setProposal((p: any) => ({ ...p, concretePerYard: e.target.value }))} className={inputClass} placeholder="e.g. 185" />
+            <input value={proposal.concretePerYard} onChange={(e) => setProposal((p: ProposalData) => ({ ...p, concretePerYard: e.target.value }))} className={inputClass} placeholder="e.g. 185" />
           </div>
           <div className="mb-4">
             <label className={labelClass}>Labor ($ per Yard) — default $60</label>
-            <input value={proposal.laborPerYard} onChange={(e) => setProposal((p: any) => ({ ...p, laborPerYard: e.target.value }))} className={inputClass} />
+            <input value={proposal.laborPerYard} onChange={(e) => setProposal((p: ProposalData) => ({ ...p, laborPerYard: e.target.value }))} className={inputClass} />
           </div>
           <div className="mb-4">
             <label className={labelClass}>Other Job Costs ($)</label>
             <div className="flex gap-3">
               <input
                 value={proposal.otherCosts}
-                onChange={(e) => setProposal((p: any) => ({ ...p, otherCosts: e.target.value }))}
+                onChange={(e) => setProposal((p: ProposalData) => ({ ...p, otherCosts: e.target.value }))}
                 className={`${inputClass} w-32 flex-shrink-0`}
                 placeholder="0"
               />
               <input
                 value={proposal.otherCostsNote}
-                onChange={(e) => setProposal((p: any) => ({ ...p, otherCostsNote: e.target.value }))}
+                onChange={(e) => setProposal((p: ProposalData) => ({ ...p, otherCostsNote: e.target.value }))}
                 className={`${inputClass} flex-1`}
                 placeholder="pump rental, winterization, etc."
               />
@@ -200,7 +181,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
                   </label>
                   <input
                     value={proposal.rebarCostPerLF}
-                    onChange={(e) => setProposal((p: any) => ({ ...p, rebarCostPerLF: e.target.value }))}
+                    onChange={(e) => setProposal((p: ProposalData) => ({ ...p, rebarCostPerLF: e.target.value }))}
                     className={`${inputClass} w-28`}
                     placeholder="e.g. 0.75"
                   />
@@ -248,124 +229,19 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
 
       {/* Right column — Revenue, Costs, Profitability */}
       <div>
-        {/* Revenue */}
-        <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
-          <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Revenue (from Proposal)</h3>
-          <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
-            <span className="text-muted-foreground">Standard Total</span>
-            <span className="font-bold text-ecfi-std-green-text">{fmtCurrency(grandStd)}</span>
-          </div>
-          <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
-            <span className="text-muted-foreground">Optional Total</span>
-            <span className="font-bold text-ecfi-gold-text">{fmtCurrency(grandOpt)}</span>
-          </div>
-          <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
-            <span className="font-extrabold text-sm">Proposal Total</span>
-            <span className="font-extrabold text-lg">{fmtCurrency(proposalTotal)}</span>
-          </div>
-          {passThroughTotal > 0 && (
-            <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
-              <span className="text-muted-foreground text-[12px]">Less: Pass-Through (Pump / Winter)</span>
-              <span className="font-bold text-muted-foreground">({fmtCurrency(passThroughTotal)})</span>
-            </div>
-          )}
-          <div className="flex justify-between py-3 border-b-2 border-ecfi-panel-border">
-            <span className="font-extrabold text-sm text-ecfi-vol-blue-text">FOUNDATION REVENUE</span>
-            <span className="font-extrabold text-lg text-ecfi-vol-blue-text">{fmtCurrency(foundationRevenue)}</span>
-          </div>
-          {passThroughTotal > 0 && (
-            <div className="text-[10px] text-muted-foreground/60 mt-2 italic">
-              Concrete Pump and Winter Concrete are pass-through items excluded from margin calc.
-            </div>
-          )}
-        </div>
-
-        {/* Cost Breakdown */}
-        <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
-          <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Cost Breakdown</h3>
-          {[
-            [`Concrete (${totalYards.toFixed(1)} yd × ${fmtCurrency(parseFloat(proposal.concretePerYard) || 0)}/yd)`, concreteCost],
-            [`Labor (${totalYards.toFixed(1)} yd × ${fmtCurrency(parseFloat(proposal.laborPerYard) || 0)}/yd)`, laborCost],
-            [`Rebar (${totalRebarLF.toFixed(0)} LF × ${fmtCurrency(rebarCostPerLF)}/LF)`, rebarTotalCost],
-            [`Other Costs${proposal.otherCostsNote ? ` — ${proposal.otherCostsNote}` : ""}`, otherCostVal],
-          ].map(([lbl, val], i) => (
-            <div key={i} className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
-              <span className="text-muted-foreground">{lbl as string}</span>
-              <span className="font-bold">{fmtCurrency(val as number)}</span>
-            </div>
-          ))}
-          <div className="flex justify-between py-3 border-b-2 border-ecfi-panel-border">
-            <span className="font-extrabold text-sm">TOTAL COST</span>
-            <span className="text-ecfi-danger-text font-extrabold text-lg">{fmtCurrency(totalCost)}</span>
-          </div>
-        </div>
-
-        {/* Profitability */}
-        <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border">
-          <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Profitability</h3>
-          <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
-            <span className="text-muted-foreground">Foundation Revenue</span>
-            <span className="font-bold">{fmtCurrency(foundationRevenue)}</span>
-          </div>
-          <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
-            <span className="text-muted-foreground">Total Cost</span>
-            <span className="text-ecfi-danger-text font-bold">({fmtCurrency(totalCost)})</span>
-          </div>
-          <div className="flex justify-between py-3 border-b-2 border-ecfi-panel-border">
-            <span className="font-extrabold text-sm">GROSS PROFIT</span>
-            <span className={`font-extrabold text-[22px] ${grossProfit >= 0 ? "text-ecfi-std-green-text" : "text-ecfi-danger-text"}`}>
-              {fmtCurrency(grossProfit)}
-            </span>
-          </div>
-
-          {/* Gross Margin Visual */}
-          <div className="mt-5">
-            <div className="flex justify-between mb-2">
-              <span className="text-[12px] text-muted-foreground font-bold uppercase tracking-wider">Gross Margin</span>
-              <span className={`text-[28px] font-extrabold ${grossMargin >= 30 ? "text-ecfi-std-green-text" : grossMargin >= 15 ? "text-ecfi-gold-text" : "text-ecfi-danger-text"}`}>
-                {grossMargin.toFixed(1)}%
-              </span>
-            </div>
-            <div className="w-full h-3 bg-ecfi-panel-border overflow-hidden">
-              <div
-                className="h-full transition-all duration-500"
-                style={{
-                  width: `${Math.min(Math.max(grossMargin, 0), 100)}%`,
-                  background:
-                    grossMargin >= 30
-                      ? "linear-gradient(90deg, hsl(var(--ecfi-std-green) / 0.6), hsl(var(--ecfi-std-green)))"
-                      : grossMargin >= 15
-                      ? "linear-gradient(90deg, hsl(var(--ecfi-gold) / 0.6), hsl(var(--ecfi-gold)))"
-                      : "linear-gradient(90deg, hsl(var(--ecfi-danger) / 0.6), hsl(var(--ecfi-danger)))",
-                }}
-              />
-            </div>
-            <div className="flex justify-between mt-2">
-              <span className="text-[10px] text-ecfi-danger-text">0%</span>
-              <span className="text-[10px] text-ecfi-gold-text">15%</span>
-              <span className="text-[10px] text-ecfi-std-green-text">30%+</span>
-            </div>
-          </div>
-
-          {/* Per-Yard Metrics */}
-          <div className="mt-6 p-4 bg-background border border-ecfi-panel-border">
-            <div className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase mb-3">Per-Yard Metrics</div>
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                ["Revenue/CY", foundationRevenue, "text-foreground"],
-                ["Cost/CY", totalCost, "text-ecfi-danger-text"],
-                ["Profit/CY", grossProfit, grossProfit >= 0 ? "text-ecfi-std-green-text" : "text-ecfi-danger-text"],
-              ].map(([lbl, val, clr], i) => (
-                <div key={i} className="text-center">
-                  <div className="text-[10px] text-muted-foreground">{lbl as string}</div>
-                  <div className={`text-base font-extrabold ${clr as string}`}>
-                    {totalYards > 0 ? fmtCurrency((val as number) / totalYards) : "-"}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <RevenueSummaryPanel
+          data={{ grandStd, grandOpt, proposalTotal, foundationRevenue, passThroughTotal }}
+        />
+        <CostBreakdownPanel
+          data={{
+            totalYards, concreteCost, laborCost, rebarTotalCost, totalRebarLF,
+            rebarCostPerLF, otherCostVal, otherCostsNote: proposal.otherCostsNote,
+            concretePerYard, laborPerYard, totalCost,
+          }}
+        />
+        <ProfitabilityPanel
+          data={{ foundationRevenue, totalCost, grossProfit, grossMargin, totalYards }}
+        />
       </div>
     </div>
   );

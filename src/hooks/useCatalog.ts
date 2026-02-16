@@ -1,14 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-
-export interface CatalogItem {
-  id: string;
-  description: string;
-  category: string;
-  section: string;
-  default_unit: string;
-}
+export type { CatalogItem } from "@/types/catalog";
+import type { CatalogItem } from "@/types/catalog";
 
 export function useCatalog() {
   const { user } = useAuth();

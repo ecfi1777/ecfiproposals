@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useProposal } from "@/hooks/useProposal";
 import { useCatalog } from "@/hooks/useCatalog";
+import { useDarkMode } from "@/hooks/useDarkMode";
 import { calcSection, calcTotalYards } from "@/lib/ecfi-utils";
 import { TopNav } from "@/components/ecfi/TopNav";
 import { ProposalTab } from "@/components/ecfi/ProposalTab";
@@ -18,27 +19,20 @@ const Index = () => {
     saving, lastSaved, saveProposal, newProposal, loadProposal,
   } = useProposal();
   const { catalog, addItem } = useCatalog();
+  const { darkMode, toggleDarkMode } = useDarkMode();
   const [activeTab, setActiveTab] = useState<TabKey>("proposal");
   const [searchParams, setSearchParams] = useSearchParams();
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("ecfi-theme") === "dark";
-    }
-    return false;
-  });
 
-  // Load proposal from URL param
+  // We only want this to run when searchParams change on mount,
+  // not when the proposal state or loadProposal ref updates,
+  // to avoid re-triggering the load cycle.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const id = searchParams.get("id");
     if (id && id !== proposal.id) {
       loadProposal(id).then(() => setActiveTab("proposal"));
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem("ecfi-theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
 
   const handleNew = () => {
     newProposal();
@@ -74,8 +68,7 @@ const Index = () => {
         proposalTotal={proposalTotal}
         saving={saving}
         darkMode={darkMode}
-        setDarkMode={setDarkMode}
-        
+        onToggleDarkMode={toggleDarkMode}
         onNew={handleNew}
         lastSaved={lastSaved}
       />

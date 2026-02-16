@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { LineItem, emptyLine, emptySlabLine, calcSection, calcTotalYards, fmtCurrency } from "@/lib/ecfi-utils";
+import { LineItem, ProposalData, emptyLine, emptySlabLine, calcSection, calcTotalYards, fmtCurrency } from "@/lib/ecfi-utils";
 import { LineRow, SectionHeader } from "./LineRow";
 import { VolumeBreakdown } from "./VolumeBreakdown";
 import type { CatalogItem } from "@/hooks/useCatalog";
@@ -24,7 +24,7 @@ interface ProposalTabProps {
     foundType: string;
     foundSize: string;
   };
-  setProposal: (fn: (prev: any) => any) => void;
+  setProposal: (fn: (prev: ProposalData) => ProposalData) => void;
   ftgLines: LineItem[];
   setFtgLines: (fn: LineItem[] | ((prev: LineItem[]) => LineItem[])) => void;
   slabLines: LineItem[];
@@ -101,7 +101,7 @@ export function ProposalTab({
           <label className={labelClass}>Builder</label>
           <input
             value={proposal.builder}
-            onChange={(e) => setProposal((p: any) => ({ ...p, builder: e.target.value }))}
+            onChange={(e) => setProposal((p: ProposalData) => ({ ...p, builder: e.target.value }))}
             className={inputClass}
             placeholder="Builder Name"
           />
@@ -126,7 +126,7 @@ export function ProposalTab({
                 mode="single"
                 selected={dateValue}
                 onSelect={(d) => {
-                  if (d) setProposal((p: any) => ({ ...p, date: format(d, "yyyy-MM-dd") }));
+                  if (d) setProposal((p: ProposalData) => ({ ...p, date: format(d, "yyyy-MM-dd") }));
                 }}
                 initialFocus
                 className={cn("p-3 pointer-events-auto")}
@@ -141,7 +141,7 @@ export function ProposalTab({
           <label className={labelClass}>Job Location</label>
           <input
             value={proposal.location}
-            onChange={(e) => setProposal((p: any) => ({ ...p, location: e.target.value }))}
+            onChange={(e) => setProposal((p: ProposalData) => ({ ...p, location: e.target.value }))}
             className={inputClass}
             placeholder="Address, Subdivision, Owner Name"
           />
@@ -150,7 +150,7 @@ export function ProposalTab({
           <label className={labelClass}>County</label>
           <input
             value={proposal.county}
-            onChange={(e) => setProposal((p: any) => ({ ...p, county: e.target.value }))}
+            onChange={(e) => setProposal((p: ProposalData) => ({ ...p, county: e.target.value }))}
             className={inputClass}
             placeholder="County Name"
           />
@@ -162,7 +162,7 @@ export function ProposalTab({
           <label className={labelClass}>Foundation Type</label>
           <input
             value={proposal.foundType}
-            onChange={(e) => setProposal((p: any) => ({ ...p, foundType: e.target.value }))}
+            onChange={(e) => setProposal((p: ProposalData) => ({ ...p, foundType: e.target.value }))}
             className={inputClass}
             placeholder="Custom"
           />
@@ -171,7 +171,7 @@ export function ProposalTab({
           <label className={labelClass}>Foundation Size</label>
           <input
             value={proposal.foundSize}
-            onChange={(e) => setProposal((p: any) => ({ ...p, foundSize: e.target.value }))}
+            onChange={(e) => setProposal((p: ProposalData) => ({ ...p, foundSize: e.target.value }))}
             className={inputClass}
             placeholder={`49'-4" x 32'-4"`}
           />
