@@ -1,8 +1,19 @@
+import { useState } from "react";
 import { LineItem, UNIT_OPTIONS, fmt, isRebarEligible, RebarData } from "@/lib/ecfi-utils";
 import { calcCYPerUnit } from "@/lib/calcCYPerUnit";
 import { ComboBox } from "./ComboBox";
 import { RebarPopup } from "./RebarPopup";
 import type { CatalogItem } from "@/hooks/useCatalog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface LineRowProps {
   line: LineItem;
@@ -22,8 +33,19 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
   const showRebar = line.section === "ftg" && isRebarEligible(line.description);
   const hasRebarData = !!(line.rebar && (line.rebar.horizFtgBars > 0 || line.rebar.horizWallBars > 0 || line.rebar.vertSpacingInches > 0));
 
+  const hasData = !!(line.description || line.qty || line.unitPriceStd || line.unitPriceOpt);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const handleRebarSave = (data: RebarData) => {
     onChange({ ...line, rebar: data });
+  };
+
+  const handleDeleteClick = () => {
+    if (hasData) {
+      setShowDeleteConfirm(true);
+    } else {
+      onDelete();
+    }
   };
 
   return (
@@ -96,11 +118,31 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx }: Lin
         )}
       </div>
       <button
-        onClick={onDelete}
+        onClick={handleDeleteClick}
         className="bg-transparent border border-[var(--danger)]/30 text-[var(--danger)] cursor-pointer px-[7px] py-1 text-[13px] hover:bg-[var(--danger)]/10 transition-colors rounded-lg"
       >
         ×
       </button>
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove line item?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove <span className="font-semibold text-[var(--text-main)]">{line.description || `line ${idx + 1}`}</span> from the proposal. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onDelete}
+              className="bg-[var(--danger)] text-white hover:bg-[var(--danger)]/90"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
