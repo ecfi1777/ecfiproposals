@@ -199,7 +199,7 @@ function buildReportHTML(
 <div style="border-top:2px solid #1e293b;margin-bottom:16px"></div>
 <table style="width:100%;font-size:11px;margin-bottom:24px">
   <tr>
-    <td style="width:33%"><strong>Project:</strong> ${data.builder || "—"}</td>
+    <td style="width:33%"><strong>Builder:</strong> ${data.builder || "—"}</td>
     <td style="width:33%;text-align:center"><strong>Location:</strong> ${data.location || "—"}</td>
     <td style="width:33%;text-align:right"><strong>Date:</strong> ${data.date || "—"}</td>
   </tr>
