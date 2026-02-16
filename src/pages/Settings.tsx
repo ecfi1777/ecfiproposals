@@ -453,7 +453,7 @@ function ImportExportTab() {
 export default function SettingsPage({ embedded }: { embedded?: boolean }) {
   const [searchParams, setSearchParams] = useSearchParams();
   
-  const VALID_SUBTABS: TabKey[] = ["catalog", "formulas", "pricing"];
+  const VALID_SUBTABS: TabKey[] = ["catalog", "formulas", "pricing", "import"];
   const subtabParam = searchParams.get("subtab") as TabKey | null;
   const activeTab: TabKey = subtabParam && VALID_SUBTABS.includes(subtabParam) ? subtabParam : "catalog";
 
