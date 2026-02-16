@@ -38,12 +38,25 @@ function VolumeDetailRow({ line }: { line: LineItem }) {
   );
 }
 
+/** Check if a line is a pass-through item (pump, winterization) */
+const isPassThrough = (desc: string): boolean =>
+  /concrete\s*pump/i.test(desc) || /winter\s*concrete/i.test(desc);
+
 export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: CostAnalysisTabProps) {
   const ftgTotals = calcSection(ftgLines);
   const slabTotals = calcSection(slabLines);
   const grandStd = ftgTotals.std + slabTotals.std;
   const grandOpt = ftgTotals.opt + slabTotals.opt;
   const proposalTotal = grandStd + grandOpt;
+
+  // Foundation Revenue excludes pass-through items (pumps, winterization)
+  const allLines = [...ftgLines, ...slabLines];
+  const foundationLines = allLines.filter((l) => !isPassThrough(l.description));
+  const passThroughLines = allLines.filter((l) => isPassThrough(l.description));
+  const foundationTotals = calcSection(foundationLines);
+  const foundationRevenue = foundationTotals.std + foundationTotals.opt;
+  const passThroughTotal = proposalTotal - foundationRevenue;
+
   const ftgYards = calcTotalYards(ftgLines);
   const slabYards = calcTotalYards(slabLines);
   const autoTotalYards = ftgYards + slabYards;
@@ -65,8 +78,8 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
   const laborCost = (parseFloat(proposal.laborPerYard) || 0) * totalYards;
   const otherCostVal = parseFloat(proposal.otherCosts) || 0;
   const totalCost = concreteCost + laborCost + otherCostVal + rebarTotalCost;
-  const grossProfit = proposalTotal - totalCost;
-  const grossMargin = proposalTotal > 0 ? (grossProfit / proposalTotal) * 100 : 0;
+  const grossProfit = foundationRevenue - totalCost;
+  const grossMargin = foundationRevenue > 0 ? (grossProfit / foundationRevenue) * 100 : 0;
 
   const inputClass = "w-full px-2.5 py-2 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-sm font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold";
   const labelClass = "text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 block";
@@ -246,10 +259,25 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
             <span className="text-muted-foreground">Optional Total</span>
             <span className="font-bold text-ecfi-gold-text">{fmtCurrency(grandOpt)}</span>
           </div>
-          <div className="flex justify-between py-3 border-b-2 border-ecfi-panel-border">
-            <span className="font-extrabold text-sm">GRAND TOTAL</span>
+          <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
+            <span className="font-extrabold text-sm">Proposal Total</span>
             <span className="font-extrabold text-lg">{fmtCurrency(proposalTotal)}</span>
           </div>
+          {passThroughTotal > 0 && (
+            <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
+              <span className="text-muted-foreground text-[12px]">Less: Pass-Through (Pump / Winter)</span>
+              <span className="font-bold text-muted-foreground">({fmtCurrency(passThroughTotal)})</span>
+            </div>
+          )}
+          <div className="flex justify-between py-3 border-b-2 border-ecfi-panel-border">
+            <span className="font-extrabold text-sm text-ecfi-vol-blue-text">FOUNDATION REVENUE</span>
+            <span className="font-extrabold text-lg text-ecfi-vol-blue-text">{fmtCurrency(foundationRevenue)}</span>
+          </div>
+          {passThroughTotal > 0 && (
+            <div className="text-[10px] text-muted-foreground/60 mt-2 italic">
+              Concrete Pump and Winter Concrete are pass-through items excluded from margin calc.
+            </div>
+          )}
         </div>
 
         {/* Cost Breakdown */}
@@ -276,8 +304,8 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
         <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border">
           <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Profitability</h3>
           <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
-            <span className="text-muted-foreground">Revenue</span>
-            <span className="font-bold">{fmtCurrency(proposalTotal)}</span>
+            <span className="text-muted-foreground">Foundation Revenue</span>
+            <span className="font-bold">{fmtCurrency(foundationRevenue)}</span>
           </div>
           <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
             <span className="text-muted-foreground">Total Cost</span>
@@ -324,7 +352,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
             <div className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase mb-3">Per-Yard Metrics</div>
             <div className="grid grid-cols-3 gap-4">
               {[
-                ["Revenue/CY", proposalTotal, "text-foreground"],
+                ["Revenue/CY", foundationRevenue, "text-foreground"],
                 ["Cost/CY", totalCost, "text-ecfi-danger-text"],
                 ["Profit/CY", grossProfit, grossProfit >= 0 ? "text-ecfi-std-green-text" : "text-ecfi-danger-text"],
               ].map(([lbl, val, clr], i) => (
