@@ -42,13 +42,13 @@ export default function Signup() {
     <div className="min-h-screen flex items-center justify-center bg-background font-mono px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-block bg-ecfi-gold text-primary-foreground font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
-          <p className="text-xs text-muted-foreground tracking-widest uppercase">Create Account</p>
+          <div className="inline-block bg-black text-white font-extrabold text-lg px-4 py-2 tracking-widest">ECFI</div>
+          <p className="text-xs text-foreground tracking-widest uppercase">Create Account</p>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-muted-foreground">Full Name</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-foreground">Full Name</label>
             <Input
               type="text"
               value={fullName}
@@ -59,7 +59,7 @@ export default function Signup() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-muted-foreground">Email</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-foreground">Email</label>
             <Input
               type="email"
               value={email}
@@ -70,7 +70,7 @@ export default function Signup() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-muted-foreground">Password</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-foreground">Password</label>
             <div className="relative mt-1">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -91,14 +91,14 @@ export default function Signup() {
               </button>
             </div>
           </div>
-          <Button type="submit" disabled={submitting} className="w-full font-mono font-bold tracking-widest uppercase">
+          <Button type="submit" disabled={submitting} className="w-full font-mono font-bold tracking-widest uppercase bg-[#2563eb] hover:bg-[#1d4ed8] text-white">
             {submitting ? "Creating account..." : "Sign Up"}
           </Button>
         </form>
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-xs text-foreground">
           Already have an account?{" "}
-          <Link to="/login" className="text-ecfi-gold-text hover:underline font-bold">
+          <Link to="/login" className="text-foreground hover:underline font-bold">
             Sign In
           </Link>
         </p>
