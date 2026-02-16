@@ -401,7 +401,6 @@ function CatalogTab() {
 
 function ImportExportTab() {
   const [priceOpen, setPriceOpen] = useState(false);
-  const [catalogOpen, setCatalogOpen] = useState(false);
 
   return (
     <div className="p-6 max-w-[900px] mx-auto space-y-4">
@@ -419,20 +418,6 @@ function ImportExportTab() {
         </div>
       </button>
 
-      {/* Import Catalog Items */}
-      <button
-        onClick={() => setCatalogOpen(true)}
-        className="w-full border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl p-5 text-left hover:bg-[var(--section-bg)] transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-start gap-4"
-      >
-        <div className="p-2.5 bg-[var(--primary-blue-soft)] rounded-lg">
-          <List className="w-5 h-5 text-[var(--primary-blue)]" />
-        </div>
-        <div>
-          <div className="text-[13px] font-bold text-[var(--text-main)] tracking-wider">Import Catalog Items</div>
-          <div className="text-[11px] text-[var(--text-muted)] mt-0.5">Bulk-add new items to your catalog from a CSV</div>
-        </div>
-      </button>
-
       {/* Export — coming soon */}
       <div className="w-full border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl p-5 text-left opacity-50 cursor-not-allowed shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-start gap-4">
         <div className="p-2.5 bg-[var(--section-bg)] rounded-lg">
@@ -445,7 +430,6 @@ function ImportExportTab() {
       </div>
 
       <ImportPriceHistory open={priceOpen} onClose={() => setPriceOpen(false)} />
-      <ImportCatalogItems open={catalogOpen} onClose={() => setCatalogOpen(false)} />
     </div>
   );
 }
