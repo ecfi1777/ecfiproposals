@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 interface TopNavProps {
   saving: boolean;
   lastSaved?: Date | null;
+  isDirty?: boolean;
+  proposalBuilder?: string;
 }
 
 function timeAgo(d: Date): string {
@@ -15,7 +17,7 @@ function timeAgo(d: Date): string {
   return `${hrs}h ago`;
 }
 
-export function TopNav({ saving, lastSaved }: TopNavProps) {
+export function TopNav({ saving, lastSaved, isDirty, proposalBuilder }: TopNavProps) {
   const { profile, signOut } = useAuth();
 
   return (
@@ -23,7 +25,15 @@ export function TopNav({ saving, lastSaved }: TopNavProps) {
       <div className="flex items-center gap-4">
         <div className="bg-black text-white font-extrabold text-base px-3 py-1.5 tracking-widest">ECFI</div>
         <div>
-          <div className="text-base font-bold tracking-wider text-[var(--text-main)]">Proposal Builder</div>
+          <div className="flex items-center gap-2">
+            <span className="text-base font-bold tracking-wider text-[var(--text-main)]">Proposal Builder</span>
+            {isDirty && (
+              <span className="flex items-center gap-1 text-[10px] text-ecfi-override-orange-text font-semibold tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-ecfi-override-orange-text inline-block" />
+                unsaved
+              </span>
+            )}
+          </div>
           <div className="text-[10px] text-[var(--text-muted)] tracking-widest uppercase">Eastern Concrete Foundation, Inc.</div>
         </div>
       </div>
