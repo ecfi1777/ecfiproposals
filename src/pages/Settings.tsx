@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Settings as SettingsIcon } from "lucide-react";
-import CatalogPage from "./Catalog";
+import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import type { CatalogItemWithTimestamp } from "@/types/catalog";
 
 const TABS = [
   { key: "catalog", label: "Item Catalog" },
@@ -33,74 +36,7 @@ function DefaultPricingPlaceholder() {
   );
 }
 
-export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>("catalog");
-
-  return (
-    <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] font-mono">
-      <header className="bg-[var(--card-bg)] border-b border-[var(--card-border)] px-6 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors text-[12px] tracking-wider"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            BACK
-          </Link>
-          <div className="bg-black text-white font-extrabold text-base px-3 py-1.5 tracking-widest">ECFI</div>
-          <div>
-            <div className="text-base font-bold tracking-wider text-[var(--text-main)] flex items-center gap-2">
-              <SettingsIcon className="w-4 h-4 text-[var(--text-secondary)]" />
-              Settings
-            </div>
-            <div className="text-[10px] text-[var(--text-muted)] tracking-widest uppercase">
-              Application configuration
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Tab bar */}
-      <div className="bg-[var(--card-bg)] border-b border-[var(--card-border)] px-6 flex gap-0">
-        {TABS.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`px-5 py-3 text-[12px] font-bold tracking-wider transition-colors border-b-2 ${
-              activeTab === tab.key
-                ? "text-[var(--primary-blue)] border-[var(--primary-blue)]"
-                : "text-[var(--text-secondary)] border-transparent hover:text-[var(--primary-blue)]"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab content */}
-      {activeTab === "catalog" && <CatalogContent />}
-      {activeTab === "formulas" && <FormulasPlaceholder />}
-      {activeTab === "pricing" && <DefaultPricingPlaceholder />}
-    </div>
-  );
-}
-
-// Inline the catalog content without its own header
-function CatalogContent() {
-  // Re-use the catalog page but we need to render just the content portion
-  // For now, render the full Catalog page content inline
-  return <CatalogPageContent />;
-}
-
-// Extract catalog content without header wrapper
-import { useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { Plus, Pencil, Trash2, Search, X, Check } from "lucide-react";
-import { toast } from "sonner";
-import type { CatalogItemWithTimestamp } from "@/types/catalog";
-
-function CatalogPageContent() {
+function CatalogTab() {
   const { user } = useAuth();
   const [items, setItems] = useState<CatalogItemWithTimestamp[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,7 +64,9 @@ function CatalogPageContent() {
   }, [user, fetchItems]);
 
   const filtered = items.filter((it) =>
-    it.description.toLowerCase().includes(search.toLowerCase())
+    it.description.toLowerCase().includes(search.toLowerCase()) ||
+    it.category.toLowerCase().includes(search.toLowerCase()) ||
+    it.section.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleAdd = async () => {
@@ -183,6 +121,12 @@ function CatalogPageContent() {
     }
   };
 
+  const sectionLabel = (s: string) => {
+    if (s === "ftg_wall") return "Ftg/Wall";
+    if (s === "slabs") return "Slabs";
+    return s;
+  };
+
   return (
     <div className="p-6 max-w-[900px] mx-auto space-y-5">
       <div className="flex gap-2">
@@ -208,7 +152,7 @@ function CatalogPageContent() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search catalog..."
+          placeholder="Search by description, category, or section..."
           className="w-full pl-9 pr-8 py-2 border border-[var(--card-border)] bg-[var(--bg-main)] text-[var(--text-main)] text-sm font-mono rounded-lg focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)]"
         />
         {search && (
@@ -231,6 +175,14 @@ function CatalogPageContent() {
         </div>
       ) : (
         <div className="border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          {/* Column headers */}
+          <div className="flex items-center gap-2 px-4 py-2 bg-[var(--section-bg)] border-b border-[var(--card-border)]">
+            <span className="flex-1 text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider">Description</span>
+            <span className="w-[60px] text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-center">Unit</span>
+            <span className="w-[70px] text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-center">Section</span>
+            <span className="w-[70px] text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-center">Category</span>
+            <span className="w-[56px]" />
+          </div>
           {filtered.map((item, i) => (
             <div
               key={item.id}
@@ -258,21 +210,25 @@ function CatalogPageContent() {
               ) : (
                 <>
                   <span className="flex-1 text-[13px] font-mono text-[var(--text-main)]">{item.description}</span>
-                  <span className="text-[10px] text-[var(--text-muted)] mr-2">{item.default_unit}</span>
-                  <button
-                    onClick={() => { setEditingId(item.id); setEditValue(item.description); }}
-                    className="text-[var(--text-muted)] hover:text-[var(--primary-blue)] p-1 transition-colors"
-                    title="Edit"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.id, item.description)}
-                    className="text-[var(--text-muted)] hover:text-[var(--danger)] p-1 transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <span className="w-[60px] text-[10px] text-[var(--text-muted)] text-center">{item.default_unit}</span>
+                  <span className="w-[70px] text-[10px] text-[var(--text-secondary)] text-center">{sectionLabel(item.section)}</span>
+                  <span className="w-[70px] text-[10px] text-[var(--text-muted)] text-center capitalize">{item.category}</span>
+                  <div className="w-[56px] flex justify-end gap-0.5">
+                    <button
+                      onClick={() => { setEditingId(item.id); setEditValue(item.description); }}
+                      className="text-[var(--text-muted)] hover:text-[var(--primary-blue)] p-1 transition-colors"
+                      title="Edit"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id, item.description)}
+                      className="text-[var(--text-muted)] hover:text-[var(--danger)] p-1 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </>
               )}
             </div>
@@ -282,6 +238,58 @@ function CatalogPageContent() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState<TabKey>("catalog");
+
+  return (
+    <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] font-mono">
+      <header className="bg-[var(--card-bg)] border-b border-[var(--card-border)] px-6 py-3.5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-colors text-[12px] tracking-wider"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            BACK
+          </Link>
+          <div className="bg-black text-white font-extrabold text-base px-3 py-1.5 tracking-widest">ECFI</div>
+          <div>
+            <div className="text-base font-bold tracking-wider text-[var(--text-main)] flex items-center gap-2">
+              <SettingsIcon className="w-4 h-4 text-[var(--text-secondary)]" />
+              Settings
+            </div>
+            <div className="text-[10px] text-[var(--text-muted)] tracking-widest uppercase">
+              Application configuration
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Tab bar */}
+      <div className="bg-[var(--card-bg)] border-b border-[var(--card-border)] px-6 flex gap-0">
+        {TABS.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-5 py-3 text-[12px] font-bold tracking-wider transition-colors border-b-2 ${
+              activeTab === tab.key
+                ? "text-[var(--primary-blue)] border-[var(--primary-blue)]"
+                : "text-[var(--text-secondary)] border-transparent hover:text-[var(--primary-blue)]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      {activeTab === "catalog" && <CatalogTab />}
+      {activeTab === "formulas" && <FormulasPlaceholder />}
+      {activeTab === "pricing" && <DefaultPricingPlaceholder />}
     </div>
   );
 }
