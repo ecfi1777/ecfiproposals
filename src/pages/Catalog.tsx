@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, Pencil, Trash2, Search, X, Check } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Search, X, Check, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import type { CatalogItemWithTimestamp } from "@/types/catalog";
 
@@ -15,25 +15,38 @@ export default function CatalogPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
 
+  const [showInactive, setShowInactive] = useState(false);
+
   const fetchItems = async () => {
     if (!user) return;
     setLoading(true);
     const { data, error } = await supabase
       .from("catalog_items")
-      .select("id, description, category, section, default_unit, created_at")
+      .select("id, description, category, section, default_unit, created_at, is_active")
       .eq("user_id", user.id)
-      .eq("is_active", true)
       .order("sort_order")
       .order("description");
-    if (!error && data) setItems(data);
+    if (!error && data) setItems(data as any);
     setLoading(false);
   };
 
   useEffect(() => { if (user) fetchItems(); }, [user]);
 
-  const filtered = items.filter((it) =>
-    it.description.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = items.filter((it) => {
+    const matchesSearch = it.description.toLowerCase().includes(search.toLowerCase());
+    const matchesActive = showInactive ? true : (it as any).is_active !== false;
+    return matchesSearch && matchesActive;
+  });
+
+  const handleToggleActive = async (id: string, currentlyActive: boolean) => {
+    const { error } = await supabase.from("catalog_items").update({ is_active: !currentlyActive }).eq("id", id);
+    if (error) {
+      toast.error("Failed to update item");
+    } else {
+      toast.success(!currentlyActive ? "Item activated" : "Item deactivated");
+      fetchItems();
+    }
+  };
 
   const handleAdd = async () => {
     if (!user) return;
@@ -137,8 +150,21 @@ export default function CatalogPage() {
           )}
         </div>
 
-        <div className="text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
-          {filtered.length} item{filtered.length !== 1 ? "s" : ""} {search ? "matching" : "total"}
+        <div className="flex items-center justify-between">
+          <div className="text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
+            {filtered.length} item{filtered.length !== 1 ? "s" : ""} {search ? "matching" : "total"}
+          </div>
+          <button
+            onClick={() => setShowInactive(!showInactive)}
+            className={`flex items-center gap-1.5 text-[11px] font-mono tracking-wider px-3 py-1.5 rounded-lg border transition-colors ${
+              showInactive
+                ? "bg-[var(--primary-blue-soft)] text-[var(--primary-blue)] border-[var(--primary-blue)]/30"
+                : "text-[var(--text-muted)] border-[var(--card-border)] hover:text-[var(--text-secondary)]"
+            }`}
+          >
+            {showInactive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            {showInactive ? "SHOWING ALL" : "SHOW INACTIVE"}
+          </button>
         </div>
 
         {loading ? (
@@ -176,8 +202,18 @@ export default function CatalogPage() {
                   </>
                 ) : (
                   <>
-                    <span className="flex-1 text-[13px] font-mono text-[var(--text-main)]">{item.description}</span>
+                    <span className={`flex-1 text-[13px] font-mono ${(item as any).is_active === false ? "text-[var(--text-muted)] line-through" : "text-[var(--text-main)]"}`}>{item.description}</span>
+                    {(item as any).is_active === false && (
+                      <span className="text-[9px] bg-[var(--text-muted)]/15 text-[var(--text-muted)] px-1.5 py-0.5 rounded font-semibold tracking-wider mr-1">INACTIVE</span>
+                    )}
                     <span className="text-[10px] text-[var(--text-muted)] mr-2">{item.default_unit}</span>
+                    <button
+                      onClick={() => handleToggleActive(item.id, (item as any).is_active !== false)}
+                      className={`p-1 transition-colors ${(item as any).is_active === false ? "text-[var(--text-muted)] hover:text-[var(--success)]" : "text-[var(--success)] hover:text-[var(--text-muted)]"}`}
+                      title={(item as any).is_active === false ? "Activate" : "Deactivate"}
+                    >
+                      {(item as any).is_active === false ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
                     <button
                       onClick={() => { setEditingId(item.id); setEditValue(item.description); }}
                       className="text-[var(--text-muted)] hover:text-[var(--primary-blue)] p-1 transition-colors"
