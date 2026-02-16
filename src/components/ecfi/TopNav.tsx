@@ -9,7 +9,7 @@ interface TopNavProps {
   proposalTotal: number;
   saving: boolean;
   darkMode: boolean;
-  setDarkMode: (v: boolean) => void;
+  onToggleDarkMode: () => void;
   onNew?: () => void;
   lastSaved?: Date | null;
 }
@@ -23,7 +23,7 @@ function timeAgo(d: Date): string {
   return `${hrs}h ago`;
 }
 
-export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMode, setDarkMode, onNew, lastSaved }: TopNavProps) {
+export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMode, onToggleDarkMode, onNew, lastSaved }: TopNavProps) {
   const { profile, signOut } = useAuth();
 
   return (
@@ -70,7 +70,7 @@ export function TopNav({ catalogCount, totalYards, proposalTotal, saving, darkMo
           </span>
         )}
         <button
-          onClick={() => setDarkMode(!darkMode)}
+          onClick={onToggleDarkMode}
           className="p-2 border border-ecfi-panel-border hover:bg-ecfi-panel-bg transition-colors"
           title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >

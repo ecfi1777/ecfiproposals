@@ -4,32 +4,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Plus, Pencil, Trash2, Search, X, Check } from "lucide-react";
 import { toast } from "sonner";
-
-interface CatalogItem {
-  id: string;
-  description: string;
-  category: string;
-  section: string;
-  default_unit: string;
-  created_at: string;
-}
+import { useDarkMode } from "@/hooks/useDarkMode";
+import type { CatalogItemWithTimestamp } from "@/types/catalog";
 
 export default function CatalogPage() {
   const { user } = useAuth();
-  const [items, setItems] = useState<CatalogItem[]>([]);
+  const [items, setItems] = useState<CatalogItemWithTimestamp[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [newItem, setNewItem] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== "undefined") return localStorage.getItem("ecfi-theme") === "dark";
-    return false;
-  });
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
+  useDarkMode();
 
   const fetchItems = async () => {
     if (!user) return;

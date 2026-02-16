@@ -119,7 +119,18 @@ export function useProposal() {
       // Write price history for priced items
       const pricedLines = allLines.filter((l) => l.qty && (l.unitPriceStd || l.unitPriceOpt));
       if (pricedLines.length > 0) {
-        const historyRows: any[] = [];
+        const historyRows: {
+          user_id: string;
+          proposal_id: string | undefined;
+          description: string;
+          unit: string;
+          qty: number;
+          unit_price: number;
+          pricing_type: string;
+          builder: string | null;
+          job_location: string | null;
+          county: string | null;
+        }[] = [];
         for (const l of pricedLines) {
           if (l.unitPriceStd) {
             historyRows.push({
@@ -155,9 +166,9 @@ export function useProposal() {
 
       setLastSaved(new Date());
       toast.success("Proposal saved successfully");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Save failed:", err);
-      toast.error("Failed to save proposal: " + (err.message || "Unknown error"));
+      toast.error("Failed to save proposal: " + (err instanceof Error ? err.message : "Unknown error"));
     } finally {
       setSaving(false);
     }
@@ -221,9 +232,9 @@ export function useProposal() {
       setSlabLines(slab);
       setLastSaved(new Date());
       toast.success("Proposal loaded");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Load failed:", err);
-      toast.error("Failed to load proposal");
+      toast.error("Failed to load proposal: " + (err instanceof Error ? err.message : "Unknown error"));
     } finally {
       setSaving(false);
     }
