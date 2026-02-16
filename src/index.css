@@ -30,7 +30,7 @@
     --ring: 333 71% 50%;
     --radius: 0;
 
-    /* ECFI semantic colors — light mode */
+    /* ECFI semantic colors */
     --ecfi-gold: 43 86% 49%;
     --ecfi-gold-text: 40 86% 38%;
     --ecfi-std-green: 147 50% 36%;
@@ -94,87 +94,21 @@
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
     --tracking-normal: 0em;
     --spacing: 0.25rem;
-  }
 
-  .dark {
-    --background: 240 5% 10%;
-    --foreground: 0 0% 98%;
-    --card: 240 3% 15%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 5% 26%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 328 85% 70%;
-    --primary-foreground: 336 83% 17%;
-    --secondary: 240 3% 46%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3% 46%;
-    --muted-foreground: 0 0% 98%;
-    --accent: 343 87% 15%;
-    --accent-foreground: 351 94% 71%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 85% 97%;
-    --border: 240 5% 33%;
-    --input: 240 5% 33%;
-    --ring: 328 85% 70%;
-
-    --ecfi-gold: 43 86% 59%;
-    --ecfi-gold-text: 43 86% 59%;
-    --ecfi-std-green: 108 56% 67%;
-    --ecfi-std-green-text: 108 56% 67%;
-    --ecfi-vol-blue: 210 100% 71%;
-    --ecfi-vol-blue-text: 210 100% 71%;
-    --ecfi-wall-purple: 270 76% 75%;
-    --ecfi-wall-purple-text: 270 76% 75%;
-    --ecfi-ftg-orange: 28 96% 61%;
-    --ecfi-ftg-orange-text: 28 96% 61%;
-    --ecfi-slab-green: 142 69% 58%;
-    --ecfi-slab-green-text: 142 69% 58%;
-    --ecfi-override-orange: 30 100% 64%;
-    --ecfi-override-orange-text: 30 100% 64%;
-    --ecfi-danger: 0 100% 71%;
-    --ecfi-danger-text: 0 100% 71%;
-
-    --ecfi-nav-bg: 0 0% 4%;
-    --ecfi-nav-border: 0 0% 13%;
-    --ecfi-panel-bg: 0 0% 8%;
-    --ecfi-panel-border: 0 0% 15%;
-    --ecfi-input-bg: 0 0% 12%;
-    --ecfi-input-border: 0 0% 23%;
-    --ecfi-dropdown-bg: 0 0% 15%;
-    --ecfi-dropdown-border: 0 0% 27%;
-    --ecfi-dropdown-hover: 0 0% 20%;
-    --ecfi-tab-bg: 0 0% 5%;
-    --ecfi-tab-active-bg: 0 0% 10%;
-    --ecfi-row-number: 0 0% 33%;
-    --ecfi-subtle: 0 0% 40%;
-    --ecfi-vol-breakdown-bg: 216 30% 6%;
-    --ecfi-vol-breakdown-border: 217 40% 15%;
-    --ecfi-preview-bg: 0 0% 6%;
-    --ecfi-preview-panel: 0 0% 8%;
-    --ecfi-preview-border: 0 0% 15%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 328 85% 70%;
-    --sidebar-primary-foreground: 336 83% 17%;
-    --sidebar-accent: 351 94% 71%;
-    --sidebar-accent-foreground: 343 87% 15%;
-    --sidebar-border: 240 5% 33%;
-    --sidebar-ring: 328 85% 70%;
-    --chart-1: 327 87% 81%;
-    --chart-2: 352 95% 81%;
-    --chart-3: 328 85% 70%;
-    --chart-4: 351 94% 71%;
-    --chart-5: 240 5% 33%;
-    --sidebar: 240 3% 15%;
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    /* New design system variables (defined, not yet applied to components) */
+    --bg-main: #FFFFFF;
+    --bg-page: #F6F8FB;
+    --card-bg: #FFFFFF;
+    --card-border: #E5E7EB;
+    --section-bg: #F3F4F6;
+    --primary-blue: #1E5EFF;
+    --primary-blue-hover: #1746C2;
+    --primary-blue-soft: #F3F7FF;
+    --text-main: #111827;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+    --success: #15803D;
+    --danger: #B91C1C;
   }
 }
 
@@ -183,7 +117,27 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--bg-page);
+    color: var(--text-main);
     font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* PDF Export — scoped styles for print/export isolation */
+.pdf-export {
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-family: 'JetBrains Mono', 'Courier New', monospace !important;
+}
+
+@media print {
+  body > *:not(.pdf-export) {
+    display: none !important;
+  }
+  .pdf-export {
+    background: #ffffff !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
