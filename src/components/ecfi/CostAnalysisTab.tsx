@@ -54,8 +54,10 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
 
   const concretePerYard = parseFloat(proposal.concretePerYard) || 0;
   const laborPerYard = parseFloat(proposal.laborPerYard) || 0;
-  const concreteCost = concretePerYard * totalYards;
-  const laborCost = laborPerYard * totalYards;
+  // Round up to nearest 0.5 yard for ordering/cost calculations
+  const orderYards = Math.ceil(totalYards * 2) / 2;
+  const concreteCost = concretePerYard * orderYards;
+  const laborCost = laborPerYard * orderYards;
   const otherCostVal = parseFloat(proposal.otherCosts) || 0;
   const totalCost = concreteCost + laborCost + otherCostVal + rebarTotalCost;
   const grossProfit = foundationRevenue - totalCost;
