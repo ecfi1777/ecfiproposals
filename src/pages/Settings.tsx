@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -14,12 +14,127 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]["key"];
 
-function FormulasPlaceholder() {
+const FORMULAS = [
+  {
+    name: "Wall Volume",
+    formula: "(Height_ft × (Thickness_in ÷ 12) × Length_LF) ÷ 27",
+    explanation: "Converts wall dimensions to cubic yards. Height in feet, thickness in inches converted to feet by dividing by 12, length in linear feet. Divide by 27 to convert cubic feet to cubic yards.",
+    example: {
+      label: "1 LF of 8' × 8\" wall",
+      steps: "8 × 0.667 × 1 = 5.333 CF ÷ 27",
+      result: "0.198 CY/LF",
+    },
+  },
+  {
+    name: "Footing Volume",
+    formula: "((Depth_in ÷ 12) × (Width_in ÷ 12) × Length_LF) ÷ 27",
+    explanation: "Both footing dimensions are in inches, converted to feet. Length in linear feet. Divide by 27 to convert cubic feet to cubic yards.",
+    example: {
+      label: "1 LF of 8\" × 16\" footing",
+      steps: "0.667 × 1.333 × 1 = 0.889 CF ÷ 27",
+      result: "0.033 CY/LF",
+    },
+  },
+  {
+    name: "Combined Wall + Footing Volume",
+    formula: "(Wall CY/LF + Footing CY/LF) × Total LF",
+    explanation: "For wall-with-footing items, both volumes are calculated separately then summed per linear foot, then multiplied by quantity.",
+    example: {
+      label: "150 LF of 8' × 8\" wall with 8\" × 16\" footing",
+      steps: "(0.198 + 0.033) × 150",
+      result: "34.57 CY",
+    },
+  },
+  {
+    name: "Slab Volume",
+    formula: "(Area_SF × (Thickness_in ÷ 12)) ÷ 27",
+    explanation: "Area in square feet, thickness in inches converted to feet. Divide by 27 to convert cubic feet to cubic yards.",
+    example: {
+      label: "860 SF basement slab at 4\" thick",
+      steps: "860 × 0.333 = 286.67 CF ÷ 27",
+      result: "10.62 CY",
+    },
+  },
+  {
+    name: "Pier Pad Volume",
+    formula: "((L_in ÷ 12) × (W_in ÷ 12) × (D_in ÷ 12)) ÷ 27",
+    explanation: "All three dimensions in inches, each converted to feet. Multiply by quantity of pads.",
+    example: {
+      label: "5 pier pads at 36\" × 36\" × 12\"",
+      steps: "3 × 3 × 1 = 9 CF per pad ÷ 27 = 0.333 CY × 5",
+      result: "1.67 CY",
+    },
+  },
+  {
+    name: "Grade Beam Volume",
+    formula: "((Width_in ÷ 12) × (Depth_in ÷ 12) × Length_LF) ÷ 27",
+    explanation: "Width and depth in inches, length in linear feet. Divide by 27 to convert cubic feet to cubic yards.",
+    example: {
+      label: "40 LF of 16\" × 16\" grade beam",
+      steps: "1.333 × 1.333 × 40 = 71.11 CF ÷ 27",
+      result: "2.63 CY",
+    },
+  },
+];
+
+function FormulasTab() {
+  const [expanded, setExpanded] = useState<number | null>(null);
+
   return (
-    <div className="p-6 max-w-[900px] mx-auto">
-      <div className="border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl p-10 text-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="text-[var(--text-secondary)] text-sm font-semibold mb-1">Formulas</div>
-        <div className="text-[var(--text-muted)] text-xs">Coming soon — volume formulas and calculation rules.</div>
+    <div className="p-6 max-w-[900px] mx-auto space-y-5">
+      <div>
+        <h2 className="text-base font-bold tracking-wider text-[var(--text-main)]">Concrete Volume Calculations</h2>
+        <p className="text-[11px] text-[var(--text-muted)] mt-1">Formulas used to estimate cubic yards from item dimensions.</p>
+      </div>
+
+      <div className="space-y-3">
+        {FORMULAS.map((f, i) => {
+          const isOpen = expanded === i;
+          return (
+            <div
+              key={i}
+              className="border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden"
+            >
+              <button
+                onClick={() => setExpanded(isOpen ? null : i)}
+                className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[var(--section-bg)] transition-colors"
+              >
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-[13px] font-semibold text-[var(--text-main)]">{f.name}</span>
+                  <code className="text-[11px] font-mono bg-ecfi-vol-tint text-ecfi-vol-blue-text px-2.5 py-1 rounded-md border border-ecfi-vol-blue/20">
+                    {f.formula}
+                  </code>
+                </div>
+                <ChevronDown
+                  className={`w-4 h-4 text-[var(--text-muted)] transition-transform flex-shrink-0 ml-3 ${isOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {isOpen && (
+                <div className="px-5 pb-5 pt-0 border-t border-[var(--card-border)]">
+                  <div className="mt-4 space-y-4">
+                    {/* Explanation */}
+                    <div>
+                      <div className="text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-widest mb-1">Explanation</div>
+                      <p className="text-[12px] text-[var(--text-secondary)] leading-relaxed">{f.explanation}</p>
+                    </div>
+
+                    {/* Worked example */}
+                    <div className="p-4 bg-[var(--section-bg)] border border-[var(--card-border)] rounded-lg">
+                      <div className="text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-widest mb-2">Worked Example</div>
+                      <div className="text-[12px] text-[var(--text-main)] font-semibold mb-1.5">{f.example.label}</div>
+                      <div className="font-mono text-[12px] text-[var(--text-secondary)] mb-2">{f.example.steps}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-widest">Result</span>
+                        <span className="font-mono text-[13px] font-bold text-ecfi-vol-blue-text">{f.example.result}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -288,7 +403,7 @@ export default function SettingsPage() {
 
       {/* Tab content */}
       {activeTab === "catalog" && <CatalogTab />}
-      {activeTab === "formulas" && <FormulasPlaceholder />}
+      {activeTab === "formulas" && <FormulasTab />}
       {activeTab === "pricing" && <DefaultPricingPlaceholder />}
     </div>
   );
