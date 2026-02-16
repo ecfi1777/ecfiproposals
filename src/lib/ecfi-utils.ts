@@ -34,7 +34,8 @@ export interface ProposalData {
   otherCosts: string;
   otherCostsNote: string;
   concreteYardsOverride: string;
-  rebarCostPerLF: string;
+  rebarCostPerStick: string;
+  rebarWastePercent: string;
 }
 
 export const emptyLine = (): LineItem => ({

@@ -19,7 +19,8 @@ const freshProposal = (): ProposalData => ({
   otherCosts: "",
   otherCostsNote: "",
   concreteYardsOverride: "",
-  rebarCostPerLF: "",
+  rebarCostPerStick: "",
+  rebarWastePercent: "0",
 });
 
 export function useProposal() {
@@ -250,7 +251,8 @@ export function useProposal() {
         otherCosts: p.other_costs?.toString() || "",
         otherCostsNote: p.other_costs_note || "",
         concreteYardsOverride: p.concrete_yards_override?.toString() || "",
-        rebarCostPerLF: "",
+        rebarCostPerStick: "",
+        rebarWastePercent: "0",
       });
 
       const { data: lines, error: lErr } = await supabase
