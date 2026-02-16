@@ -34,7 +34,7 @@ export function RebarPopup({ rebar, onSave, hasData }: RebarPopupProps) {
   };
 
   const inputClass =
-    "w-full px-2 py-1.5 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-[13px] font-mono text-right focus:outline-none focus:ring-1 focus:ring-ecfi-gold";
+    "w-full px-2 py-1.5 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-[13px] font-mono text-right focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg";
   const labelClass = "text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1 block";
 
   return (
@@ -44,7 +44,7 @@ export function RebarPopup({ rebar, onSave, hasData }: RebarPopupProps) {
           type="button"
           className={`p-1 transition-colors ${
             hasData
-              ? "text-ecfi-gold-text hover:text-ecfi-gold-text/80"
+              ? "text-[var(--primary-blue)] hover:text-[var(--primary-blue-hover)]"
               : "text-muted-foreground/40 hover:text-muted-foreground/70"
           }`}
           title="Rebar configuration"
@@ -57,7 +57,7 @@ export function RebarPopup({ rebar, onSave, hasData }: RebarPopupProps) {
         align="start"
         sideOffset={4}
       >
-        <h4 className="text-[11px] font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-4">
+        <h4 className="text-[11px] font-extrabold text-[var(--primary-blue)] tracking-widest uppercase mb-4">
           Rebar Configuration
         </h4>
 
@@ -97,7 +97,7 @@ export function RebarPopup({ rebar, onSave, hasData }: RebarPopupProps) {
 
         <button
           onClick={handleSave}
-          className="w-full py-2 bg-ecfi-gold text-ecfi-gold-contrast text-[12px] font-extrabold uppercase tracking-widest hover:opacity-90 transition-opacity"
+          className="w-full py-2 bg-[var(--primary-blue)] text-white text-[12px] font-extrabold uppercase tracking-widest rounded-lg hover:bg-[var(--primary-blue-hover)] transition-colors"
         >
           Save
         </button>

@@ -13,7 +13,7 @@ export function ProfitabilityPanel({ data }: { data: ProfitabilityData }) {
 
   return (
     <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border">
-      <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Profitability</h3>
+      <h3 className="text-sm font-extrabold text-[var(--primary-blue)] tracking-widest uppercase mb-5">Profitability</h3>
       <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
         <span className="text-muted-foreground">Foundation Revenue</span>
         <span className="font-bold">{fmtCurrency(foundationRevenue)}</span>
@@ -33,7 +33,7 @@ export function ProfitabilityPanel({ data }: { data: ProfitabilityData }) {
       <div className="mt-5">
         <div className="flex justify-between mb-2">
           <span className="text-[12px] text-muted-foreground font-bold uppercase tracking-wider">Gross Margin</span>
-          <span className={`text-[28px] font-extrabold ${grossMargin >= 30 ? "text-ecfi-std-green-text" : grossMargin >= 15 ? "text-ecfi-gold-text" : "text-ecfi-danger-text"}`}>
+          <span className={`text-[28px] font-extrabold ${grossMargin >= 30 ? "text-ecfi-std-green-text" : grossMargin >= 15 ? "text-[var(--primary-blue)]" : "text-ecfi-danger-text"}`}>
             {grossMargin.toFixed(1)}%
           </span>
         </div>
@@ -46,14 +46,14 @@ export function ProfitabilityPanel({ data }: { data: ProfitabilityData }) {
                 grossMargin >= 30
                   ? "linear-gradient(90deg, hsl(var(--ecfi-std-green) / 0.6), hsl(var(--ecfi-std-green)))"
                   : grossMargin >= 15
-                  ? "linear-gradient(90deg, hsl(var(--ecfi-gold) / 0.6), hsl(var(--ecfi-gold)))"
+                  ? `linear-gradient(90deg, var(--primary-blue-soft), var(--primary-blue))`
                   : "linear-gradient(90deg, hsl(var(--ecfi-danger) / 0.6), hsl(var(--ecfi-danger)))",
             }}
           />
         </div>
         <div className="flex justify-between mt-2">
           <span className="text-[10px] text-ecfi-danger-text">0%</span>
-          <span className="text-[10px] text-ecfi-gold-text">15%</span>
+          <span className="text-[10px] text-[var(--primary-blue)]">15%</span>
           <span className="text-[10px] text-ecfi-std-green-text">30%+</span>
         </div>
       </div>

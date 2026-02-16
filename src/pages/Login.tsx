@@ -79,7 +79,7 @@ export default function Login() {
                   placeholder="you@ecfi.com"
                 />
               </div>
-              <Button type="submit" disabled={resetSubmitting} className="w-full font-mono font-bold tracking-widest uppercase bg-[#2563eb] hover:bg-[#1d4ed8] text-white">
+              <Button type="submit" disabled={resetSubmitting} className="w-full font-mono font-bold tracking-widest uppercase bg-[var(--primary-blue)] hover:bg-[var(--primary-blue-hover)] text-white">
                 {resetSubmitting ? "Sending..." : "Send Reset Link"}
               </Button>
               <button
@@ -133,7 +133,7 @@ export default function Login() {
                   Forgot password?
                 </button>
               </div>
-              <Button type="submit" disabled={submitting} className="w-full font-mono font-bold tracking-widest uppercase bg-[#2563eb] hover:bg-[#1d4ed8] text-white">
+              <Button type="submit" disabled={submitting} className="w-full font-mono font-bold tracking-widest uppercase bg-[var(--primary-blue)] hover:bg-[var(--primary-blue-hover)] text-white">
                 {submitting ? "Signing in..." : "Sign In"}
               </Button>
             </form>

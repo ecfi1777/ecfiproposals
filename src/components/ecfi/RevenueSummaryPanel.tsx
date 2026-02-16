@@ -13,14 +13,14 @@ export function RevenueSummaryPanel({ data }: { data: RevenueSummaryData }) {
 
   return (
     <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
-      <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Revenue (from Proposal)</h3>
+      <h3 className="text-sm font-extrabold text-[var(--primary-blue)] tracking-widest uppercase mb-5">Revenue (from Proposal)</h3>
       <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
         <span className="text-muted-foreground">Standard Total</span>
         <span className="font-bold text-ecfi-std-green-text">{fmtCurrency(grandStd)}</span>
       </div>
       <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
         <span className="text-muted-foreground">Optional Total</span>
-        <span className="font-bold text-ecfi-gold-text">{fmtCurrency(grandOpt)}</span>
+        <span className="font-bold text-[var(--text-secondary)]">{fmtCurrency(grandOpt)}</span>
       </div>
       <div className="flex justify-between py-2.5 border-b border-ecfi-panel-border">
         <span className="font-extrabold text-sm">Proposal Total</span>

@@ -77,8 +77,8 @@ const Index = () => {
             onClick={() => setActiveTab(t.key)}
             className={`px-6 py-2.5 font-bold text-[13px] tracking-widest uppercase border-b-2 transition-all font-mono ${
               activeTab === t.key
-                ? "bg-ecfi-tab-active-bg text-ecfi-gold-text border-ecfi-gold"
-                : "text-muted-foreground border-transparent hover:text-foreground"
+                ? "bg-ecfi-tab-active-bg text-[var(--primary-blue)] border-[var(--primary-blue)]"
+                : "text-[var(--text-secondary)] border-transparent hover:text-[var(--primary-blue)]"
             }`}
           >
             {t.label}

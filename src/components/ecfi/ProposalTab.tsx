@@ -64,8 +64,8 @@ export function ProposalTab({
 
   const dateValue = proposal.date ? new Date(proposal.date + "T00:00:00") : undefined;
 
-  const inputClass = "w-full px-2.5 py-2 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-sm font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold";
-  const labelClass = "text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 block";
+  const inputClass = "w-full px-2.5 py-2 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-sm font-mono focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg";
+  const labelClass = "text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest mb-1 block";
 
   const sections = [
     {
@@ -74,7 +74,7 @@ export function ProposalTab({
       setLines: setFtgLines,
       totals: ftgTotals,
       yards: ftgYards,
-      colorClass: "bg-ecfi-gold",
+      colorClass: "bg-[var(--primary-blue)]",
       newLine: emptyLine,
       catalogItems: ftgCatalog,
       sectionKey: "ftg_wall",
@@ -187,12 +187,12 @@ export function ProposalTab({
               <div className={`w-1 h-6 ${sec.colorClass}`} />
               <h2 className="text-base font-extrabold tracking-widest uppercase">{sec.title}</h2>
               <span className="text-[12px] text-ecfi-std-green-text font-semibold">{fmtCurrency(sec.totals.std)} std</span>
-              {sec.totals.opt > 0 && <span className="text-[12px] text-ecfi-gold-text font-semibold">+ {fmtCurrency(sec.totals.opt)} opt</span>}
+              {sec.totals.opt > 0 && <span className="text-[12px] text-[var(--text-secondary)] font-semibold">+ {fmtCurrency(sec.totals.opt)} opt</span>}
               <span className="text-[11px] text-ecfi-vol-blue-text font-semibold">{sec.yards.toFixed(1)} CY</span>
             </div>
             <button
               onClick={() => sec.setLines((prev) => [...prev, sec.newLine()])}
-              className="bg-ecfi-std-green/10 text-ecfi-std-green-text border border-ecfi-std-green/30 px-4 py-1.5 cursor-pointer font-bold text-[12px] font-mono tracking-wider hover:bg-ecfi-std-green/20 transition-colors"
+              className="bg-[var(--primary-blue-soft)] text-[var(--primary-blue)] border border-[var(--primary-blue)]/30 px-4 py-1.5 cursor-pointer font-bold text-[12px] font-mono tracking-wider hover:bg-[var(--primary-blue)]/10 transition-colors rounded-lg"
             >
               + ADD LINE
             </button>
@@ -240,7 +240,7 @@ export function ProposalTab({
           </div>
           <div className="text-right">
             <div className="text-[10px] text-muted-foreground tracking-wider uppercase">Grand Total (Opt)</div>
-            <div className="text-xl font-extrabold text-ecfi-gold-text">{fmtCurrency(grandOpt)}</div>
+            <div className="text-xl font-extrabold text-[var(--text-secondary)]">{fmtCurrency(grandOpt)}</div>
           </div>
         </div>
 
@@ -251,7 +251,7 @@ export function ProposalTab({
       <div className="fixed bottom-0 left-0 right-0 bg-ecfi-panel-bg/95 backdrop-blur-sm border-t border-ecfi-panel-border px-6 py-3 flex items-center justify-between z-50">
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <button className="flex items-center gap-2 px-4 py-2 border border-destructive text-destructive font-bold text-[12px] font-mono tracking-wider hover:bg-destructive/10 transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 border border-[var(--danger)] text-[var(--danger)] font-bold text-[12px] font-mono tracking-wider hover:bg-[var(--danger)]/10 transition-colors rounded-lg">
               <Eraser className="w-4 h-4" />
               Clear Form
             </button>
@@ -275,10 +275,10 @@ export function ProposalTab({
           </AlertDialogContent>
         </AlertDialog>
 
-        <button
+          <button
           onClick={onSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-ecfi-std-green text-white font-extrabold text-[13px] font-mono tracking-wider hover:opacity-90 disabled:opacity-50 transition-opacity"
+          className="flex items-center gap-2 px-6 py-2.5 bg-[var(--primary-blue)] text-white font-extrabold text-[13px] font-mono tracking-wider hover:bg-[var(--primary-blue-hover)] disabled:opacity-50 transition-colors rounded-lg"
         >
           <Save className="w-4 h-4" />
           {saving ? "Saving..." : "Save Proposal"}

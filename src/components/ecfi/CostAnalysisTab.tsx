@@ -62,15 +62,15 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
   const grossProfit = foundationRevenue - totalCost;
   const grossMargin = foundationRevenue > 0 ? (grossProfit / foundationRevenue) * 100 : 0;
 
-  const inputClass = "w-full px-2.5 py-2 border border-ecfi-input-border bg-ecfi-input-bg text-foreground text-sm font-mono focus:outline-none focus:ring-1 focus:ring-ecfi-gold";
-  const labelClass = "text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 block";
+  const inputClass = "w-full px-2.5 py-2 border border-[var(--card-border)] bg-[var(--bg-main)] text-foreground text-sm font-mono focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg";
+  const labelClass = "text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest mb-1 block";
 
   return (
     <div className="grid grid-cols-2 gap-6">
       {/* Left column — Inputs */}
       <div>
         <div className="p-6 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
-          <h3 className="text-sm font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-5">Job Cost Inputs</h3>
+          <h3 className="text-sm font-extrabold text-[var(--primary-blue)] tracking-widest uppercase mb-5">Job Cost Inputs</h3>
 
           {/* Concrete Yards — auto with override */}
           <div className="mb-5 p-4 bg-ecfi-vol-breakdown-bg border border-ecfi-vol-breakdown-border">
@@ -131,7 +131,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
 
         {/* Rebar Summary */}
         <div className="p-5 bg-ecfi-panel-bg border border-ecfi-panel-border mb-5">
-          <h3 className="text-[12px] font-extrabold text-ecfi-gold-text tracking-widest uppercase mb-3">Rebar</h3>
+          <h3 className="text-[12px] font-extrabold text-[var(--primary-blue)] tracking-widest uppercase mb-3">Rebar</h3>
           {rebarLines.length > 0 ? (
             <>
               <div className="overflow-x-auto mb-3">
@@ -208,7 +208,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
           </div>
           {ftgLines.filter((l) => l.description).length > 0 && (
             <div className="mb-3">
-              <div className="text-[10px] font-bold text-ecfi-gold-text tracking-wider mb-1.5 uppercase">Footings & Walls</div>
+              <div className="text-[10px] font-bold text-[var(--primary-blue)] tracking-wider mb-1.5 uppercase">Footings & Walls</div>
               {ftgLines.filter((l) => l.description).map((l, i) => <VolumeDetailRow key={i} line={l} />)}
               <div className="text-right text-[12px] font-bold text-ecfi-vol-blue-text py-1.5 border-t border-ecfi-panel-border">
                 Subtotal: {ftgYards.toFixed(2)} CY
