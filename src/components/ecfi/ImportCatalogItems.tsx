@@ -89,6 +89,10 @@ function validateRow(category: ItemCategory, raw: Record<string, string>, fieldM
   }
 }
 
+function cleanDim(val: string): string {
+  return val.replace(/"/g, "").replace(/'/g, "").trim();
+}
+
 function buildDescription(category: ItemCategory, raw: Record<string, string>, fieldMap: Record<string, string>): string {
   const get = (key: string) => (raw[fieldMap[key]] || "").trim();
   const tags = get("tags");
@@ -96,37 +100,44 @@ function buildDescription(category: ItemCategory, raw: Record<string, string>, f
 
   switch (category) {
     case "wall": {
-      const wh = get("wall_height").replace("'", "'");
-      const wt = get("wall_thickness");
-      const fw = get("footing_width");
-      const fd = get("footing_depth");
-      let desc = `${wh} x ${wt} Wall`;
-      if (fw && fd) desc += ` - with ${fw} x ${fd} Footings`;
+      const wh = cleanDim(get("wall_height"));
+      const wt = cleanDim(get("wall_thickness"));
+      const fw = cleanDim(get("footing_width"));
+      const fd = cleanDim(get("footing_depth"));
+      let desc = `${wh}' x ${wt}" Wall`;
+      if (fw && fd) desc += ` - with ${fw}" x ${fd}" Footings`;
       return desc + tagsSuffix;
     }
-    case "slab":
-      return `${get("description")} - ${get("slab_thickness")}${tagsSuffix}`;
-    case "footing":
-      return `${get("description")}: ${get("footing_width")} x ${get("footing_depth")}${tagsSuffix}`;
+    case "slab": {
+      const st = cleanDim(get("slab_thickness"));
+      const label = get("description").replace(/"/g, "").trim();
+      return `${label} - ${st}"${tagsSuffix}`;
+    }
+    case "footing": {
+      const fw = cleanDim(get("footing_width"));
+      const fd = cleanDim(get("footing_depth"));
+      const label = get("description").replace(/"/g, "").trim();
+      return `${label}: ${fw}" x ${fd}"${tagsSuffix}`;
+    }
     case "wall_only": {
-      const wh = get("wall_height").replace("'", "'");
-      const wt = get("wall_thickness");
-      return `${wh} x ${wt} Wall${tagsSuffix}`;
+      const wh = cleanDim(get("wall_height"));
+      const wt = cleanDim(get("wall_thickness"));
+      return `${wh}' x ${wt}" Wall${tagsSuffix}`;
     }
     case "pier": {
-      const ps = get("pier_size").replace(/"/g, "");
+      const ps = cleanDim(get("pier_size"));
       const parts = ps.split(/\s*x\s*/i);
-      const pd = get("pier_depth").replace(/"/g, "");
+      const pd = cleanDim(get("pier_depth"));
       return `Pier Pad: ${parts[0]}" x ${parts[1] || parts[0]}" x ${pd}"`;
     }
     case "column": {
-      const ps = get("pier_size").replace(/"/g, "");
+      const ps = cleanDim(get("pier_size"));
       const parts = ps.split(/\s*x\s*/i);
-      const pd = get("pier_depth").replace(/"/g, "");
+      const pd = cleanDim(get("pier_depth"));
       return `Column: ${parts[0]}" x ${parts[1] || parts[0]}" x ${pd}"`;
     }
     case "other":
-      return get("description");
+      return get("description").replace(/"/g, "").trim();
   }
 }
 
