@@ -167,6 +167,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx, secti
             description: result.description,
             unit: result.unit,
             qty: result.qty,
+            customData: result.customData,
             ...(result.pricingColumn === "std"
               ? { unitPriceStd: result.unitPrice }
               : { unitPriceOpt: result.unitPrice }),

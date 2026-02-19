@@ -9,6 +9,24 @@ export interface RebarData {
   vertSpacingInches: number;
 }
 
+export interface CustomItemDimensions {
+  wallHeight?: string;
+  wallThickness?: string;
+  footingWidth?: string;
+  footingDepth?: string;
+  slabThickness?: string;
+  pierSize?: string;
+  pierDepth?: string;
+  customLabel?: string;
+}
+
+export interface CustomItemData {
+  category: "wall" | "slab" | "footing" | "pier" | "other";
+  dimensions: CustomItemDimensions;
+  tags: string[];
+  isCustom: true;
+}
+
 export interface LineItem {
   id: string;
   qty: string;
@@ -19,6 +37,7 @@ export interface LineItem {
   section: "ftg" | "slab";
   cyOverride: string;
   rebar?: RebarData;
+  customData?: CustomItemData;
 }
 
 export interface ProposalData {
