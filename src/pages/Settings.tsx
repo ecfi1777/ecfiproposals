@@ -161,6 +161,7 @@ function CatalogTab() {
   const [itemsWithHistory, setItemsWithHistory] = useState<Set<string>>(new Set());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectMode, setSelectMode] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const fetchItems = useCallback(async () => {
     if (!user) return;
@@ -333,6 +334,8 @@ function CatalogTab() {
         } : null}
       />
 
+      <ImportCatalogItems open={importOpen} onClose={() => { setImportOpen(false); fetchItems(); }} />
+
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
         <input
@@ -368,6 +371,13 @@ function CatalogTab() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setImportOpen(true)}
+            className="flex items-center gap-1.5 text-[11px] font-mono tracking-wider px-3 py-1.5 rounded-lg border text-[var(--text-muted)] border-[var(--card-border)] hover:text-[var(--text-secondary)] transition-colors"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            IMPORT CSV
+          </button>
           <button
             onClick={() => {
               const headers = ["description", "default_unit", "section", "category", "is_active"];
