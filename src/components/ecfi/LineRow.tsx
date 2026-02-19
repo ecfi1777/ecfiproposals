@@ -22,7 +22,7 @@ interface LineRowProps {
   onChange: (updated: LineItem) => void;
   onDelete: () => void;
   items: CatalogItem[];
-  onSaveNew: (description: string) => void;
+  onSaveNew: (description: string, unit?: string) => void;
   idx: number;
   sectionPrefix: string;
   openHistoryKey: string | null;
@@ -173,7 +173,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx, secti
               : { unitPriceOpt: result.unitPrice }),
           };
           onChange(updated);
-          if (result.saveToCatalog) onSaveNew(result.description);
+          if (result.saveToCatalog) onSaveNew(result.description, result.unit);
         }}
       />
     </div>
