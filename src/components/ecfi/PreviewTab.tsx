@@ -233,9 +233,9 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
             <tbody>
               {extraCharges.map((ec, i) => (
                 <tr key={i}>
-                  <td className="border-[0.75px] border-black px-2 py-[3px]">{ec.desc}</td>
-                  <td className="border-[0.75px] border-black px-2 py-[3px] text-right w-[120px] font-bold">{ec.rate}</td>
-                  <td className="border-[0.75px] border-black px-2 py-[3px] text-center w-[50px]">{ec.tbd}</td>
+                  <td className="border-[0.75px] border-black px-2 py-[5px]">{ec.desc}</td>
+                  <td className="border-[0.75px] border-black px-2 py-[5px] text-right w-[120px] font-bold">{ec.rate}</td>
+                  <td className="border-[0.75px] border-black px-2 py-[5px] text-center w-[50px]">{ec.tbd}</td>
                 </tr>
               ))}
             </tbody>
