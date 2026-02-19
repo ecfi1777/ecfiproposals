@@ -7,7 +7,7 @@ import Papa from "papaparse";
 
 type Step = "upload" | "preview" | "done";
 
-type ItemCategory = "wall" | "slab" | "footing" | "pier" | "other";
+type ItemCategory = "wall" | "wall_only" | "slab" | "footing" | "pier" | "column" | "other";
 
 interface ParsedItem {
   description: string;
@@ -24,29 +24,35 @@ interface ValidationWarning {
 
 const CATEGORY_UNIT_MAP: Record<ItemCategory, string> = {
   wall: "LF",
+  wall_only: "LF",
   slab: "SF",
   footing: "LF",
   pier: "EA",
+  column: "EA",
   other: "EA",
 };
 
 const CATEGORY_SECTION_MAP: Record<ItemCategory, string> = {
   wall: "ftg_wall",
+  wall_only: "ftg_wall",
   slab: "slabs",
   footing: "ftg_wall",
   pier: "ftg_wall",
+  column: "ftg_wall",
   other: "ftg_wall",
 };
 
 const CATEGORY_DB_MAP: Record<ItemCategory, string> = {
   wall: "walls_with_footings",
+  wall_only: "walls_only",
   slab: "slabs",
   footing: "footings",
   pier: "pier_pads",
+  column: "columns",
   other: "extras",
 };
 
-const VALID_CATEGORIES: ItemCategory[] = ["wall", "slab", "footing", "pier", "other"];
+const VALID_CATEGORIES: ItemCategory[] = ["wall", "wall_only", "slab", "footing", "pier", "column", "other"];
 
 function validateRow(category: ItemCategory, raw: Record<string, string>, fieldMap: Record<string, string>): string | null {
   const get = (key: string) => (raw[fieldMap[key]] || "").trim();
@@ -64,9 +70,17 @@ function validateRow(category: ItemCategory, raw: Record<string, string>, fieldM
       if (!get("footing_width") || !get("footing_depth") || !get("description"))
         return "Footing rows require footing_width, footing_depth, and description";
       return null;
+    case "wall_only":
+      if (!get("wall_height") || !get("wall_thickness"))
+        return "Wall-only rows require wall_height and wall_thickness";
+      return null;
     case "pier":
       if (!get("pier_size") || !get("pier_depth"))
         return "Pier rows require pier_size and pier_depth";
+      return null;
+    case "column":
+      if (!get("pier_size") || !get("pier_depth"))
+        return "Column rows require pier_size and pier_depth";
       return null;
     case "other":
       if (!get("description"))
@@ -94,11 +108,22 @@ function buildDescription(category: ItemCategory, raw: Record<string, string>, f
       return `${get("description")} - ${get("slab_thickness")}${tagsSuffix}`;
     case "footing":
       return `${get("description")}: ${get("footing_width")} x ${get("footing_depth")}${tagsSuffix}`;
+    case "wall_only": {
+      const wh = get("wall_height").replace("'", "'");
+      const wt = get("wall_thickness");
+      return `${wh} x ${wt} Wall${tagsSuffix}`;
+    }
     case "pier": {
       const ps = get("pier_size").replace(/"/g, "");
       const parts = ps.split(/\s*x\s*/i);
       const pd = get("pier_depth").replace(/"/g, "");
       return `Pier Pad: ${parts[0]}" x ${parts[1] || parts[0]}" x ${pd}"`;
+    }
+    case "column": {
+      const ps = get("pier_size").replace(/"/g, "");
+      const parts = ps.split(/\s*x\s*/i);
+      const pd = get("pier_depth").replace(/"/g, "");
+      return `Column: ${parts[0]}" x ${parts[1] || parts[0]}" x ${pd}"`;
     }
     case "other":
       return get("description");
@@ -163,9 +188,11 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
       "category,description,unit,wall_height,wall_thickness,footing_width,footing_depth,slab_thickness,pier_size,pier_depth,tags",
       'wall,,LF,8\',8",8",16",,,,',
       'wall,,LF,8\',8",8",16",,,,Garage',
+      'wall_only,,LF,8\',8",,,,,,',
       'slab,Basement Slab,SF,,,,,4",,,',
       'footing,Garage Grade Beam,LF,,,,16",,,,',
       'pier,,EA,,,,,,36" x 36",12",',
+      'column,,EA,,,,,,16" x 16",96",',
       'other,Complete Escape Window - Well Window Ladder Grate,EA,,,,,,,',
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -230,7 +257,7 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
           // Description: use provided or auto-generate
           const providedDesc = (raw[fieldMap["description"]] || "").trim();
           let desc: string;
-          if (categoryRaw === "wall" || categoryRaw === "pier") {
+          if (categoryRaw === "wall" || categoryRaw === "wall_only" || categoryRaw === "pier" || categoryRaw === "column") {
             // For wall/pier, description is always auto-generated from dimensions
             desc = providedDesc || buildDescription(categoryRaw, raw, fieldMap);
           } else {

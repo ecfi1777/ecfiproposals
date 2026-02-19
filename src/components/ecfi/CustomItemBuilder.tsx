@@ -8,7 +8,7 @@ import { Wrench } from "lucide-react";
 import { fmt, type CustomItemData, type CustomItemDimensions } from "@/lib/ecfi-utils";
 
 /* ── Types ── */
-type ItemCategory = "wall" | "slab" | "footing" | "pier" | "other";
+type ItemCategory = "wall" | "wall_only" | "slab" | "footing" | "pier" | "column" | "other";
 
 export interface CustomItemResult {
   description: string;
@@ -32,9 +32,11 @@ interface CustomItemBuilderProps {
 /* ── Chip options ── */
 const CATEGORIES: { value: ItemCategory; label: string }[] = [
   { value: "wall", label: "Wall" },
+  { value: "wall_only", label: "Wall Only" },
   { value: "slab", label: "Slab / Flatwork" },
   { value: "footing", label: "Footing Only" },
   { value: "pier", label: "Pier Pad" },
+  { value: "column", label: "Column" },
   { value: "other", label: "Other / Misc" },
 ];
 
@@ -45,6 +47,8 @@ const FTG_DEPTHS = ['8"', '10"', '12"', '16"', '20"'];
 const SLAB_THICKNESSES = ['4"', '5"', '6"', '8"'];
 const PIER_SIZES = ['24"x24"', '30"x30"', '36"x36"', '42"x42"', '48"x48"'];
 const PIER_DEPTHS = ['10"', '12"', '16"', '20"', '24"'];
+const COLUMN_SIZES = ['12"x12"', '16"x16"', '20"x20"', '24"x24"', '30"x30"'];
+const COLUMN_HEIGHTS = ['36"', '48"', '60"', '72"', '84"', '96"'];
 
 const WALL_TAGS = ["Garage", "Porch", "Rear Extension", "Garage Over Dig", "Crawl Space"];
 const SLAB_TAGS = ["Structural", "Garage", "Porch", "Patio", "Basement"];
@@ -122,6 +126,10 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
   const [pierSize, setPierSize] = useState('24"x24"');
   const [pierDepth, setPierDepth] = useState('12"');
 
+  // Column
+  const [columnSize, setColumnSize] = useState('16"x16"');
+  const [columnHeight, setColumnHeight] = useState('96"');
+
   // Other
   const [miscDesc, setMiscDesc] = useState("");
 
@@ -150,9 +158,11 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
   const defaultUnit = useMemo(() => {
     switch (category) {
       case "wall": return "LF";
+      case "wall_only": return "LF";
       case "slab": return "SF";
       case "footing": return "LF";
       case "pier": return "EA";
+      case "column": return "EA";
       case "other": return "EA";
     }
   }, [category]);
@@ -163,6 +173,8 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
     switch (category) {
       case "wall":
         return `${wallHeight.replace("'", "'")} x ${wallThickness} Wall - with ${wallFtgWidth} x ${wallFtgDepth} Footings${tagsStr}`;
+      case "wall_only":
+        return `${wallHeight.replace("'", "'")} x ${wallThickness} Wall${tagsStr}`;
       case "slab":
         return `${slabLabel} - ${slabThickness}${tagsStr}`;
       case "footing":
@@ -171,10 +183,14 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
         const ps = parsePierSize(pierSize);
         return `Pier Pad: ${ps.a}" x ${ps.b}" x ${parseIn(pierDepth)}"`;
       }
+      case "column": {
+        const cs = parsePierSize(columnSize);
+        return `Column: ${cs.a}" x ${cs.b}" x ${parseIn(columnHeight)}"`;
+      }
       case "other":
         return miscDesc;
     }
-  }, [category, wallHeight, wallThickness, wallFtgWidth, wallFtgDepth, slabLabel, slabThickness, ftgLabel, ftgWidth, ftgDepth, pierSize, pierDepth, miscDesc, tagsStr]);
+  }, [category, wallHeight, wallThickness, wallFtgWidth, wallFtgDepth, slabLabel, slabThickness, ftgLabel, ftgWidth, ftgDepth, pierSize, pierDepth, columnSize, columnHeight, miscDesc, tagsStr]);
 
   // CY calculation from structured dims (not regex)
   const totalCY = useMemo(() => {
@@ -187,6 +203,11 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
         const fwFt = parseIn(wallFtgWidth) / 12;
         const fdFt = parseIn(wallFtgDepth) / 12;
         return (q * ((htFt * thkFt) + (fwFt * fdFt))) / 27;
+      }
+      case "wall_only": {
+        const htFt = parseFt(wallHeight);
+        const thkFt = parseIn(wallThickness) / 12;
+        return (q * htFt * thkFt) / 27;
       }
       case "slab": {
         const thkFt = parseIn(slabThickness) / 12;
@@ -204,14 +225,20 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
         const dpFt = parseIn(pierDepth) / 12;
         return (q * aFt * bFt * dpFt) / 27;
       }
+      case "column": {
+        const cs = parsePierSize(columnSize);
+        const aFt = cs.a / 12;
+        const bFt = cs.b / 12;
+        const hFt = parseIn(columnHeight) / 12;
+        return (q * aFt * bFt * hFt) / 27;
+      }
       default:
         return 0;
     }
-  }, [category, qty, wallHeight, wallThickness, wallFtgWidth, wallFtgDepth, slabThickness, ftgWidth, ftgDepth, pierSize, pierDepth]);
+  }, [category, qty, wallHeight, wallThickness, wallFtgWidth, wallFtgDepth, slabThickness, ftgWidth, ftgDepth, pierSize, pierDepth, columnSize, columnHeight]);
 
   const cyPerUnit = useMemo(() => {
     if (category === "other") return 0;
-    // Calculate for qty=1
     switch (category) {
       case "wall": {
         const htFt = parseFt(wallHeight);
@@ -219,6 +246,11 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
         const fwFt = parseIn(wallFtgWidth) / 12;
         const fdFt = parseIn(wallFtgDepth) / 12;
         return ((htFt * thkFt) + (fwFt * fdFt)) / 27;
+      }
+      case "wall_only": {
+        const htFt = parseFt(wallHeight);
+        const thkFt = parseIn(wallThickness) / 12;
+        return (htFt * thkFt) / 27;
       }
       case "slab":
         return (parseIn(slabThickness) / 12) / 27;
@@ -228,10 +260,14 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
         const ps = parsePierSize(pierSize);
         return (ps.a / 12 * ps.b / 12 * parseIn(pierDepth) / 12) / 27;
       }
+      case "column": {
+        const cs = parsePierSize(columnSize);
+        return (cs.a / 12 * cs.b / 12 * parseIn(columnHeight) / 12) / 27;
+      }
       default:
         return 0;
     }
-  }, [category, wallHeight, wallThickness, wallFtgWidth, wallFtgDepth, slabThickness, ftgWidth, ftgDepth, pierSize, pierDepth]);
+  }, [category, wallHeight, wallThickness, wallFtgWidth, wallFtgDepth, slabThickness, ftgWidth, ftgDepth, pierSize, pierDepth, columnSize, columnHeight]);
 
   const totalPrice = (parseFloat(qty) || 0) * (parseFloat(unitPrice) || 0);
 
@@ -239,12 +275,16 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
     switch (category) {
       case "wall":
         return { wallHeight, wallThickness, footingWidth: wallFtgWidth, footingDepth: wallFtgDepth };
+      case "wall_only":
+        return { wallHeight, wallThickness };
       case "slab":
         return { slabThickness, customLabel: slabLabel };
       case "footing":
         return { footingWidth: ftgWidth, footingDepth: ftgDepth, customLabel: ftgLabel };
       case "pier":
         return { pierSize, pierDepth };
+      case "column":
+        return { pierSize: columnSize, pierDepth: columnHeight };
       case "other":
         return { customLabel: miscDesc };
     }
@@ -271,7 +311,7 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
 
   const inputClass = "w-full px-2.5 py-2 border border-[var(--card-border)] bg-[var(--bg-main)] text-[var(--text-main)] text-sm font-mono focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)] rounded-lg";
 
-  const availableTags = category === "wall" ? WALL_TAGS : category === "slab" ? SLAB_TAGS : category === "footing" ? FTG_TAGS : [];
+  const availableTags = category === "wall" ? WALL_TAGS : category === "wall_only" ? WALL_TAGS : category === "slab" ? SLAB_TAGS : category === "footing" ? FTG_TAGS : [];
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -330,6 +370,23 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
             </div>
           )}
 
+          {category === "wall_only" && (
+            <div className="space-y-3">
+              <div>
+                <SectionLabel>Wall Height</SectionLabel>
+                <div className="flex flex-wrap gap-1.5">
+                  {WALL_HEIGHTS.map((h) => <Chip key={h} label={h} selected={wallHeight === h} onClick={() => setWallHeight(h)} />)}
+                </div>
+              </div>
+              <div>
+                <SectionLabel>Wall Thickness</SectionLabel>
+                <div className="flex flex-wrap gap-1.5">
+                  {WALL_THICKNESSES.map((t) => <Chip key={t} label={t} selected={wallThickness === t} onClick={() => setWallThickness(t)} />)}
+                </div>
+              </div>
+            </div>
+          )}
+
           {category === "slab" && (
             <div className="space-y-3">
               <div>
@@ -378,6 +435,23 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
                 <SectionLabel>Pier Depth</SectionLabel>
                 <div className="flex flex-wrap gap-1.5">
                   {PIER_DEPTHS.map((d) => <Chip key={d} label={d} selected={pierDepth === d} onClick={() => setPierDepth(d)} />)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {category === "column" && (
+            <div className="space-y-3">
+              <div>
+                <SectionLabel>Column Size</SectionLabel>
+                <div className="flex flex-wrap gap-1.5">
+                  {COLUMN_SIZES.map((s) => <Chip key={s} label={s} selected={columnSize === s} onClick={() => setColumnSize(s)} />)}
+                </div>
+              </div>
+              <div>
+                <SectionLabel>Column Height</SectionLabel>
+                <div className="flex flex-wrap gap-1.5">
+                  {COLUMN_HEIGHTS.map((h) => <Chip key={h} label={h} selected={columnHeight === h} onClick={() => setColumnHeight(h)} />)}
                 </div>
               </div>
             </div>

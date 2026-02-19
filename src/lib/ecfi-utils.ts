@@ -21,7 +21,7 @@ export interface CustomItemDimensions {
 }
 
 export interface CustomItemData {
-  category: "wall" | "slab" | "footing" | "pier" | "other";
+  category: "wall" | "wall_only" | "slab" | "footing" | "pier" | "column" | "other";
   dimensions: CustomItemDimensions;
   tags: string[];
   isCustom: true;
