@@ -4,6 +4,8 @@ export interface CatalogItem {
   category: string;
   section: string;
   default_unit: string;
+  custom_data?: Record<string, any> | null;
+  is_active?: boolean;
 }
 
 export interface CatalogItemWithTimestamp extends CatalogItem {
