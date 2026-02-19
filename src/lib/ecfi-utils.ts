@@ -117,12 +117,20 @@ export const calcVolumeSplit = (lines: LineItem[]) => {
   return { wall, ftg, slab, other, total: wall + ftg + slab + other };
 };
 
-/** Check if a description qualifies for rebar (wall with footings) */
-export const isRebarEligible = (desc: string): boolean =>
-  /Wall\s*-\s*with/i.test(desc) && /Foot/i.test(desc);
+/** Check if a description qualifies for rebar (wall with footings, or custom wall/footing) */
+export const isRebarEligible = (desc: string, customData?: CustomItemData): boolean => {
+  if (customData?.isCustom) {
+    // Custom items: wall and footing categories support rebar; other/slab/pier do not
+    return customData.category === "wall" || customData.category === "footing";
+  }
+  return /Wall\s*-\s*with/i.test(desc) && /Foot/i.test(desc);
+};
 
-/** Parse wall height in feet from description like "8' x 8\" Wall - with ..." */
-export const parseWallHeight = (desc: string): number => {
+/** Parse wall height in feet from description like "8' x 8\" Wall - with ..." or from customData */
+export const parseWallHeight = (desc: string, customData?: CustomItemData): number => {
+  if (customData?.isCustom && customData.dimensions.wallHeight) {
+    return parseFloat(customData.dimensions.wallHeight.replace(/[^0-9.]/g, "")) || 0;
+  }
   const m = desc.match(/^(\d+)'\s*x/i);
   return m ? parseFloat(m[1]) : 0;
 };
@@ -132,7 +140,7 @@ export const calcRebarForLine = (line: LineItem): {
   horizFtgLF: number; horizWallLF: number; vertLF: number; totalLF: number;
 } => {
   const empty = { horizFtgLF: 0, horizWallLF: 0, vertLF: 0, totalLF: 0 };
-  if (!line.rebar || !line.qty || !isRebarEligible(line.description)) return empty;
+  if (!line.rebar || !line.qty || !isRebarEligible(line.description, line.customData)) return empty;
   const qty = parseFloat(line.qty) || 0;
   const { horizFtgBars, horizWallBars, vertSpacingInches } = line.rebar;
 
@@ -142,7 +150,7 @@ export const calcRebarForLine = (line: LineItem): {
   let vertLF = 0;
   if (vertSpacingInches > 0) {
     const numVert = Math.ceil(qty / (vertSpacingInches / 12));
-    const wallHt = parseWallHeight(line.description);
+    const wallHt = parseWallHeight(line.description, line.customData);
     const barLength = wallHt - 0.25; // minus 3 inches
     if (barLength > 0) vertLF = numVert * barLength;
   }

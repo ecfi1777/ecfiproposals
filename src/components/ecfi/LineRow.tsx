@@ -35,7 +35,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx, secti
   const volCalc = calcCYPerUnit(line.description);
   const autoYards = line.qty ? parseFloat(line.qty) * volCalc.cy : 0;
   const isOverridden = line.cyOverride !== "";
-  const showRebar = line.section === "ftg" && isRebarEligible(line.description);
+  const showRebar = line.section === "ftg" && isRebarEligible(line.description, line.customData);
   const hasRebarData = !!(line.rebar && (line.rebar.horizFtgBars > 0 || line.rebar.horizWallBars > 0 || line.rebar.vertSpacingInches > 0));
 
   const hasData = !!(line.description || line.qty || line.unitPriceStd || line.unitPriceOpt);

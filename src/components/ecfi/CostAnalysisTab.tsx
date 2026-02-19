@@ -56,7 +56,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
   // Calculator Rebar (from wall icon popups)
   const calculatorRebarLF = calcTotalRebarLF(ftgLines);
   const rebarLines = ftgLines.filter(
-    (l) => l.rebar && isRebarEligible(l.description) && (l.rebar.horizFtgBars > 0 || l.rebar.horizWallBars > 0 || l.rebar.vertSpacingInches > 0)
+    (l) => l.rebar && isRebarEligible(l.description, l.customData) && (l.rebar.horizFtgBars > 0 || l.rebar.horizWallBars > 0 || l.rebar.vertSpacingInches > 0)
   );
 
   // Line Item Rebar (proposal lines starting with "Rebar")
@@ -226,7 +226,7 @@ export function CostAnalysisTab({ proposal, setProposal, ftgLines, slabLines }: 
                           const r = calcRebarForLine(l);
                           const isExpanded = expandedRows.has(l.id);
                           const qty = parseFloat(l.qty) || 0;
-                          const wallHt = parseWallHeight(l.description);
+                          const wallHt = parseWallHeight(l.description, l.customData);
                           const vertSpacing = l.rebar!.vertSpacingInches;
                           return (
                             <>
