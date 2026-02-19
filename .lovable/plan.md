@@ -1,38 +1,26 @@
 
 
-## Fix: Only Guard Actions That Clear the Proposal
+## Fix: Text Too Close to Bottom Border in PDF Export
 
-**Problem**: The current unsaved changes warning triggers when switching to the Proposals tab, Price History tab, or Settings tab. But those tabs don't clear the proposal data — the user can freely browse them and come back to find their work intact. The warning should only fire for actions that would actually replace/clear the current proposal.
+**Problem**: In the exported/printed PDF, text in table cells appears cramped against the bottom cell border. The on-screen preview looks fine, but the PDF rendering (via html2canvas) doesn't match.
 
-**Solution**: Remove the tab-switching guard entirely. Only guard actions that destroy current proposal data:
+**Root Cause**: Table cells use `py-[3px]` (3px top and bottom padding), which is too tight for PDF output. The rendering engine compresses the space differently than the browser preview.
 
-1. **Loading a different proposal** (from Proposals tab or Price History) -- already guarded via `handleLoadProposal`
-2. **Clicking "New Proposal"** -- already guarded via `handleNewClick`
-3. **Browser close/refresh** -- already guarded via `beforeunload`
+**Solution**: Increase vertical padding from `py-[3px]` to `py-[5px]` across all table cells in the preview document. This adds just 2px more breathing room on each side, which will make the PDF output match the visual feel of the on-screen preview without significantly changing the overall layout.
 
-**Change**: In `src/pages/Index.tsx`, simplify `handleTabClick` to always call `setActiveTab(tab)` directly, removing the dirty-state check for tab switching (lines 142-152).
+### Changes in `src/components/ecfi/PreviewTab.tsx`
 
-### Technical Detail
+All instances of `py-[3px]` will be updated to `py-[5px]` in the following areas:
 
-```
-// BEFORE (lines 142-152):
-const handleTabClick = (tab: TabKey) => {
-  if (tab === activeTab) return;
-  const editTabs: TabKey[] = ["proposal", "costs", "preview"];
-  const isLeavingEdit = editTabs.includes(activeTab) && !editTabs.includes(tab);
-  if (isLeavingEdit && isDirty) {
-    guardAction(() => setActiveTab(tab));
-  } else {
-    setActiveTab(tab);
-  }
-};
+1. **Line item rows** (lines 96-103) - QTY, UNIT, DESCRIPTION, UNIT $, TOTAL cells
+2. **Subtotal rows** (lines 109-113) - section subtotal cells
+3. **Header info table** (lines 159-174) - Builder, Date, Job Location, County, Found Type
+4. **Found Size + column headers row** (lines 181-185)
+5. **Column header row** (lines 193-199) - QTY, UNIT, DESCRIPTION, etc. headers
 
-// AFTER:
-const handleTabClick = (tab: TabKey) => {
-  if (tab === activeTab) return;
-  setActiveTab(tab);
-};
-```
+The Extra Charges section uses `py-[2px]` which will be bumped to `py-[3px]` for consistency.
 
-This is a single change in one file. The `beforeunload`, `handleLoadProposal`, and `handleNewClick` guards remain fully intact -- those are the real data-loss scenarios.
+The Grand Total row already uses `py-1` (4px) which is fine.
+
+This is a single-file change affecting only cell padding values.
 
