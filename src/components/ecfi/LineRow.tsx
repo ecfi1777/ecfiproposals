@@ -4,7 +4,7 @@ import { calcCYPerUnit } from "@/lib/calcCYPerUnit";
 import { ComboBox } from "./ComboBox";
 import { RebarPopup } from "./RebarPopup";
 import { PriceHistoryPopup } from "./PriceHistoryPopup";
-import { CustomItemBuilder } from "./CustomItemBuilder";
+import { CustomItemBuilder, type CustomItemResult } from "./CustomItemBuilder";
 import type { CatalogItem } from "@/hooks/useCatalog";
 import {
   AlertDialog,
@@ -161,9 +161,18 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx, secti
         open={showCustomBuilder}
         onClose={() => setShowCustomBuilder(false)}
         section={line.section}
-        onAdd={(desc, unit, saveCatalog) => {
-          onChange({ ...line, description: desc, unit });
-          if (saveCatalog) onSaveNew(desc);
+        onAdd={(result: CustomItemResult) => {
+          const updated = {
+            ...line,
+            description: result.description,
+            unit: result.unit,
+            qty: result.qty,
+            ...(result.pricingColumn === "std"
+              ? { unitPriceStd: result.unitPrice }
+              : { unitPriceOpt: result.unitPrice }),
+          };
+          onChange(updated);
+          if (result.saveToCatalog) onSaveNew(result.description);
         }}
       />
     </div>
