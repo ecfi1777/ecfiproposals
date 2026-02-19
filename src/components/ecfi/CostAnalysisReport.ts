@@ -76,7 +76,7 @@ function buildReportHTML(
 
   // Rebar section
   const rebarLines = ftgLines.filter(
-    l => l.rebar && isRebarEligible(l.description) && (l.rebar.horizFtgBars > 0 || l.rebar.horizWallBars > 0 || l.rebar.vertSpacingInches > 0)
+    l => l.rebar && isRebarEligible(l.description, l.customData) && (l.rebar.horizFtgBars > 0 || l.rebar.horizWallBars > 0 || l.rebar.vertSpacingInches > 0)
   );
   const lineItemRebarLines = allLines.filter(
     l => l.description && /^rebar/i.test(l.description.trim()) && l.qty
@@ -94,7 +94,7 @@ function buildReportHTML(
       rebarLines.forEach(l => {
         const r = calcRebarForLine(l);
         const qty = parseFloat(l.qty) || 0;
-        const wallHt = parseWallHeight(l.description);
+        const wallHt = parseWallHeight(l.description, l.customData);
         const vertSpacing = l.rebar!.vertSpacingInches;
         rebarRows += `<tr>
           <td style="padding:4px 8px;border-bottom:1px solid #e5e7eb">${l.description}</td>
