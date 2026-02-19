@@ -5,7 +5,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Wrench } from "lucide-react";
-import { fmt } from "@/lib/ecfi-utils";
+import { fmt, type CustomItemData, type CustomItemDimensions } from "@/lib/ecfi-utils";
 
 /* ── Types ── */
 type ItemCategory = "wall" | "slab" | "footing" | "pier" | "other";
@@ -17,6 +17,7 @@ export interface CustomItemResult {
   unitPrice: string;
   pricingColumn: "std" | "opt";
   saveToCatalog: boolean;
+  customData: CustomItemData;
 }
 
 interface CustomItemBuilderProps {
@@ -232,6 +233,21 @@ export function CustomItemBuilder({ open, onClose, onAdd }: CustomItemBuilderPro
 
   const totalPrice = (parseFloat(qty) || 0) * (parseFloat(unitPrice) || 0);
 
+  const buildDimensions = (): CustomItemDimensions => {
+    switch (category) {
+      case "wall":
+        return { wallHeight, wallThickness, footingWidth: wallFtgWidth, footingDepth: wallFtgDepth };
+      case "slab":
+        return { slabThickness, customLabel: slabLabel };
+      case "footing":
+        return { footingWidth: ftgWidth, footingDepth: ftgDepth, customLabel: ftgLabel };
+      case "pier":
+        return { pierSize, pierDepth };
+      case "other":
+        return { customLabel: miscDesc };
+    }
+  };
+
   const handleAdd = () => {
     if (!description.trim()) return;
     onAdd({
@@ -241,6 +257,12 @@ export function CustomItemBuilder({ open, onClose, onAdd }: CustomItemBuilderPro
       unitPrice,
       pricingColumn: pricingCol,
       saveToCatalog,
+      customData: {
+        category,
+        dimensions: buildDimensions(),
+        tags: [...selectedTags],
+        isCustom: true,
+      },
     });
     onClose();
   };
