@@ -216,7 +216,7 @@ export function ProposalTab({
               }}
               onDelete={() => sec.setLines((prev) => prev.filter((_, i) => i !== idx))}
               items={sec.catalogItems}
-              onSaveNew={(desc) => onSaveNew(desc, sec.sectionKey, "LF")}
+              onSaveNew={(desc, unit) => onSaveNew(desc, sec.sectionKey, unit || "LF")}
             />
           ))}
         </div>
