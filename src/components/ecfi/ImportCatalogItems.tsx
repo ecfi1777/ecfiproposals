@@ -215,6 +215,7 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
+      quoteChar: '\0',  // disable — inch symbol " conflicts with CSV quoting
       complete: async (results) => {
         const headers = (results.meta.fields || []).map((h) => h.toLowerCase().trim());
 
