@@ -93,23 +93,23 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
     const to = l.qty && l.unitPriceOpt ? parseFloat(l.qty) * parseFloat(l.unitPriceOpt) : 0;
     return (
       <tr key={i}>
-        <td className="px-2 py-[3px] border border-black text-right text-[11px]">{l.qty}</td>
-        <td className="px-2 py-[3px] border border-black text-center text-[11px]">{l.unit}</td>
-        <td className="px-2 py-[3px] border border-black text-[11px]">{l.description}</td>
-        <td className="px-2 py-[3px] border border-black text-right text-[11px]">{l.unitPriceStd ? fmt(parseFloat(l.unitPriceStd)) : ""}</td>
-        <td className="px-2 py-[3px] border border-black text-right text-[11px]">{ts ? fmt(ts) : ""}</td>
-        <td className="px-2 py-[3px] border border-black text-right text-[11px]">{l.unitPriceOpt ? fmt(parseFloat(l.unitPriceOpt)) : ""}</td>
-        <td className="px-2 py-[3px] border border-black text-right text-[11px]">{to ? fmt(to) : ""}</td>
+        <td className="px-2 py-[5px] border border-black text-right text-[11px]">{l.qty}</td>
+        <td className="px-2 py-[5px] border border-black text-center text-[11px]">{l.unit}</td>
+        <td className="px-2 py-[5px] border border-black text-[11px]">{l.description}</td>
+        <td className="px-2 py-[5px] border border-black text-right text-[11px]">{l.unitPriceStd ? fmt(parseFloat(l.unitPriceStd)) : ""}</td>
+        <td className="px-2 py-[5px] border border-black text-right text-[11px]">{ts ? fmt(ts) : ""}</td>
+        <td className="px-2 py-[5px] border border-black text-right text-[11px]">{l.unitPriceOpt ? fmt(parseFloat(l.unitPriceOpt)) : ""}</td>
+        <td className="px-2 py-[5px] border border-black text-right text-[11px]">{to ? fmt(to) : ""}</td>
       </tr>
     );
   };
 
   const renderSubtotalRow = (label: string, totals: { std: number; opt: number }) => (
     <tr className="font-bold bg-gray-100">
-      <td colSpan={4} className="px-2 py-[3px] border border-black text-right text-[11px] uppercase">{label}</td>
-      <td className="px-2 py-[3px] border border-black text-right text-[11px]">{fmt(totals.std)}</td>
-      <td className="px-2 py-[3px] border border-black text-right text-[11px]"></td>
-      <td className="px-2 py-[3px] border border-black text-right text-[11px]">{fmt(totals.opt)}</td>
+      <td colSpan={4} className="px-2 py-[5px] border border-black text-right text-[11px] uppercase">{label}</td>
+      <td className="px-2 py-[5px] border border-black text-right text-[11px]">{fmt(totals.std)}</td>
+      <td className="px-2 py-[5px] border border-black text-right text-[11px]"></td>
+      <td className="px-2 py-[5px] border border-black text-right text-[11px]">{fmt(totals.opt)}</td>
     </tr>
   );
 
@@ -156,20 +156,20 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
         <table className="w-full border-collapse mb-1 text-[11px]">
           <tbody>
             <tr>
-              <td className="border border-black px-2 py-[3px] font-bold w-[100px]">Builder:</td>
-              <td className="border border-black px-2 py-[3px]">{proposal.builder || "—"}</td>
-              <td className="border border-black px-2 py-[3px] font-bold w-[65px]">Date:</td>
-              <td className="border border-black px-2 py-[3px] w-[130px]">{proposal.date || "—"}</td>
+              <td className="border border-black px-2 py-[5px] font-bold w-[100px]">Builder:</td>
+              <td className="border border-black px-2 py-[5px]">{proposal.builder || "—"}</td>
+              <td className="border border-black px-2 py-[5px] font-bold w-[65px]">Date:</td>
+              <td className="border border-black px-2 py-[5px] w-[130px]">{proposal.date || "—"}</td>
             </tr>
             <tr>
-              <td className="border border-black px-2 py-[3px] font-bold">Job Location:</td>
-              <td className="border border-black px-2 py-[3px]">{proposal.location || "—"}</td>
-              <td className="border border-black px-2 py-[3px] font-bold">County:</td>
-              <td className="border border-black px-2 py-[3px]">{proposal.county || "—"}</td>
+              <td className="border border-black px-2 py-[5px] font-bold">Job Location:</td>
+              <td className="border border-black px-2 py-[5px]">{proposal.location || "—"}</td>
+              <td className="border border-black px-2 py-[5px] font-bold">County:</td>
+              <td className="border border-black px-2 py-[5px]">{proposal.county || "—"}</td>
             </tr>
             <tr>
-              <td className="border border-black px-2 py-[3px] font-bold">Found. Type:</td>
-              <td className="border border-black px-2 py-[3px]" colSpan={3}>{proposal.foundType || "—"}</td>
+              <td className="border border-black px-2 py-[5px] font-bold">Found. Type:</td>
+              <td className="border border-black px-2 py-[5px]" colSpan={3}>{proposal.foundType || "—"}</td>
             </tr>
           </tbody>
         </table>
@@ -178,10 +178,10 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
         <table className="w-full border-collapse mb-0 text-[11px]">
           <tbody>
             <tr>
-              <td className="border border-black px-2 py-[3px] font-bold w-[100px]">Found. Size:</td>
-              <td className="border border-black px-2 py-[3px]">{proposal.foundSize || "—"}</td>
-              <td className="border border-black px-2 py-[3px] text-center font-bold w-[160px]" colSpan={2}>Standard</td>
-              <td className="border border-black px-2 py-[3px] text-center font-bold w-[160px]" colSpan={2}>Optional</td>
+              <td className="border border-black px-2 py-[5px] font-bold w-[100px]">Found. Size:</td>
+              <td className="border border-black px-2 py-[5px]">{proposal.foundSize || "—"}</td>
+              <td className="border border-black px-2 py-[5px] text-center font-bold w-[160px]" colSpan={2}>Standard</td>
+              <td className="border border-black px-2 py-[5px] text-center font-bold w-[160px]" colSpan={2}>Optional</td>
             </tr>
           </tbody>
         </table>
@@ -190,13 +190,13 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
         <table className="w-full border-collapse text-[11px]">
           <thead>
             <tr className="bg-gray-200 font-bold">
-              <th className="border border-black px-2 py-[3px] text-center w-[55px]">QTY</th>
-              <th className="border border-black px-2 py-[3px] text-center w-[45px]">UNIT</th>
-              <th className="border border-black px-2 py-[3px] text-left">DESCRIPTION</th>
-              <th className="border border-black px-2 py-[3px] text-right w-[75px]">UNIT $</th>
-              <th className="border border-black px-2 py-[3px] text-right w-[85px]">TOTAL</th>
-              <th className="border border-black px-2 py-[3px] text-right w-[75px]">UNIT $</th>
-              <th className="border border-black px-2 py-[3px] text-right w-[85px]">TOTAL</th>
+              <th className="border border-black px-2 py-[5px] text-center w-[55px]">QTY</th>
+              <th className="border border-black px-2 py-[5px] text-center w-[45px]">UNIT</th>
+              <th className="border border-black px-2 py-[5px] text-left">DESCRIPTION</th>
+              <th className="border border-black px-2 py-[5px] text-right w-[75px]">UNIT $</th>
+              <th className="border border-black px-2 py-[5px] text-right w-[85px]">TOTAL</th>
+              <th className="border border-black px-2 py-[5px] text-right w-[75px]">UNIT $</th>
+              <th className="border border-black px-2 py-[5px] text-right w-[85px]">TOTAL</th>
             </tr>
           </thead>
           <tbody>
@@ -233,9 +233,9 @@ export function PreviewTab({ proposal, ftgLines, slabLines }: PreviewTabProps) {
             <tbody>
               {extraCharges.map((ec, i) => (
                 <tr key={i}>
-                  <td className="border border-black px-2 py-[2px]">{ec.desc}</td>
-                  <td className="border border-black px-2 py-[2px] text-right w-[120px] font-bold">{ec.rate}</td>
-                  <td className="border border-black px-2 py-[2px] text-center w-[50px]">{ec.tbd}</td>
+                  <td className="border border-black px-2 py-[3px]">{ec.desc}</td>
+                  <td className="border border-black px-2 py-[3px] text-right w-[120px] font-bold">{ec.rate}</td>
+                  <td className="border border-black px-2 py-[3px] text-center w-[50px]">{ec.tbd}</td>
                 </tr>
               ))}
             </tbody>
