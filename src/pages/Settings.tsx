@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check, ChevronDown, Eye, EyeOff, Upload, List, Download, Clock } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check, ChevronDown, Eye, EyeOff, Upload, List, Download, Clock, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import { ImportPriceHistory } from "@/components/ecfi/ImportPriceHistory";
 import { ImportCatalogItems } from "@/components/ecfi/ImportCatalogItems";
 import { DefaultCostsTab } from "@/components/ecfi/DefaultCostsTab";
 import { PriceHistoryPopup } from "@/components/ecfi/PriceHistoryPopup";
+import { CustomItemBuilder, type CustomItemResult } from "@/components/ecfi/CustomItemBuilder";
 
 const TABS = [
   { key: "catalog", label: "Item Catalog" },
@@ -153,7 +154,7 @@ function CatalogTab() {
   const [items, setItems] = useState<CatalogItemWithTimestamp[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [newItem, setNewItem] = useState("");
+  const [builderOpen, setBuilderOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [showInactive, setShowInactive] = useState(false);
@@ -211,26 +212,26 @@ function CatalogTab() {
     return matchesSearch && matchesActive;
   });
 
-  const handleAdd = async () => {
+  const handleBuilderAdd = async (result: CustomItemResult) => {
     if (!user) return;
-    const description = newItem.trim();
+    const description = result.description.trim();
     if (!description) return;
     if (items.some((it) => it.description.toLowerCase() === description.toLowerCase())) {
       toast.error("Item already exists");
       return;
     }
+    const sectionMap: Record<string, string> = { wall: "ftg_wall", slab: "slabs", footing: "ftg_wall", pier: "ftg_wall", other: "ftg_wall" };
     const { error } = await supabase.from("catalog_items").insert({
       user_id: user.id,
       description,
-      category: "custom",
-      section: "ftg_wall",
-      default_unit: "EA",
+      category: result.customData?.category || "custom",
+      section: sectionMap[result.customData?.category || "other"] || "ftg_wall",
+      default_unit: result.unit,
     });
     if (error) {
       toast.error("Failed to add item");
     } else {
-      toast.success("Item added");
-      setNewItem("");
+      toast.success("Item added to catalog");
       fetchItems();
     }
   };
@@ -271,23 +272,20 @@ function CatalogTab() {
 
   return (
     <div className="p-6 max-w-[900px] mx-auto space-y-5">
-      <div className="flex gap-2">
-        <input
-          value={newItem}
-          onChange={(e) => setNewItem(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-          placeholder="Add new catalog item..."
-          className="flex-1 px-3 py-2.5 border border-[var(--card-border)] bg-[var(--bg-main)] text-[var(--text-main)] text-sm font-mono rounded-lg focus:outline-none focus:border-[var(--primary-blue)] focus:ring-[3px] focus:ring-[var(--primary-blue-soft)]"
-        />
-        <button
-          onClick={handleAdd}
-          disabled={!newItem.trim()}
-          className="flex items-center gap-2 bg-[var(--primary-blue-soft)] text-[var(--primary-blue)] border border-[var(--primary-blue)]/40 px-4 py-2.5 font-bold text-[12px] font-mono tracking-wider hover:bg-[var(--primary-blue)]/10 transition-colors disabled:opacity-40 rounded-lg"
-        >
-          <Plus className="w-4 h-4" />
-          ADD
-        </button>
-      </div>
+      <button
+        onClick={() => setBuilderOpen(true)}
+        className="flex items-center gap-2 bg-[var(--primary-blue-soft)] text-[var(--primary-blue)] border border-[var(--primary-blue)]/40 px-4 py-2.5 font-bold text-[12px] font-mono tracking-wider hover:bg-[var(--primary-blue)]/10 transition-colors rounded-lg w-full justify-center"
+      >
+        <Wrench className="w-4 h-4" />
+        BUILD NEW CATALOG ITEM
+      </button>
+
+      <CustomItemBuilder
+        open={builderOpen}
+        onClose={() => setBuilderOpen(false)}
+        onAdd={handleBuilderAdd}
+        mode="catalog"
+      />
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />

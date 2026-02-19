@@ -24,7 +24,9 @@ interface CustomItemBuilderProps {
   open: boolean;
   onClose: () => void;
   onAdd: (result: CustomItemResult) => void;
-  section: "ftg" | "slab";
+  section?: "ftg" | "slab";
+  /** "proposal" shows qty/pricing fields; "catalog" hides them */
+  mode?: "proposal" | "catalog";
 }
 
 /* ── Chip options ── */
@@ -98,7 +100,7 @@ const parsePierSize = (s: string): { a: number; b: number } => {
 };
 
 /* ── Main component ── */
-export function CustomItemBuilder({ open, onClose, onAdd }: CustomItemBuilderProps) {
+export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: CustomItemBuilderProps) {
   const [category, setCategory] = useState<ItemCategory>("wall");
 
   // Wall
@@ -280,7 +282,9 @@ export function CustomItemBuilder({ open, onClose, onAdd }: CustomItemBuilderPro
             Custom Item Builder
           </DialogTitle>
           <DialogDescription className="text-[var(--text-muted)] text-xs">
-            Build a line item from structured dimensions. Volume is auto-calculated.
+            {mode === "catalog"
+              ? "Build a catalog item from structured dimensions."
+              : "Build a line item from structured dimensions. Volume is auto-calculated."}
           </DialogDescription>
         </DialogHeader>
 
@@ -399,7 +403,8 @@ export function CustomItemBuilder({ open, onClose, onAdd }: CustomItemBuilderPro
             </div>
           )}
 
-          {/* D. Quantity, Unit Price, Pricing Column */}
+          {/* D. Quantity, Unit Price, Pricing Column — only in proposal mode */}
+          {mode === "proposal" && (
           <div>
             <SectionLabel>Pricing</SectionLabel>
             <div className="flex gap-2 items-end">
@@ -440,6 +445,7 @@ export function CustomItemBuilder({ open, onClose, onAdd }: CustomItemBuilderPro
               </div>
             </div>
           </div>
+          )}
 
           {/* E. Auto-Generated Description */}
           <div className="bg-[var(--section-bg)] border border-[var(--card-border)] rounded-lg p-3 space-y-2">
@@ -467,8 +473,8 @@ export function CustomItemBuilder({ open, onClose, onAdd }: CustomItemBuilderPro
             )}
           </div>
 
-          {/* G. Mini Table Preview */}
-          {description && (
+          {/* G. Mini Table Preview — only in proposal mode */}
+          {mode === "proposal" && description && (
             <div>
               <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest mb-1 block">Line Item Preview</span>
               <div className="border border-[var(--card-border)] rounded-lg overflow-hidden text-[12px] font-mono">
@@ -490,7 +496,8 @@ export function CustomItemBuilder({ open, onClose, onAdd }: CustomItemBuilderPro
             </div>
           )}
 
-          {/* Save to catalog */}
+          {/* Save to catalog — only in proposal mode (catalog mode always saves) */}
+          {mode === "proposal" && (
           <div className="flex items-center gap-2">
             <Checkbox
               id="save-catalog"
@@ -501,6 +508,7 @@ export function CustomItemBuilder({ open, onClose, onAdd }: CustomItemBuilderPro
               Save to catalog for future use
             </label>
           </div>
+          )}
         </div>
 
         <DialogFooter>
@@ -512,7 +520,7 @@ export function CustomItemBuilder({ open, onClose, onAdd }: CustomItemBuilderPro
             disabled={!description.trim()}
             className="bg-[var(--primary-blue)] text-white hover:bg-[var(--primary-blue-hover)] disabled:opacity-50"
           >
-            Add to Proposal
+            {mode === "catalog" ? "Add to Catalog" : "Add to Proposal"}
           </Button>
         </DialogFooter>
       </DialogContent>
