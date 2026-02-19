@@ -4,6 +4,7 @@ import { calcCYPerUnit } from "@/lib/calcCYPerUnit";
 import { ComboBox } from "./ComboBox";
 import { RebarPopup } from "./RebarPopup";
 import { PriceHistoryPopup } from "./PriceHistoryPopup";
+import { CustomItemBuilder } from "./CustomItemBuilder";
 import type { CatalogItem } from "@/hooks/useCatalog";
 import {
   AlertDialog,
@@ -39,6 +40,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx, secti
 
   const hasData = !!(line.description || line.qty || line.unitPriceStd || line.unitPriceOpt);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showCustomBuilder, setShowCustomBuilder] = useState(false);
 
   const handleRebarSave = (data: RebarData) => {
     onChange({ ...line, rebar: data });
@@ -78,6 +80,7 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx, secti
           items={items}
           onSaveNew={onSaveNew}
           placeholder="Description..."
+          onOpenCustomBuilder={() => setShowCustomBuilder(true)}
         />
         {showRebar && (
           <RebarPopup rebar={line.rebar} onSave={handleRebarSave} hasData={hasRebarData} />
@@ -153,6 +156,16 @@ export function LineRow({ line, onChange, onDelete, items, onSaveNew, idx, secti
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <CustomItemBuilder
+        open={showCustomBuilder}
+        onClose={() => setShowCustomBuilder(false)}
+        section={line.section}
+        onAdd={(desc, unit, saveCatalog) => {
+          onChange({ ...line, description: desc, unit });
+          if (saveCatalog) onSaveNew(desc);
+        }}
+      />
     </div>
   );
 }
