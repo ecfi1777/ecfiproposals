@@ -353,9 +353,17 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
               <label
                 htmlFor="catalog-csv-upload"
                 className="block border-2 border-dashed border-[var(--card-border)] rounded-xl p-8 text-center cursor-pointer hover:border-[var(--primary-blue)] transition-colors"
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const file = e.dataTransfer.files?.[0];
+                  if (file && file.name.endsWith(".csv")) handleFile(file);
+                }}
               >
                 <Upload className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-3" />
-                <div className="text-sm text-[var(--text-secondary)] font-semibold">Click to upload a CSV file</div>
+                <div className="text-sm text-[var(--text-secondary)] font-semibold">Click or drag & drop a CSV file</div>
                 <div className="text-[10px] text-[var(--text-muted)] mt-1">Max 10MB • .csv files only</div>
                 <div className="text-[10px] text-[var(--text-muted)] mt-2">
                   <strong>Columns:</strong> category, description, unit, wall_height, wall_thickness, footing_width, footing_depth, slab_thickness, pier_size, pier_depth, tags
