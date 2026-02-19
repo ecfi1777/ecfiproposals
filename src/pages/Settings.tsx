@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check, ChevronDown, Eye, EyeOff, Upload, List, Download, Clock, Wrench } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, ChevronDown, Eye, EyeOff, Upload, List, Download, Clock, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -155,8 +155,7 @@ function CatalogTab() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [builderOpen, setBuilderOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState("");
+  const [editingItem, setEditingItem] = useState<CatalogItemWithTimestamp | null>(null);
   const [showInactive, setShowInactive] = useState(false);
   const [openHistoryKey, setOpenHistoryKey] = useState<string | null>(null);
   const [itemsWithHistory, setItemsWithHistory] = useState<Set<string>>(new Set());
@@ -166,11 +165,11 @@ function CatalogTab() {
     setLoading(true);
     const { data, error } = await supabase
       .from("catalog_items")
-      .select("id, description, category, section, default_unit, created_at, is_active")
+      .select("id, description, category, section, default_unit, created_at, is_active, custom_data")
       .eq("user_id", user.id)
       .order("sort_order")
       .order("description");
-    if (!error && data) setItems(data as any);
+    if (!error && data) setItems(data as CatalogItemWithTimestamp[]);
     setLoading(false);
   }, [user]);
 
@@ -208,7 +207,7 @@ function CatalogTab() {
       it.description.toLowerCase().includes(search.toLowerCase()) ||
       it.category.toLowerCase().includes(search.toLowerCase()) ||
       it.section.toLowerCase().includes(search.toLowerCase());
-    const matchesActive = showInactive ? true : (it as any).is_active !== false;
+    const matchesActive = showInactive ? true : it.is_active !== false;
     return matchesSearch && matchesActive;
   });
 
@@ -237,19 +236,27 @@ function CatalogTab() {
     }
   };
 
-  const handleUpdate = async (id: string) => {
-    const description = editValue.trim();
+  const handleBuilderEdit = async (result: CustomItemResult) => {
+    if (!editingItem) return;
+    const description = result.description.trim();
     if (!description) return;
-    if (items.some((it) => it.id !== id && it.description.toLowerCase() === description.toLowerCase())) {
+    if (items.some((it) => it.id !== editingItem.id && it.description.toLowerCase() === description.toLowerCase())) {
       toast.error("Item name already exists");
       return;
     }
-    const { error } = await supabase.from("catalog_items").update({ description }).eq("id", id);
+    const sectionMap: Record<string, string> = { wall: "ftg_wall", wall_only: "ftg_wall", slab: "slabs", footing: "ftg_wall", pier: "ftg_wall", column: "ftg_wall", other: "ftg_wall" };
+    const { error } = await supabase.from("catalog_items").update({
+      description,
+      category: result.customData?.category || "custom",
+      section: sectionMap[result.customData?.category || "other"] || "ftg_wall",
+      default_unit: result.unit,
+      custom_data: (result.customData as any) || null,
+    }).eq("id", editingItem.id);
     if (error) {
       toast.error("Failed to update item");
     } else {
       toast.success("Item updated");
-      setEditingId(null);
+      setEditingItem(null);
       fetchItems();
     }
   };
@@ -286,6 +293,20 @@ function CatalogTab() {
         onClose={() => setBuilderOpen(false)}
         onAdd={handleBuilderAdd}
         mode="catalog"
+      />
+
+      <CustomItemBuilder
+        open={!!editingItem}
+        onClose={() => setEditingItem(null)}
+        onAdd={handleBuilderEdit}
+        mode="catalog"
+        initialData={editingItem ? {
+          category: (editingItem.custom_data as any)?.category || "other",
+          dimensions: (editingItem.custom_data as any)?.dimensions || {},
+          tags: (editingItem.custom_data as any)?.tags || [],
+          description: editingItem.description,
+          unit: editingItem.default_unit,
+        } : null}
       />
 
       <div className="relative">
@@ -371,30 +392,10 @@ function CatalogTab() {
               key={item.id}
               className={`grid grid-cols-[1fr_30px_50px_80px_100px_88px] items-center px-4 py-2.5 ${i > 0 ? "border-t border-[var(--card-border)]" : ""} hover:bg-[var(--section-bg)] transition-colors`}
             >
-              {editingId === item.id ? (
-                <div className="col-span-6 flex items-center gap-2">
-                  <input
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleUpdate(item.id);
-                      if (e.key === "Escape") setEditingId(null);
-                    }}
-                    autoFocus
-                    className="flex-1 px-2 py-1 border border-[var(--primary-blue)] bg-[var(--bg-main)] text-[var(--text-main)] text-[13px] font-mono rounded-lg focus:outline-none focus:ring-[3px] focus:ring-[var(--primary-blue-soft)]"
-                  />
-                  <button onClick={() => handleUpdate(item.id)} className="text-[var(--primary-blue)] hover:opacity-80 p-1">
-                    <Check className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => setEditingId(null)} className="text-[var(--text-muted)] hover:text-[var(--text-main)] p-1">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <span className={`text-[13px] font-mono truncate overflow-hidden ${(item as any).is_active === false ? "text-[var(--text-muted)] line-through" : "text-[var(--text-main)]"}`}>
+              <>
+                  <span className={`text-[13px] font-mono truncate overflow-hidden ${item.is_active === false ? "text-[var(--text-muted)] line-through" : "text-[var(--text-main)]"}`}>
                     {item.description}
-                    {(item as any).is_active === false && (
+                    {item.is_active === false && (
                       <span className="ml-2 text-[9px] bg-[var(--text-muted)]/15 text-[var(--text-muted)] px-1.5 py-0.5 rounded font-semibold tracking-wider no-underline inline-block">INACTIVE</span>
                     )}
                   </span>
@@ -418,14 +419,14 @@ function CatalogTab() {
                   <span className="text-[10px] text-[var(--text-muted)] text-center capitalize truncate overflow-hidden">{item.category}</span>
                   <div className="flex justify-end gap-0.5">
                     <button
-                      onClick={() => handleToggleActive(item.id, (item as any).is_active !== false)}
+                      onClick={() => handleToggleActive(item.id, item.is_active !== false)}
                       className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] p-1 transition-colors"
-                      title={(item as any).is_active === false ? "Activate" : "Deactivate"}
+                      title={item.is_active === false ? "Activate" : "Deactivate"}
                     >
-                      {(item as any).is_active === false ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      {item.is_active === false ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
                     <button
-                      onClick={() => { setEditingId(item.id); setEditValue(item.description); }}
+                      onClick={() => setEditingItem(item)}
                       className="text-[var(--text-muted)] hover:text-[var(--primary-blue)] p-1 transition-colors"
                       title="Edit"
                     >
@@ -439,8 +440,7 @@ function CatalogTab() {
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                </>
-              )}
+              </>
             </div>
           ))}
           {filtered.length === 0 && (

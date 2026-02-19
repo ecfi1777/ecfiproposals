@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
@@ -27,6 +27,14 @@ interface CustomItemBuilderProps {
   section?: "ftg" | "slab";
   /** "proposal" shows qty/pricing fields; "catalog" hides them */
   mode?: "proposal" | "catalog";
+  /** When provided, pre-populates all fields for edit mode */
+  initialData?: {
+    category: string;
+    dimensions: Record<string, string>;
+    tags: string[];
+    description: string;
+    unit: string;
+  } | null;
 }
 
 /* ── Chip options ── */
@@ -104,7 +112,8 @@ const parsePierSize = (s: string): { a: number; b: number } => {
 };
 
 /* ── Main component ── */
-export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: CustomItemBuilderProps) {
+export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal", initialData }: CustomItemBuilderProps) {
+  const isEditMode = !!initialData;
   const [category, setCategory] = useState<ItemCategory>("wall");
 
   // Wall
@@ -141,6 +150,38 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
   const [unitPrice, setUnitPrice] = useState("");
   const [pricingCol, setPricingCol] = useState<"std" | "opt">("std");
   const [saveToCatalog, setSaveToCatalog] = useState(false);
+
+  // Pre-populate fields when opening in edit mode
+  useEffect(() => {
+    if (!open || !initialData) return;
+    const cat = (initialData.category || "other") as ItemCategory;
+    setCategory(cat);
+    setSelectedTags(initialData.tags || []);
+    const dims = initialData.dimensions || {};
+    if (cat === "wall" || cat === "wall_only") {
+      if (dims.wallHeight) setWallHeight(dims.wallHeight);
+      if (dims.wallThickness) setWallThickness(dims.wallThickness);
+      if (cat === "wall") {
+        if (dims.footingWidth) setWallFtgWidth(dims.footingWidth);
+        if (dims.footingDepth) setWallFtgDepth(dims.footingDepth);
+      }
+    } else if (cat === "slab") {
+      if (dims.slabThickness) setSlabThickness(dims.slabThickness);
+      if (dims.customLabel) setSlabLabel(dims.customLabel);
+    } else if (cat === "footing") {
+      if (dims.footingWidth) setFtgWidth(dims.footingWidth);
+      if (dims.footingDepth) setFtgDepth(dims.footingDepth);
+      if (dims.customLabel) setFtgLabel(dims.customLabel);
+    } else if (cat === "pier") {
+      if (dims.pierSize) setPierSize(dims.pierSize);
+      if (dims.pierDepth) setPierDepth(dims.pierDepth);
+    } else if (cat === "column") {
+      if (dims.pierSize) setColumnSize(dims.pierSize);
+      if (dims.pierDepth) setColumnHeight(dims.pierDepth);
+    } else if (cat === "other") {
+      setMiscDesc(initialData.description || "");
+    }
+  }, [open, initialData]);
 
   // Reset tags when category changes
   const handleCategoryChange = (cat: ItemCategory) => {
@@ -319,7 +360,7 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-[var(--text-main)]">
             <Wrench className="w-4 h-4 text-[var(--primary-blue)]" />
-            Custom Item Builder
+            {isEditMode ? "Edit Catalog Item" : "Custom Item Builder"}
           </DialogTitle>
           <DialogDescription className="text-[var(--text-muted)] text-xs">
             {mode === "catalog"
@@ -594,7 +635,7 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
             disabled={!description.trim()}
             className="bg-[var(--primary-blue)] text-white hover:bg-[var(--primary-blue-hover)] disabled:opacity-50"
           >
-            {mode === "catalog" ? "Save to Catalog" : "Add to Proposal"}
+            {isEditMode ? "Update Item" : mode === "catalog" ? "Save to Catalog" : "Add to Proposal"}
           </Button>
         </DialogFooter>
       </DialogContent>
