@@ -8,9 +8,10 @@ interface ComboBoxProps {
   items: CatalogItem[];
   onSaveNew?: (description: string) => void;
   placeholder?: string;
+  onOpenCustomBuilder?: () => void;
 }
 
-export function ComboBox({ value, onChange, onSelectItem, items, onSaveNew, placeholder }: ComboBoxProps) {
+export function ComboBox({ value, onChange, onSelectItem, items, onSaveNew, placeholder, onOpenCustomBuilder }: ComboBoxProps) {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("");
   const [highlightIndex, setHighlightIndex] = useState(-1);
@@ -113,8 +114,16 @@ export function ComboBox({ value, onChange, onSelectItem, items, onSaveNew, plac
           </button>
         )}
       </div>
-      {open && filtered.length > 0 && (
+      {open && (filtered.length > 0 || onOpenCustomBuilder) && (
         <div ref={listRef} className="absolute top-full left-0 right-0 z-[999] bg-[var(--card-bg)] border border-[var(--card-border)] max-h-[220px] overflow-y-auto shadow-xl rounded-lg">
+          {onOpenCustomBuilder && (
+            <div
+              onClick={() => { onOpenCustomBuilder(); setOpen(false); }}
+              className="px-2.5 py-[7px] cursor-pointer text-[12px] border-b border-[var(--card-border)] font-mono text-[var(--primary-blue)] hover:bg-[var(--primary-blue-soft)] transition-colors flex items-center gap-1.5 font-semibold"
+            >
+              🔧 Build Custom Item…
+            </div>
+          )}
           {filtered.map((item, idx) => (
             <div
               key={item.id}
