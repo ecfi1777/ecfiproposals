@@ -1,26 +1,15 @@
 
 
-## Fix: Text Too Close to Bottom Border in PDF Export
+## Fix: Reduce Table Border Thickness by ~25%
 
-**Problem**: In the exported/printed PDF, text in table cells appears cramped against the bottom cell border. The on-screen preview looks fine, but the PDF rendering (via html2canvas) doesn't match.
+**Problem**: The table borders in the proposal preview/PDF are visually too thick.
 
-**Root Cause**: Table cells use `py-[3px]` (3px top and bottom padding), which is too tight for PDF output. The rendering engine compresses the space differently than the browser preview.
-
-**Solution**: Increase vertical padding from `py-[3px]` to `py-[5px]` across all table cells in the preview document. This adds just 2px more breathing room on each side, which will make the PDF output match the visual feel of the on-screen preview without significantly changing the overall layout.
+**Solution**: Replace `border` (1px) with `border-[0.75px]` across all table cells in the preview document. Also reduce the top HR separator from `border-t-2` (2px) to `border-t-[1.5px]`.
 
 ### Changes in `src/components/ecfi/PreviewTab.tsx`
 
-All instances of `py-[3px]` will be updated to `py-[5px]` in the following areas:
+1. **All table cells** (~76 occurrences): Change `border border-black` to `border-[0.75px] border-black`
+2. **HR separator** (line 153): Change `border-t-2` to `border-t-[1.5px]`
 
-1. **Line item rows** (lines 96-103) - QTY, UNIT, DESCRIPTION, UNIT $, TOTAL cells
-2. **Subtotal rows** (lines 109-113) - section subtotal cells
-3. **Header info table** (lines 159-174) - Builder, Date, Job Location, County, Found Type
-4. **Found Size + column headers row** (lines 181-185)
-5. **Column header row** (lines 193-199) - QTY, UNIT, DESCRIPTION, etc. headers
-
-The Extra Charges section uses `py-[2px]` which will be bumped to `py-[3px]` for consistency.
-
-The Grand Total row already uses `py-1` (4px) which is fine.
-
-This is a single-file change affecting only cell padding values.
+This is a single-file, find-and-replace style change. The border color stays black; only the width decreases from 1px to 0.75px (~25% thinner).
 
