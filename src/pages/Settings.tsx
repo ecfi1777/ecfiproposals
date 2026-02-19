@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, ChevronDown, Eye, EyeOff, Upload, List, Download, Clock, Wrench } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, ChevronDown, Eye, EyeOff, Upload, List, Download, Clock, Wrench, CheckSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -159,6 +159,8 @@ function CatalogTab() {
   const [showInactive, setShowInactive] = useState(false);
   const [openHistoryKey, setOpenHistoryKey] = useState<string | null>(null);
   const [itemsWithHistory, setItemsWithHistory] = useState<Set<string>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
 
   const fetchItems = useCallback(async () => {
     if (!user) return;
@@ -272,6 +274,28 @@ function CatalogTab() {
     }
   };
 
+  const toggleSelectId = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Delete ${selectedIds.size} catalog items? This cannot be undone.`)) return;
+    const ids = Array.from(selectedIds);
+    const { error } = await supabase.from("catalog_items").delete().in("id", ids);
+    if (error) {
+      toast.error("Failed to delete items");
+    } else {
+      toast.success(`${ids.length} items deleted`);
+      setSelectedIds(new Set());
+      setSelectMode(false);
+      fetchItems();
+    }
+  };
+
   const sectionLabel = (s: string) => {
     if (s === "ftg_wall") return "Ftg/Wall";
     if (s === "slabs") return "Slabs";
@@ -326,7 +350,22 @@ function CatalogTab() {
 
       <div className="flex items-center justify-between">
         <div className="text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
-          {filtered.length} item{filtered.length !== 1 ? "s" : ""} {search ? "matching" : "total"}
+          {selectMode ? (
+            <button
+              onClick={() => {
+                if (selectedIds.size === filtered.length) {
+                  setSelectedIds(new Set());
+                } else {
+                  setSelectedIds(new Set(filtered.map((it) => it.id)));
+                }
+              }}
+              className="text-[var(--primary-blue)] hover:underline"
+            >
+              {selectedIds.size === filtered.length ? "DESELECT ALL" : "SELECT ALL"}
+            </button>
+          ) : (
+            <>{filtered.length} item{filtered.length !== 1 ? "s" : ""} {search ? "matching" : "total"}</>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -356,6 +395,17 @@ function CatalogTab() {
             EXPORT CSV
           </button>
           <button
+            onClick={() => { setSelectMode(!selectMode); setSelectedIds(new Set()); }}
+            className={`flex items-center gap-1.5 text-[11px] font-mono tracking-wider px-3 py-1.5 rounded-lg border transition-colors ${
+              selectMode
+                ? "bg-[var(--primary-blue-soft)] text-[var(--primary-blue)] border-[var(--primary-blue)]/30"
+                : "text-[var(--text-muted)] border-[var(--card-border)] hover:text-[var(--text-secondary)]"
+            }`}
+          >
+            <CheckSquare className="w-3.5 h-3.5" />
+            SELECT
+          </button>
+          <button
             onClick={() => setShowInactive(!showInactive)}
             className={`flex items-center gap-1.5 text-[11px] font-mono tracking-wider px-3 py-1.5 rounded-lg border transition-colors ${
               showInactive
@@ -377,9 +427,10 @@ function CatalogTab() {
           <div className="text-[11px] text-[var(--text-muted)]">Add items above or use "+ Save" in the proposal builder to build your catalog as you work.</div>
         </div>
       ) : (
-        <div className="border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div className="border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)] relative">
           {/* Column headers */}
-          <div className="grid grid-cols-[1fr_30px_50px_80px_100px_88px] items-center px-4 py-2 bg-[var(--section-bg)] border-b border-[var(--card-border)]">
+          <div className={`grid ${selectMode ? "grid-cols-[30px_1fr_30px_50px_80px_100px_88px]" : "grid-cols-[1fr_30px_50px_80px_100px_88px]"} items-center px-4 py-2 bg-[var(--section-bg)] border-b border-[var(--card-border)]`}>
+            {selectMode && <span />}
             <span className="text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider">Description</span>
             <span />
             <span className="text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-center">Unit</span>
@@ -390,8 +441,16 @@ function CatalogTab() {
           {filtered.map((item, i) => (
             <div
               key={item.id}
-              className={`grid grid-cols-[1fr_30px_50px_80px_100px_88px] items-center px-4 py-2.5 ${i > 0 ? "border-t border-[var(--card-border)]" : ""} hover:bg-[var(--section-bg)] transition-colors`}
+              className={`grid ${selectMode ? "grid-cols-[30px_1fr_30px_50px_80px_100px_88px]" : "grid-cols-[1fr_30px_50px_80px_100px_88px]"} items-center px-4 py-2.5 ${i > 0 ? "border-t border-[var(--card-border)]" : ""} hover:bg-[var(--section-bg)] transition-colors`}
             >
+              {selectMode && (
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(item.id)}
+                  onChange={() => toggleSelectId(item.id)}
+                  className="w-4 h-4 accent-[var(--primary-blue)] cursor-pointer"
+                />
+              )}
               <>
                   <span className={`text-[13px] font-mono truncate overflow-hidden ${item.is_active === false ? "text-[var(--text-muted)] line-through" : "text-[var(--text-main)]"}`}>
                     {item.description}
@@ -445,6 +504,26 @@ function CatalogTab() {
           ))}
           {filtered.length === 0 && (
             <div className="text-[var(--text-muted)] text-sm py-6 text-center">No items found</div>
+          )}
+          {/* Bulk delete bar */}
+          {selectMode && selectedIds.size > 0 && (
+            <div className="sticky bottom-0 flex items-center justify-between px-4 py-3 bg-[var(--section-bg)] border-t border-[var(--card-border)]">
+              <span className="text-[12px] font-mono text-[var(--text-secondary)]">{selectedIds.size} item{selectedIds.size !== 1 ? "s" : ""} selected</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSelectedIds(new Set())}
+                  className="text-[11px] font-mono tracking-wider px-3 py-1.5 rounded-lg border border-[var(--card-border)] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+                >
+                  DESELECT ALL
+                </button>
+                <button
+                  onClick={handleBulkDelete}
+                  className="text-[11px] font-mono tracking-wider px-3 py-1.5 rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 text-[var(--danger)] hover:bg-[var(--danger)]/20 transition-colors font-semibold"
+                >
+                  DELETE SELECTED
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}
