@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Wrench } from "lucide-react";
 
-type ItemType = "wall_with_footings" | "wall_only" | "pier_pad" | "column" | "footings_only";
+type ItemType = "wall_with_footings" | "wall_only" | "pier_pad" | "column" | "footings_only" | "slab_flatwork" | "other_misc";
 
 interface CustomItemBuilderProps {
   open: boolean;
@@ -22,6 +22,8 @@ const ITEM_TYPES: { value: ItemType; label: string }[] = [
   { value: "pier_pad", label: "Pier Pad" },
   { value: "column", label: "Column" },
   { value: "footings_only", label: "Footings Only" },
+  { value: "slab_flatwork", label: "Slab / Flatwork" },
+  { value: "other_misc", label: "Other / Misc" },
 ];
 
 const WALL_HEIGHTS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -40,6 +42,15 @@ export function CustomItemBuilder({ open, onClose, onAdd, section }: CustomItemB
   const [dimB, setDimB] = useState("24");
   const [dimC, setDimC] = useState("12");
   const [saveToCatalog, setSaveToCatalog] = useState(false);
+  // Slab/Flatwork
+  const [slabType, setSlabType] = useState("Basement Slab");
+  const [slabThickness, setSlabThickness] = useState("4");
+  // Other/Misc
+  const [miscDescription, setMiscDescription] = useState("");
+  const [miscUnit, setMiscUnit] = useState("EA");
+
+  const SLAB_TYPES = ["Basement Slab", "Garage Slab", "Front Porch", "Rear Porch", "Driveway", "Apron", "Leadwalk", "Thickened Slab"];
+  const SLAB_THICKNESSES = ["2", "4", "6", "8"];
 
   const description = useMemo(() => {
     switch (itemType) {
@@ -53,15 +64,21 @@ export function CustomItemBuilder({ open, onClose, onAdd, section }: CustomItemB
         return `Column: ${dimA}" x ${dimB}" x ${dimC}"`;
       case "footings_only":
         return `Footings: ${ftgWidth}" x ${ftgDepth}"`;
+      case "slab_flatwork":
+        return slabThickness ? `${slabType} - ${slabThickness}"` : `${slabType} -`;
+      case "other_misc":
+        return miscDescription;
     }
-  }, [itemType, wallHeight, wallThickness, ftgWidth, ftgDepth, dimA, dimB, dimC]);
+  }, [itemType, wallHeight, wallThickness, ftgWidth, ftgDepth, dimA, dimB, dimC, slabType, slabThickness, miscDescription]);
 
   const volCalc = useMemo(() => calcCYPerUnit(description), [description]);
 
   const defaultUnit = useMemo(() => {
     if (itemType === "pier_pad" || itemType === "column") return "EA";
+    if (itemType === "slab_flatwork") return "SF";
+    if (itemType === "other_misc") return miscUnit;
     return "LF";
-  }, [itemType]);
+  }, [itemType, miscUnit]);
 
   const handleAdd = () => {
     onAdd(description, defaultUnit, saveToCatalog);
@@ -169,7 +186,53 @@ export function CustomItemBuilder({ open, onClose, onAdd, section }: CustomItemB
             </div>
           )}
 
-          {/* Preview */}
+          {/* Slab / Flatwork */}
+          {itemType === "slab_flatwork" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] text-[var(--text-secondary)] font-semibold uppercase tracking-widest mb-1 block">
+                  Slab Type
+                </label>
+                <select value={slabType} onChange={(e) => setSlabType(e.target.value)} className={selectClass}>
+                  {SLAB_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-[var(--text-secondary)] font-semibold uppercase tracking-widest mb-1 block">
+                  Thickness (in)
+                </label>
+                <select value={slabThickness} onChange={(e) => setSlabThickness(e.target.value)} className={selectClass}>
+                  <option value="">Default (4")</option>
+                  {SLAB_THICKNESSES.map((t) => <option key={t} value={t}>{t}"</option>)}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Other / Misc */}
+          {itemType === "other_misc" && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] text-[var(--text-secondary)] font-semibold uppercase tracking-widest mb-1 block">
+                  Description
+                </label>
+                <input
+                  value={miscDescription}
+                  onChange={(e) => setMiscDescription(e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. Escape Window - Opening Only"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-[var(--text-secondary)] font-semibold uppercase tracking-widest mb-1 block">
+                  Unit
+                </label>
+                <select value={miscUnit} onChange={(e) => setMiscUnit(e.target.value)} className={selectClass}>
+                  {["EA", "LF", "SF", "CY", "HR", "LS"].map((u) => <option key={u} value={u}>{u}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
           <div className="bg-[var(--section-bg)] border border-[var(--card-border)] rounded-lg p-3 space-y-2">
             <div>
               <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest">Description</span>
