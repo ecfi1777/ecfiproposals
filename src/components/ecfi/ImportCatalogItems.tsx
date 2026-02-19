@@ -14,6 +14,64 @@ interface ParsedItem {
   defaultUnit: string;
 }
 
+/** Map dimension columns back into a generated description */
+function buildDescriptionFromDimensions(raw: Record<string, string>, fieldMap: Record<string, string>): { description: string; category: string; section: string; unit: string } | null {
+  const itemType = (raw[fieldMap["item_type"]] || "").trim().toLowerCase();
+  if (!itemType) return null;
+
+  if (itemType === "wall") {
+    const wh = raw[fieldMap["wall_height"]] || "";
+    const wt = raw[fieldMap["wall_thickness"]] || "";
+    const fw = raw[fieldMap["footing_width"]] || "";
+    const fd = raw[fieldMap["footing_depth"]] || "";
+    if (!wh || !wt) return null;
+    const tags = (raw[fieldMap["tags"]] || "").trim();
+    let desc = `${wh.replace("'", "'")} x ${wt} Wall`;
+    if (fw && fd) desc += ` - with ${fw} x ${fd} Footings`;
+    if (tags) desc += `, ${tags}`;
+    return { description: desc, category: "walls_with_footings", section: "ftg_wall", unit: "LF" };
+  }
+
+  if (itemType === "slab") {
+    const label = (raw[fieldMap["label"]] || "Slab").trim();
+    const st = raw[fieldMap["slab_thickness"]] || "";
+    if (!st) return null;
+    const tags = (raw[fieldMap["tags"]] || "").trim();
+    let desc = `${label} - ${st}`;
+    if (tags) desc += `, ${tags}`;
+    return { description: desc, category: "slabs", section: "slabs", unit: "SF" };
+  }
+
+  if (itemType === "footing") {
+    const label = (raw[fieldMap["label"]] || "Footings").trim();
+    const fw = raw[fieldMap["footing_width"]] || "";
+    const fd = raw[fieldMap["footing_depth"]] || "";
+    if (!fw || !fd) return null;
+    const tags = (raw[fieldMap["tags"]] || "").trim();
+    let desc = `${label}: ${fw} x ${fd}`;
+    if (tags) desc += `, ${tags}`;
+    return { description: desc, category: "footings", section: "ftg_wall", unit: "LF" };
+  }
+
+  if (itemType === "pier") {
+    const ps = (raw[fieldMap["pier_size"]] || "").trim();
+    const pd = (raw[fieldMap["pier_depth"]] || "").trim();
+    if (!ps || !pd) return null;
+    // pier_size like "24x24" or "24\"x24\""
+    const parts = ps.replace(/"/g, "").split("x").map((p: string) => p.trim());
+    const desc = `Pier Pad: ${parts[0]}" x ${parts[1] || parts[0]}" x ${pd.replace(/"/g, "")}"`;
+    return { description: desc, category: "pier_pads", section: "ftg_wall", unit: "EA" };
+  }
+
+  if (itemType === "other") {
+    const label = (raw[fieldMap["label"]] || raw[fieldMap["description"]] || "").trim();
+    if (!label) return null;
+    return { description: label, category: "extras", section: "ftg_wall", unit: (raw[fieldMap["default_unit"]] || "EA").trim().toUpperCase() };
+  }
+
+  return null;
+}
+
 export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -36,7 +94,15 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
   };
 
   const downloadTemplate = () => {
-    const csv = "description,category,section,default_unit\n9' x 8\" Wall,walls_with_footings,ftg_wall,LF\nBasement Slab 4\",slabs,slabs,SF\nPier Pad 36x36x12,extras,ftg_wall,EA\n";
+    const csv = [
+      "item_type,wall_height,wall_thickness,footing_width,footing_depth,slab_thickness,pier_size,pier_depth,label,tags,description,category,section,default_unit",
+      'wall,4\',8",8",16",,,,,,,,,,',
+      'slab,,,,,,,,Basement Slab,,4",,,,',
+      'footing,,,,8",16",,,,Frost Footing,,,,',
+      'pier,,,,,,24"x24",12",,,,,,',
+      'other,,,,,,,,Cut Outs & Sleeves,,,,ftg_wall,EA',
+      ',,,,,,,,,,9\' x 8" Wall,walls_with_footings,ftg_wall,LF',
+    ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -58,8 +124,12 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
       skipEmptyLines: true,
       complete: async (results) => {
         const headers = (results.meta.fields || []).map((h) => h.toLowerCase().trim());
-        if (!headers.includes("description")) {
-          setError('File must have a "description" column');
+
+        // Must have either "description" or "item_type" column
+        const hasDescription = headers.includes("description");
+        const hasItemType = headers.includes("item_type");
+        if (!hasDescription && !hasItemType) {
+          setError('File must have a "description" or "item_type" column');
           return;
         }
 
@@ -80,17 +150,36 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
         const seen = new Set<string>();
 
         (results.data as Record<string, string>[]).forEach((raw) => {
-          const desc = (raw[fieldMap["description"]] || "").trim();
+          let desc = "";
+          let cat = "extras";
+          let sect = "ftg_wall";
+          let unit = "EA";
+
+          // Try structured dimensions first (item_type column)
+          const itemType = (raw[fieldMap["item_type"]] || "").trim();
+          if (itemType) {
+            const built = buildDescriptionFromDimensions(raw, fieldMap);
+            if (built) {
+              desc = built.description;
+              cat = built.category;
+              sect = built.section;
+              unit = built.unit;
+            }
+          }
+
+          // Fall back to legacy flat description column
+          if (!desc) {
+            desc = (raw[fieldMap["description"]] || "").trim();
+            cat = (raw[fieldMap["category"]] || "extras").trim() || "extras";
+            sect = (raw[fieldMap["section"]] || "ftg_wall").trim() || "ftg_wall";
+            unit = (raw[fieldMap["default_unit"]] || "EA").trim().toUpperCase() || "EA";
+          }
+
           if (!desc) return;
           const key = desc.toLowerCase();
           if (existingSet.has(key) || seen.has(key)) { dupes++; return; }
           seen.add(key);
-          items.push({
-            description: desc,
-            category: (raw[fieldMap["category"]] || "extras").trim() || "extras",
-            section: (raw[fieldMap["section"]] || "ftg_wall").trim() || "ftg_wall",
-            defaultUnit: (raw[fieldMap["default_unit"]] || "EA").trim().toUpperCase() || "EA",
-          });
+          items.push({ description: desc, category: cat, section: sect, defaultUnit: unit });
         });
 
         setNewItems(items);
@@ -158,7 +247,12 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
                 <Upload className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-3" />
                 <div className="text-sm text-[var(--text-secondary)] font-semibold">Click to upload a CSV file</div>
                 <div className="text-[10px] text-[var(--text-muted)] mt-1">Max 10MB • .csv files only</div>
-                <div className="text-[10px] text-[var(--text-muted)] mt-1">Required column: description. Optional: category, section, default_unit</div>
+                <div className="text-[10px] text-[var(--text-muted)] mt-2">
+                  <strong>Structured format:</strong> item_type, wall_height, wall_thickness, footing_width, footing_depth, slab_thickness, pier_size, pier_depth, label, tags
+                </div>
+                <div className="text-[10px] text-[var(--text-muted)] mt-1">
+                  <strong>Legacy format:</strong> description, category, section, default_unit
+                </div>
                 <input
                   ref={fileRef}
                   type="file"
