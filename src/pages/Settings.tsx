@@ -308,17 +308,45 @@ function CatalogTab() {
         <div className="text-[10px] text-[var(--text-muted)] tracking-wider uppercase">
           {filtered.length} item{filtered.length !== 1 ? "s" : ""} {search ? "matching" : "total"}
         </div>
-        <button
-          onClick={() => setShowInactive(!showInactive)}
-          className={`flex items-center gap-1.5 text-[11px] font-mono tracking-wider px-3 py-1.5 rounded-lg border transition-colors ${
-            showInactive
-              ? "bg-[var(--primary-blue-soft)] text-[var(--primary-blue)] border-[var(--primary-blue)]/30"
-              : "text-[var(--text-muted)] border-[var(--card-border)] hover:text-[var(--text-secondary)]"
-          }`}
-        >
-          {showInactive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-          {showInactive ? "SHOWING ALL" : "SHOW INACTIVE"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const headers = ["description", "default_unit", "section", "category", "is_active"];
+              const csvRows = [headers.join(",")];
+              items.forEach((it: any) => {
+                const row = headers.map((h) => {
+                  const val = String(it[h] ?? "");
+                  return val.includes(",") || val.includes('"') ? `"${val.replace(/"/g, '""')}"` : val;
+                });
+                csvRows.push(row.join(","));
+              });
+              const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "catalog_items.csv";
+              a.click();
+              URL.revokeObjectURL(url);
+              toast.success(`Exported ${items.length} catalog items`);
+            }}
+            disabled={items.length === 0}
+            className="flex items-center gap-1.5 text-[11px] font-mono tracking-wider px-3 py-1.5 rounded-lg border text-[var(--text-muted)] border-[var(--card-border)] hover:text-[var(--text-secondary)] transition-colors disabled:opacity-40"
+          >
+            <Download className="w-3.5 h-3.5" />
+            EXPORT CSV
+          </button>
+          <button
+            onClick={() => setShowInactive(!showInactive)}
+            className={`flex items-center gap-1.5 text-[11px] font-mono tracking-wider px-3 py-1.5 rounded-lg border transition-colors ${
+              showInactive
+                ? "bg-[var(--primary-blue-soft)] text-[var(--primary-blue)] border-[var(--primary-blue)]/30"
+                : "text-[var(--text-muted)] border-[var(--card-border)] hover:text-[var(--text-secondary)]"
+            }`}
+          >
+            {showInactive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            {showInactive ? "SHOWING ALL" : "SHOW INACTIVE"}
+          </button>
+        </div>
       </div>
 
       {loading ? (
