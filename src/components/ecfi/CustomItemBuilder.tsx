@@ -457,7 +457,7 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
             </div>
 
             {/* F. Concrete Volume */}
-            {category !== "other" && (
+            {category !== "other" && mode === "proposal" && (
               <div className="flex gap-4 pt-1">
                 <div>
                   <span className="text-[10px] text-ecfi-vol-blue-text uppercase tracking-widest">CY / Unit</span>
@@ -520,7 +520,7 @@ export function CustomItemBuilder({ open, onClose, onAdd, mode = "proposal" }: C
             disabled={!description.trim()}
             className="bg-[var(--primary-blue)] text-white hover:bg-[var(--primary-blue-hover)] disabled:opacity-50"
           >
-            {mode === "catalog" ? "Add to Catalog" : "Add to Proposal"}
+            {mode === "catalog" ? "Save to Catalog" : "Add to Proposal"}
           </Button>
         </DialogFooter>
       </DialogContent>

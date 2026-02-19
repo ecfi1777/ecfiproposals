@@ -227,7 +227,8 @@ function CatalogTab() {
       category: result.customData?.category || "custom",
       section: sectionMap[result.customData?.category || "other"] || "ftg_wall",
       default_unit: result.unit,
-    });
+      custom_data: result.customData || null,
+    } as any);
     if (error) {
       toast.error("Failed to add item");
     } else {

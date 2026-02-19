@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, Download, X, AlertCircle, CheckCircle } from "lucide-react";
+import { Upload, Download, X, AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -7,69 +7,132 @@ import Papa from "papaparse";
 
 type Step = "upload" | "preview" | "done";
 
+type ItemCategory = "wall" | "slab" | "footing" | "pier" | "other";
+
 interface ParsedItem {
   description: string;
   category: string;
   section: string;
   defaultUnit: string;
+  customData: Record<string, any> | null;
 }
 
-/** Map dimension columns back into a generated description */
-function buildDescriptionFromDimensions(raw: Record<string, string>, fieldMap: Record<string, string>): { description: string; category: string; section: string; unit: string } | null {
-  const itemType = (raw[fieldMap["item_type"]] || "").trim().toLowerCase();
-  if (!itemType) return null;
+interface ValidationWarning {
+  row: number;
+  message: string;
+}
 
-  if (itemType === "wall") {
-    const wh = raw[fieldMap["wall_height"]] || "";
-    const wt = raw[fieldMap["wall_thickness"]] || "";
-    const fw = raw[fieldMap["footing_width"]] || "";
-    const fd = raw[fieldMap["footing_depth"]] || "";
-    if (!wh || !wt) return null;
-    const tags = (raw[fieldMap["tags"]] || "").trim();
-    let desc = `${wh.replace("'", "'")} x ${wt} Wall`;
-    if (fw && fd) desc += ` - with ${fw} x ${fd} Footings`;
-    if (tags) desc += `, ${tags}`;
-    return { description: desc, category: "walls_with_footings", section: "ftg_wall", unit: "LF" };
+const CATEGORY_UNIT_MAP: Record<ItemCategory, string> = {
+  wall: "LF",
+  slab: "SF",
+  footing: "LF",
+  pier: "EA",
+  other: "EA",
+};
+
+const CATEGORY_SECTION_MAP: Record<ItemCategory, string> = {
+  wall: "ftg_wall",
+  slab: "slabs",
+  footing: "ftg_wall",
+  pier: "ftg_wall",
+  other: "ftg_wall",
+};
+
+const CATEGORY_DB_MAP: Record<ItemCategory, string> = {
+  wall: "walls_with_footings",
+  slab: "slabs",
+  footing: "footings",
+  pier: "pier_pads",
+  other: "extras",
+};
+
+const VALID_CATEGORIES: ItemCategory[] = ["wall", "slab", "footing", "pier", "other"];
+
+function validateRow(category: ItemCategory, raw: Record<string, string>, fieldMap: Record<string, string>): string | null {
+  const get = (key: string) => (raw[fieldMap[key]] || "").trim();
+
+  switch (category) {
+    case "wall":
+      if (!get("wall_height") || !get("wall_thickness") || !get("footing_width") || !get("footing_depth"))
+        return "Wall rows require wall_height, wall_thickness, footing_width, footing_depth";
+      return null;
+    case "slab":
+      if (!get("slab_thickness") || !get("description"))
+        return "Slab rows require slab_thickness and description";
+      return null;
+    case "footing":
+      if (!get("footing_width") || !get("footing_depth") || !get("description"))
+        return "Footing rows require footing_width, footing_depth, and description";
+      return null;
+    case "pier":
+      if (!get("pier_size") || !get("pier_depth"))
+        return "Pier rows require pier_size and pier_depth";
+      return null;
+    case "other":
+      if (!get("description"))
+        return "Other rows require description";
+      return null;
+  }
+}
+
+function buildDescription(category: ItemCategory, raw: Record<string, string>, fieldMap: Record<string, string>): string {
+  const get = (key: string) => (raw[fieldMap[key]] || "").trim();
+  const tags = get("tags");
+  const tagsSuffix = tags ? `, ${tags}` : "";
+
+  switch (category) {
+    case "wall": {
+      const wh = get("wall_height").replace("'", "'");
+      const wt = get("wall_thickness");
+      const fw = get("footing_width");
+      const fd = get("footing_depth");
+      let desc = `${wh} x ${wt} Wall`;
+      if (fw && fd) desc += ` - with ${fw} x ${fd} Footings`;
+      return desc + tagsSuffix;
+    }
+    case "slab":
+      return `${get("description")} - ${get("slab_thickness")}${tagsSuffix}`;
+    case "footing":
+      return `${get("description")}: ${get("footing_width")} x ${get("footing_depth")}${tagsSuffix}`;
+    case "pier": {
+      const ps = get("pier_size").replace(/"/g, "");
+      const parts = ps.split(/\s*x\s*/i);
+      const pd = get("pier_depth").replace(/"/g, "");
+      return `Pier Pad: ${parts[0]}" x ${parts[1] || parts[0]}" x ${pd}"`;
+    }
+    case "other":
+      return get("description");
+  }
+}
+
+function buildCustomData(category: ItemCategory, raw: Record<string, string>, fieldMap: Record<string, string>): Record<string, any> | null {
+  const get = (key: string) => (raw[fieldMap[key]] || "").trim();
+  const tags = get("tags") ? get("tags").split(",").map((t: string) => t.trim()).filter(Boolean) : [];
+
+  const dimensions: Record<string, string> = {};
+  let hasDimensions = false;
+
+  if (get("wall_height")) { dimensions.wallHeight = get("wall_height"); hasDimensions = true; }
+  if (get("wall_thickness")) { dimensions.wallThickness = get("wall_thickness"); hasDimensions = true; }
+  if (get("footing_width")) { dimensions.footingWidth = get("footing_width"); hasDimensions = true; }
+  if (get("footing_depth")) { dimensions.footingDepth = get("footing_depth"); hasDimensions = true; }
+  if (get("slab_thickness")) { dimensions.slabThickness = get("slab_thickness"); hasDimensions = true; }
+  if (get("pier_size")) { dimensions.pierSize = get("pier_size"); hasDimensions = true; }
+  if (get("pier_depth")) { dimensions.pierDepth = get("pier_depth"); hasDimensions = true; }
+
+  // For slab/footing/other with a description used as label, store it
+  if ((category === "slab" || category === "footing" || category === "other") && get("description")) {
+    dimensions.customLabel = get("description");
   }
 
-  if (itemType === "slab") {
-    const label = (raw[fieldMap["label"]] || "Slab").trim();
-    const st = raw[fieldMap["slab_thickness"]] || "";
-    if (!st) return null;
-    const tags = (raw[fieldMap["tags"]] || "").trim();
-    let desc = `${label} - ${st}`;
-    if (tags) desc += `, ${tags}`;
-    return { description: desc, category: "slabs", section: "slabs", unit: "SF" };
-  }
+  if (!hasDimensions && tags.length === 0) return null;
 
-  if (itemType === "footing") {
-    const label = (raw[fieldMap["label"]] || "Footings").trim();
-    const fw = raw[fieldMap["footing_width"]] || "";
-    const fd = raw[fieldMap["footing_depth"]] || "";
-    if (!fw || !fd) return null;
-    const tags = (raw[fieldMap["tags"]] || "").trim();
-    let desc = `${label}: ${fw} x ${fd}`;
-    if (tags) desc += `, ${tags}`;
-    return { description: desc, category: "footings", section: "ftg_wall", unit: "LF" };
-  }
-
-  if (itemType === "pier") {
-    const ps = (raw[fieldMap["pier_size"]] || "").trim();
-    const pd = (raw[fieldMap["pier_depth"]] || "").trim();
-    if (!ps || !pd) return null;
-    // pier_size like "24x24" or "24\"x24\""
-    const parts = ps.replace(/"/g, "").split("x").map((p: string) => p.trim());
-    const desc = `Pier Pad: ${parts[0]}" x ${parts[1] || parts[0]}" x ${pd.replace(/"/g, "")}"`;
-    return { description: desc, category: "pier_pads", section: "ftg_wall", unit: "EA" };
-  }
-
-  if (itemType === "other") {
-    const label = (raw[fieldMap["label"]] || raw[fieldMap["description"]] || "").trim();
-    if (!label) return null;
-    return { description: label, category: "extras", section: "ftg_wall", unit: (raw[fieldMap["default_unit"]] || "EA").trim().toUpperCase() };
-  }
-
-  return null;
+  return {
+    category,
+    dimensions,
+    tags,
+    isCustom: true,
+  };
 }
 
 export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -78,6 +141,7 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
   const [step, setStep] = useState<Step>("upload");
   const [newItems, setNewItems] = useState<ParsedItem[]>([]);
   const [dupeCount, setDupeCount] = useState(0);
+  const [warnings, setWarnings] = useState<ValidationWarning[]>([]);
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<number | null>(null);
@@ -87,6 +151,7 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
     setStep("upload");
     setNewItems([]);
     setDupeCount(0);
+    setWarnings([]);
     setImporting(false);
     setProgress(0);
     setResult(null);
@@ -95,13 +160,13 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
 
   const downloadTemplate = () => {
     const csv = [
-      "item_type,wall_height,wall_thickness,footing_width,footing_depth,slab_thickness,pier_size,pier_depth,label,tags,description,category,section,default_unit",
-      'wall,4\',8",8",16",,,,,,,,,,',
-      'slab,,,,,,,,Basement Slab,,4",,,,',
-      'footing,,,,8",16",,,,Frost Footing,,,,',
-      'pier,,,,,,24"x24",12",,,,,,',
-      'other,,,,,,,,Cut Outs & Sleeves,,,,ftg_wall,EA',
-      ',,,,,,,,,,9\' x 8" Wall,walls_with_footings,ftg_wall,LF',
+      "category,description,unit,wall_height,wall_thickness,footing_width,footing_depth,slab_thickness,pier_size,pier_depth,tags",
+      'wall,,LF,8\',8",8",16",,,,',
+      'wall,,LF,8\',8",8",16",,,,Garage',
+      'slab,Basement Slab,SF,,,,,4",,,',
+      'footing,Garage Grade Beam,LF,,,,16",,,,',
+      'pier,,EA,,,,,,36" x 36",12",',
+      'other,Complete Escape Window - Well Window Ladder Grate,EA,,,,,,,',
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -114,6 +179,7 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
 
   const handleFile = async (file: File) => {
     setError("");
+    setWarnings([]);
     if (!user) return;
     if (file.size > 10 * 1024 * 1024) {
       setError("File too large (max 10MB)");
@@ -125,11 +191,8 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
       complete: async (results) => {
         const headers = (results.meta.fields || []).map((h) => h.toLowerCase().trim());
 
-        // Must have either "description" or "item_type" column
-        const hasDescription = headers.includes("description");
-        const hasItemType = headers.includes("item_type");
-        if (!hasDescription && !hasItemType) {
-          setError('File must have a "description" or "item_type" column');
+        if (!headers.includes("category")) {
+          setError('File must have a "category" column');
           return;
         }
 
@@ -146,44 +209,62 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
         const existingSet = new Set((existing || []).map((c) => c.description.toLowerCase()));
 
         const items: ParsedItem[] = [];
+        const rowWarnings: ValidationWarning[] = [];
         let dupes = 0;
         const seen = new Set<string>();
 
-        (results.data as Record<string, string>[]).forEach((raw) => {
-          let desc = "";
-          let cat = "extras";
-          let sect = "ftg_wall";
-          let unit = "EA";
-
-          // Try structured dimensions first (item_type column)
-          const itemType = (raw[fieldMap["item_type"]] || "").trim();
-          if (itemType) {
-            const built = buildDescriptionFromDimensions(raw, fieldMap);
-            if (built) {
-              desc = built.description;
-              cat = built.category;
-              sect = built.section;
-              unit = built.unit;
-            }
+        (results.data as Record<string, string>[]).forEach((raw, rowIdx) => {
+          const categoryRaw = (raw[fieldMap["category"]] || "").trim().toLowerCase() as ItemCategory;
+          if (!VALID_CATEGORIES.includes(categoryRaw)) {
+            if (categoryRaw) rowWarnings.push({ row: rowIdx + 2, message: `Invalid category "${categoryRaw}"` });
+            return;
           }
 
-          // Fall back to legacy flat description column
+          // Validate required fields per category
+          const validationError = validateRow(categoryRaw, raw, fieldMap);
+          if (validationError) {
+            rowWarnings.push({ row: rowIdx + 2, message: validationError });
+            return;
+          }
+
+          // Description: use provided or auto-generate
+          const providedDesc = (raw[fieldMap["description"]] || "").trim();
+          let desc: string;
+          if (categoryRaw === "wall" || categoryRaw === "pier") {
+            // For wall/pier, description is always auto-generated from dimensions
+            desc = providedDesc || buildDescription(categoryRaw, raw, fieldMap);
+          } else {
+            desc = buildDescription(categoryRaw, raw, fieldMap);
+          }
+
           if (!desc) {
-            desc = (raw[fieldMap["description"]] || "").trim();
-            cat = (raw[fieldMap["category"]] || "extras").trim() || "extras";
-            sect = (raw[fieldMap["section"]] || "ftg_wall").trim() || "ftg_wall";
-            unit = (raw[fieldMap["default_unit"]] || "EA").trim().toUpperCase() || "EA";
+            rowWarnings.push({ row: rowIdx + 2, message: "Could not generate description" });
+            return;
           }
 
-          if (!desc) return;
+          // Unit: use provided or default from category
+          const unitRaw = (raw[fieldMap["unit"]] || "").trim().toUpperCase();
+          const unit = unitRaw || CATEGORY_UNIT_MAP[categoryRaw];
+
+          // Always build custom_data from dimensions when present
+          const customData = buildCustomData(categoryRaw, raw, fieldMap);
+
           const key = desc.toLowerCase();
           if (existingSet.has(key) || seen.has(key)) { dupes++; return; }
           seen.add(key);
-          items.push({ description: desc, category: cat, section: sect, defaultUnit: unit });
+
+          items.push({
+            description: desc,
+            category: CATEGORY_DB_MAP[categoryRaw],
+            section: CATEGORY_SECTION_MAP[categoryRaw],
+            defaultUnit: unit,
+            customData,
+          });
         });
 
         setNewItems(items);
         setDupeCount(dupes);
+        setWarnings(rowWarnings);
         setStep("preview");
       },
       error: () => setError("Failed to parse CSV file"),
@@ -206,8 +287,9 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
         default_unit: item.defaultUnit,
         is_active: true,
         sort_order: 0,
+        custom_data: item.customData,
       }));
-      const { data, error } = await supabase.from("catalog_items").insert(batch).select("id");
+      const { data, error } = await (supabase.from("catalog_items").insert(batch as any) as any).select("id");
       if (data) inserted += data.length;
       if (error) console.error("Catalog batch error:", error);
       setProgress(Math.min(((i + BATCH) / newItems.length) * 100, 100));
@@ -248,10 +330,7 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
                 <div className="text-sm text-[var(--text-secondary)] font-semibold">Click to upload a CSV file</div>
                 <div className="text-[10px] text-[var(--text-muted)] mt-1">Max 10MB • .csv files only</div>
                 <div className="text-[10px] text-[var(--text-muted)] mt-2">
-                  <strong>Structured format:</strong> item_type, wall_height, wall_thickness, footing_width, footing_depth, slab_thickness, pier_size, pier_depth, label, tags
-                </div>
-                <div className="text-[10px] text-[var(--text-muted)] mt-1">
-                  <strong>Legacy format:</strong> description, category, section, default_unit
+                  <strong>Columns:</strong> category, description, unit, wall_height, wall_thickness, footing_width, footing_depth, slab_thickness, pier_size, pier_depth, tags
                 </div>
                 <input
                   ref={fileRef}
@@ -276,10 +355,25 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
 
           {step === "preview" && (
             <div className="space-y-4">
-              <div className="flex items-center gap-3 text-[12px]">
+              <div className="flex items-center gap-3 text-[12px] flex-wrap">
                 <span className="font-semibold text-[var(--text-main)]">{newItems.length} new items to add</span>
                 {dupeCount > 0 && <span className="text-[var(--text-muted)]">{dupeCount} duplicates skipped</span>}
               </div>
+
+              {warnings.length > 0 && (
+                <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                  <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                  <div className="text-[12px] text-amber-600">
+                    <strong>{warnings.length} row{warnings.length !== 1 ? "s" : ""} skipped:</strong>
+                    <ul className="mt-1 space-y-0.5 list-disc pl-4">
+                      {warnings.slice(0, 5).map((w, i) => (
+                        <li key={i}>Row {w.row}: {w.message}</li>
+                      ))}
+                      {warnings.length > 5 && <li>...and {warnings.length - 5} more</li>}
+                    </ul>
+                  </div>
+                </div>
+              )}
 
               <div className="border border-[var(--card-border)] rounded-lg overflow-hidden">
                 <div className="overflow-y-auto max-h-[300px]">
@@ -335,7 +429,7 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
           {step === "preview" && (
             <>
               <button
-                onClick={() => { setStep("upload"); setNewItems([]); setDupeCount(0); setError(""); }}
+                onClick={() => { setStep("upload"); setNewItems([]); setDupeCount(0); setWarnings([]); setError(""); }}
                 className="text-[var(--text-muted)] hover:text-[var(--text-main)] text-[11px] font-bold tracking-wider"
               >
                 ← BACK

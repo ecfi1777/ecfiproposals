@@ -1,0 +1,1 @@
+ALTER TABLE catalog_items ADD COLUMN custom_data JSONB DEFAULT NULL;

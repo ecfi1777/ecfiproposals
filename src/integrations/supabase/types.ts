@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           category: string
           created_at: string
+          custom_data: Json | null
           default_unit: string
           description: string
           id: string
@@ -30,6 +31,7 @@ export type Database = {
         Insert: {
           category?: string
           created_at?: string
+          custom_data?: Json | null
           default_unit?: string
           description: string
           id?: string
@@ -42,6 +44,7 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
+          custom_data?: Json | null
           default_unit?: string
           description?: string
           id?: string
