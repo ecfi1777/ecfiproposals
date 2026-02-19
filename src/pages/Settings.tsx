@@ -220,7 +220,7 @@ function CatalogTab() {
       toast.error("Item already exists");
       return;
     }
-    const sectionMap: Record<string, string> = { wall: "ftg_wall", slab: "slabs", footing: "ftg_wall", pier: "ftg_wall", other: "ftg_wall" };
+    const sectionMap: Record<string, string> = { wall: "ftg_wall", wall_only: "ftg_wall", slab: "slabs", footing: "ftg_wall", pier: "ftg_wall", column: "ftg_wall", other: "ftg_wall" };
     const { error } = await supabase.from("catalog_items").insert({
       user_id: user.id,
       description,
