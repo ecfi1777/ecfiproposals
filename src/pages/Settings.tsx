@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check, ChevronDown, Eye, EyeOff, Upload, List, Download } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, Plus, Pencil, Trash2, Search, X, Check, ChevronDown, Eye, EyeOff, Upload, List, Download, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import type { CatalogItemWithTimestamp } from "@/types/catalog";
 import { ImportPriceHistory } from "@/components/ecfi/ImportPriceHistory";
 import { ImportCatalogItems } from "@/components/ecfi/ImportCatalogItems";
 import { DefaultCostsTab } from "@/components/ecfi/DefaultCostsTab";
+import { PriceHistoryPopup } from "@/components/ecfi/PriceHistoryPopup";
 
 const TABS = [
   { key: "catalog", label: "Item Catalog" },
@@ -156,6 +157,8 @@ function CatalogTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [showInactive, setShowInactive] = useState(false);
+  const [openHistoryKey, setOpenHistoryKey] = useState<string | null>(null);
+  const [itemsWithHistory, setItemsWithHistory] = useState<Set<string>>(new Set());
 
   const fetchItems = useCallback(async () => {
     if (!user) return;
@@ -170,9 +173,24 @@ function CatalogTab() {
     setLoading(false);
   }, [user]);
 
+  const fetchItemsWithHistory = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("price_history")
+      .select("catalog_item_id")
+      .eq("user_id", user.id)
+      .not("catalog_item_id", "is", null);
+    if (data) {
+      setItemsWithHistory(new Set(data.map((r: any) => r.catalog_item_id)));
+    }
+  }, [user]);
+
   useEffect(() => {
-    if (user) fetchItems();
-  }, [user, fetchItems]);
+    if (user) {
+      fetchItems();
+      fetchItemsWithHistory();
+    }
+  }, [user, fetchItems, fetchItemsWithHistory]);
 
   const handleToggleActive = async (id: string, currentlyActive: boolean) => {
     const { error } = await supabase.from("catalog_items").update({ is_active: !currentlyActive }).eq("id", id);
@@ -313,8 +331,9 @@ function CatalogTab() {
       ) : (
         <div className="border border-[var(--card-border)] bg-[var(--card-bg)] rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           {/* Column headers */}
-          <div className="grid grid-cols-[1fr_50px_80px_100px_88px] items-center px-4 py-2 bg-[var(--section-bg)] border-b border-[var(--card-border)]">
+          <div className="grid grid-cols-[1fr_30px_50px_80px_100px_88px] items-center px-4 py-2 bg-[var(--section-bg)] border-b border-[var(--card-border)]">
             <span className="text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider">Description</span>
+            <span />
             <span className="text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-center">Unit</span>
             <span className="text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-center">Section</span>
             <span className="text-[9px] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-center">Category</span>
@@ -323,10 +342,10 @@ function CatalogTab() {
           {filtered.map((item, i) => (
             <div
               key={item.id}
-              className={`grid grid-cols-[1fr_50px_80px_100px_88px] items-center px-4 py-2.5 ${i > 0 ? "border-t border-[var(--card-border)]" : ""} hover:bg-[var(--section-bg)] transition-colors`}
+              className={`grid grid-cols-[1fr_30px_50px_80px_100px_88px] items-center px-4 py-2.5 ${i > 0 ? "border-t border-[var(--card-border)]" : ""} hover:bg-[var(--section-bg)] transition-colors`}
             >
               {editingId === item.id ? (
-                <div className="col-span-5 flex items-center gap-2">
+                <div className="col-span-6 flex items-center gap-2">
                   <input
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
@@ -352,6 +371,21 @@ function CatalogTab() {
                       <span className="ml-2 text-[9px] bg-[var(--text-muted)]/15 text-[var(--text-muted)] px-1.5 py-0.5 rounded font-semibold tracking-wider no-underline inline-block">INACTIVE</span>
                     )}
                   </span>
+                  <div className="flex justify-center">
+                    {itemsWithHistory.has(item.id) ? (
+                      <PriceHistoryPopup
+                        description={item.description}
+                        catalogItemId={item.id}
+                        popoverKey={`catalog-${item.id}`}
+                        openKey={openHistoryKey}
+                        onOpenChange={setOpenHistoryKey}
+                      />
+                    ) : (
+                      <span className="p-1 text-[var(--text-muted)] opacity-30">
+                        <Clock size={14} strokeWidth={1.5} />
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[10px] text-[var(--text-muted)] text-center">{item.default_unit}</span>
                   <span className="text-[10px] text-[var(--text-secondary)] text-center truncate overflow-hidden">{sectionLabel(item.section)}</span>
                   <span className="text-[10px] text-[var(--text-muted)] text-center capitalize truncate overflow-hidden">{item.category}</span>
