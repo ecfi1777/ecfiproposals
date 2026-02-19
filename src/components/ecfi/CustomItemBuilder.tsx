@@ -273,7 +273,7 @@ export function CustomItemBuilder({ open, onClose, onAdd }: CustomItemBuilderPro
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto bg-[var(--card-bg)] border-[var(--card-border)]">
+      <DialogContent className="sm:max-w-[680px] max-h-[90vh] overflow-y-auto bg-[var(--card-bg)] border-[var(--card-border)]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-[var(--text-main)]">
             <Wrench className="w-4 h-4 text-[var(--primary-blue)]" />
