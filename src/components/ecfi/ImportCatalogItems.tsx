@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Upload, Download, X, AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -162,7 +162,7 @@ function buildCustomData(category: ItemCategory, raw: Record<string, string>, fi
 
 export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user } = useAuth();
-  const fileRef = useRef<HTMLInputElement>(null);
+  
   const [step, setStep] = useState<Step>("upload");
   const [newItems, setNewItems] = useState<ParsedItem[]>([]);
   const [dupeCount, setDupeCount] = useState(0);
@@ -349,9 +349,9 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
         <div className="flex-1 overflow-auto p-6">
           {step === "upload" && (
             <div className="space-y-4">
-              <div
-                className="border-2 border-dashed border-[var(--card-border)] rounded-xl p-8 text-center cursor-pointer hover:border-[var(--primary-blue)] transition-colors"
-                onClick={() => fileRef.current?.click()}
+              <label
+                htmlFor="catalog-csv-upload"
+                className="block border-2 border-dashed border-[var(--card-border)] rounded-xl p-8 text-center cursor-pointer hover:border-[var(--primary-blue)] transition-colors"
               >
                 <Upload className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-3" />
                 <div className="text-sm text-[var(--text-secondary)] font-semibold">Click to upload a CSV file</div>
@@ -360,13 +360,17 @@ export function ImportCatalogItems({ open, onClose }: { open: boolean; onClose: 
                   <strong>Columns:</strong> category, description, unit, wall_height, wall_thickness, footing_width, footing_depth, slab_thickness, pier_size, pier_depth, tags
                 </div>
                 <input
-                  ref={fileRef}
+                  id="catalog-csv-upload"
                   type="file"
                   accept=".csv"
                   className="hidden"
-                  onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    if (e.target.files?.[0]) handleFile(e.target.files[0]);
+                    e.target.value = "";
+                  }}
                 />
-              </div>
+              </label>
               <button onClick={downloadTemplate} className="flex items-center gap-2 text-[var(--primary-blue)] text-[11px] font-bold tracking-wider hover:underline">
                 <Download className="w-3.5 h-3.5" />
                 DOWNLOAD TEMPLATE
